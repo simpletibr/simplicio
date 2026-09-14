@@ -49,6 +49,7 @@ import type { RuntimeInstallResult } from "./runtime_install";
 import type { PreparationResult } from "./runtime_preparation_result";
 import { runtimeIsValid } from "./setup_flow";
 import { createDesktopUsageStore, createUsageChangefeedSupervisor } from "./usage_store";
+import { createDesktopLifecycleSupervisor } from "./desktop_lifecycle";
 
 function initialView(fallback: View, preferences: WorkbenchState["preferences"], hasSelectedProject: boolean): View {
   if (typeof window === "undefined") return "home";
@@ -250,6 +251,50 @@ export function DesktopApp({ snapshot: initialSnapshot }: { snapshot?: DesktopSn
       current = false;
     };
   }, [initialSnapshot]);
+
+
+  useEffect(() => {
+    if (
+      !snapshot
+      || snapshot.access.state !== "active"
+      || !workbench.preferences.closeIdleSessions
+      || typeof window === "undefined"
+      || !( "__TAURI_INTERNALS__" in window)
+    ) return;
+    const supervisor = createDesktopLifecycleSupervisor(
+      async () => {
+        const next = await refreshDesktopSnapshot();
+        setSnapshot(next);
+        setBotCenter(next.botCenter);
+      },
+      async () => {
+        const receipt = await closeIdleDesktopSessions();
+        usageStore.setIdleFinalization(receipt);
+      },
+    );
+    const recover = (event: "wake" | "reopen") => {
+      void supervisor.reconcile(event).catch(() => {
+        // Sleep/wake recovery remains best-effort; the next poll retries it.
+      });
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") recover("wake");
+    };
+    const onPageShow = () => recover("reopen");
+    const onFocus = () => recover("wake");
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [
+    snapshot?.access.state,
+    usageStore,
+    workbench.preferences.closeIdleSessions,
+  ]);
 
   async function refresh() {
     if (actionLock.current) return;

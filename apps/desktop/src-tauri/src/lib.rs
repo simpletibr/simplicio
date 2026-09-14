@@ -569,6 +569,150 @@ async fn desktop_session_close_idle(
     .map_err(|_| "session_idle_finalization_unavailable".to_string())?
 }
 
+
+const AUTHORITATIVE_HOST_PROVIDERS: &[&str] = &[
+    "claude",
+    "codex",
+    "opencode",
+    "grok",
+    "vscode",
+    "antigravity",
+    "pi",
+    "kiro",
+];
+
+fn validate_provider_binding_id(value: &str, field: &str) -> Result<(), String> {
+    if value.is_empty() || value.len() > 512 || value.chars().any(|ch| ch.is_control()) {
+        return Err(format!("desktop_{field}_invalid"));
+    }
+    Ok(())
+}
+
+fn validate_provider_binding_result(
+    value: Value,
+    runtime_session_id: &str,
+    provider: &str,
+) -> Result<Value, String> {
+    let raw = value
+        .as_object()
+        .ok_or_else(|| "provider_session_binding_invalid".to_string())?;
+    if raw.get("bound").and_then(Value::as_bool) != Some(true)
+        || raw.get("session_id").and_then(Value::as_str) != Some(runtime_session_id)
+        || raw.get("provider").and_then(Value::as_str) != Some(provider)
+        || raw.get("redacted").and_then(Value::as_bool) != Some(true)
+    {
+        return Err("provider_session_binding_invalid".to_string());
+    }
+    Ok(serde_json::json!({
+        "schema": "simplicio.desktop-provider-session-binding/v1",
+        "bound": true,
+        "session_id": runtime_session_id,
+        "provider": provider,
+        "redacted": true
+    }))
+}
+
+fn validate_request_result(value: Value, request_id: &str, field: &str) -> Result<Value, String> {
+    let raw = value
+        .as_object()
+        .ok_or_else(|| "desktop_request_receipt_invalid".to_string())?;
+    if raw.get("schema").and_then(Value::as_str) != Some("simplicio.session-request/v1")
+        || raw.get("request_id").and_then(Value::as_str) != Some(request_id)
+        || raw.get(field).and_then(Value::as_bool).is_none()
+        || raw.get("redacted").and_then(Value::as_bool) != Some(true)
+    {
+        return Err("desktop_request_receipt_invalid".to_string());
+    }
+    let outcome = raw.get(field).and_then(Value::as_bool).unwrap_or(false);
+    Ok(serde_json::json!({
+        "schema": "simplicio.desktop-request/v1",
+        "request_id": request_id,
+        "started": if field == "started" { outcome } else { false },
+        "completed": if field == "completed" { outcome } else { false },
+        "redacted": true
+    }))
+}
+
+#[tauri::command]
+async fn desktop_bind_provider_session(
+    runtime_session_id: String,
+    provider: String,
+    provider_session_id: String,
+    profile_id: Option<String>,
+    workspace_id: Option<String>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        validate_provider_binding_id(&runtime_session_id, "runtime_session")?;
+        validate_provider_binding_id(&provider_session_id, "provider_session")?;
+        if !AUTHORITATIVE_HOST_PROVIDERS.contains(&provider.as_str()) {
+            return Err("provider_session_binding_unknown_provider".to_string());
+        }
+        let profile_id = validate_idle_scope(profile_id, "default", "profile")?;
+        let workspace_id = validate_idle_scope(workspace_id, ".", "workspace")?;
+        let args = [
+            "session-service".to_string(),
+            "bind-provider".to_string(),
+            runtime_session_id.clone(),
+            provider.clone(),
+            provider_session_id,
+            "--profile".to_string(),
+            profile_id,
+            "--workspace".to_string(),
+            workspace_id,
+            "--json".to_string(),
+        ];
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        let value = run_runtime_json(&borrowed)
+            .map_err(|_| "provider_session_binding_unavailable".to_string())?;
+        validate_provider_binding_result(value, &runtime_session_id, &provider)
+    })
+    .await
+    .map_err(|_| "provider_session_binding_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_request_start(runtime_session_id: String, request_id: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        validate_provider_binding_id(&runtime_session_id, "runtime_session")?;
+        validate_provider_binding_id(&request_id, "request")?;
+        let args = [
+            "session-service".to_string(),
+            "request-start".to_string(),
+            runtime_session_id,
+            request_id.clone(),
+            "--json".to_string(),
+        ];
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        let value = run_runtime_json(&borrowed)
+            .map_err(|_| "desktop_request_unavailable".to_string())?;
+        validate_request_result(value, &request_id, "started")
+    })
+    .await
+    .map_err(|_| "desktop_request_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_request_finish(request_id: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        validate_provider_binding_id(&request_id, "request")?;
+        let args = [
+            "session-service".to_string(),
+            "request-finish".to_string(),
+            request_id.clone(),
+            "--json".to_string(),
+        ];
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        let value = run_runtime_json(&borrowed)
+            .map_err(|_| "desktop_request_unavailable".to_string())?;
+        validate_request_result(value, &request_id, "completed")
+    })
+    .await
+    .map_err(|_| "desktop_request_unavailable".to_string())?
+}
+
 fn default_projection_repo() -> Result<PathBuf, String> {
     std::env::var_os("SIMPLICIO_DESKTOP_REPO")
         .or_else(|| std::env::var_os("HOME"))
@@ -1292,6 +1436,9 @@ pub fn run() {
             desktop_usage_projects,
             desktop_usage_changefeed,
             desktop_session_close_idle,
+            desktop_bind_provider_session,
+            desktop_request_start,
+            desktop_request_finish,
             desktop_unified_usage,
             desktop_execution_report,
             desktop_export_unified_usage,
