@@ -35,6 +35,12 @@ import {
 } from "./runtime_install";
 import { parseRuntimeLifecycleReceipt, type RuntimeLifecycleAction, type RuntimeLifecycleReceipt } from "./runtime_lifecycle";
 import { parseIdleSessionFinalization, IDLE_SESSION_TIMEOUT_MS, type IdleSessionFinalization } from "./session_idle";
+import {
+  canonicalAuthoritativeHostProvider,
+  parseProviderSessionBinding,
+  type DesktopHostProvider,
+  type ProviderSessionBinding,
+} from "./provider_binding";
 import { parsePreparationResult, type PreparationResult } from "./runtime_preparation_result";
 
 const readSnapshot = createReadonlyRequest<DesktopSnapshot>(30_000, "desktop_snapshot_timeout");
@@ -99,6 +105,53 @@ export async function closeIdleDesktopSessions(options: {
     "session_idle_finalization_timeout",
   );
   return parseIdleSessionFinalization(value);
+}
+
+
+export async function bindDesktopProviderSession(options: {
+  runtimeSessionId: string;
+  provider: DesktopHostProvider;
+  providerSessionId: string;
+  profileId?: string;
+  workspaceId?: string;
+}): Promise<ProviderSessionBinding> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  const provider = canonicalAuthoritativeHostProvider(options.provider);
+  if (!provider) throw new Error("provider_session_binding_unknown_provider");
+  return parseProviderSessionBinding(await invoke<unknown>("desktop_bind_provider_session", {
+    runtimeSessionId: options.runtimeSessionId,
+    provider,
+    providerSessionId: options.providerSessionId,
+    profileId: options.profileId ?? null,
+    workspaceId: options.workspaceId ?? null,
+  }));
+}
+
+export async function beginDesktopRequest(runtimeSessionId: string, requestId: string): Promise<boolean> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  const value = await invoke<unknown>("desktop_request_start", { runtimeSessionId, requestId });
+  return parseDesktopRequestReceipt(value, "started");
+}
+
+export async function completeDesktopRequest(requestId: string): Promise<boolean> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  const value = await invoke<unknown>("desktop_request_finish", { requestId });
+  return parseDesktopRequestReceipt(value, "completed");
+}
+
+function parseDesktopRequestReceipt(value: unknown, field: "started" | "completed"): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("desktop_request_receipt_invalid");
+  }
+  const raw = value as Record<string, unknown>;
+  if (
+    raw.schema !== "simplicio.desktop-request/v1"
+    || raw.redacted !== true
+    || typeof raw[field] !== "boolean"
+  ) {
+    throw new Error("desktop_request_receipt_invalid");
+  }
+  return raw[field];
 }
 
 export async function exportDesktopUnifiedUsageReport(

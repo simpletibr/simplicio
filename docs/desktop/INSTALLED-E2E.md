@@ -76,3 +76,22 @@ published v3.8.47 DMG has no matching `.sig`, Linux has no native signed
 macOS-install evidence, and native Rust evidence is conditional on a
 Tauri-compatible `rustc` (the earlier PR run was blocked by rustc 1.85.0);
 these remain explicit blockers in the PR and release notes when applicable.
+
+## #376 residual acceptance
+
+The Desktop/runtime contract now covers the authoritative host binding matrix:
+Claude, Codex, OpenCode, Grok, VS Code, Antigravity, Pi and Kiro. Unknown
+provider names remain unbound. Runtime request activity is durable outside the
+prompt queue, initial idle close plus receipt creation is one idempotent
+transaction, and reconciliation replays the full finalization history from the
+single usage ledger. Provider adapters use provider event IDs where exposed
+and retain the legacy deterministic fallback when they are not.
+
+Source-level and native/bridge tests cover these contracts. Installed acceptance
+of every host still requires the real installed provider applications and a
+freshly bundled Runtime; this Linux workspace did not execute that matrix.
+Do not create synthetic macOS evidence: the published v3.8.47 DMG has no
+matching .sig, and Apple signing/notarization or a macOS native executor is
+not available here. Those installed-app and signed-distribution checks remain
+blocked/unexecuted and are not represented as passing evidence. Provider
+processes are never terminated by this lifecycle.
