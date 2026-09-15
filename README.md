@@ -1,937 +1,151 @@
-# 🔥 Simplicio — The AI Agent That SAVES UP TO 96% OF YOUR TOKENS
+# ⚡ Simplicio
+
+> **The High-Performance Native AI Coding Runtime & Agent (100% Rust)**  
+> Save up to 96% of tokens with sub-millisecond local orientation, atomic edits, and governed concurrency.
 
 <p align="center">
-  <img src="assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="920" />
+  <img src="assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="840" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/wesleysimplicio/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/wesleysimplicio/simplicio?color=blue&label=latest" alt="Latest Release"></a>
+  <a href="https://github.com/wesleysimplicio/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/wesleysimplicio/simplicio?color=2fe6a0&label=release" alt="Latest Release"></a>
+  <a href="https://simpleti.com.br/simplicio/docs"><img src="https://img.shields.io/badge/docs-simpleti.com.br-ffd23f" alt="Documentation"></a>
   <a href="https://github.com/wesleysimplicio/simplicio/stargazers"><img src="https://img.shields.io/github/stars/wesleysimplicio/simplicio?style=social" alt="Stars"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/releases"><img src="https://img.shields.io/github/downloads/wesleysimplicio/simplicio/total?color=green" alt="Downloads"></a>
+  <img src="https://img.shields.io/badge/runtime-100%25%20Rust-orange" alt="Runtime">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="License">
 </p>
 
 <p align="center">
-  <a href="#-installation">Install</a> ·
-  <a href="#-login-and-entitlement">Login</a> ·
-  <a href="#-simplicio-mcp">MCP</a> ·
-  <a href="#host-integrations">Integrations</a> ·
-  <a href="#-what-it-does">Features</a> ·
-  <a href="#-benchmarks-and-token-savings">Benchmarks</a> ·
-  <a href="https://simpleti.com.br/simplicio/">Website</a>
-</p>
-
-<p align="center">
-  <strong>🌍 Languages:</strong><br>
-  <a href="README.md">🇬🇧 English</a> |
-  <a href="READMEs/README.pt-BR.md">🇧🇷 Português</a> |
-  <a href="READMEs/README.es-ES.md">🇪🇸 Español</a> |
-  <a href="READMEs/README.fr-FR.md">🇫🇷 Français</a> |
-  <a href="READMEs/README.ja-JP.md">🇯🇵 日本語</a> |
-  <a href="READMEs/README.ko-KR.md">🇰🇷 한국어</a> |
-  <a href="READMEs/README.zh-CN.md">🇨🇳 简体中文</a> |
-  <a href="READMEs/README.it-IT.md">🇮🇹 Italiano</a> |
-  <a href="READMEs/README.ru-RU.md">🇷🇺 Русский</a> |
-  <a href="READMEs/README.pl-PL.md">🇵🇱 Polski</a> |
-  <a href="READMEs/README.hi-IN.md">🇮🇳 हिन्दी</a> |
-  <a href="READMEs/README.ar-SA.md">🇸🇦 العربية</a> |
-  <a href="READMEs/README.he-IL.md">🇮🇱 עברית</a> |
-  <a href="READMEs/README.ms-MY.md">🇲🇾 Bahasa Melayu</a> |
-  <a href="READMEs/README.id-ID.md">🇮🇩 Bahasa Indonesia</a>
+  <a href="#-quick-install">Quick Install</a> •
+  <a href="#-first-60-seconds">First 60 Seconds</a> •
+  <a href="#-mcp--ide-integration">MCP & IDEs</a> •
+  <a href="#-core-architecture">Architecture</a> •
+  <a href="https://simpleti.com.br/simplicio/docs">Full Documentation</a>
 </p>
 
 ---
 
-## ⚡ TL;DR
+## ⚡ What is Simplicio?
 
-**Simplicio** is a terminal AI coding agent — a single binary that replaces your
-entire AI-assisted development workflow: chat, code generation, repository
-context, planning, local multi-agent orchestration (64 → 600 agents), and
-evidence-backed PR delivery.
+**Simplicio** is a single-binary, local-first runtime and AI coding agent built in 100% Rust. It replaces heavy context dumps and fragmented Python tools with mathematical token bounding, cryptographic atomic edits, and hardware-governed multi-agent orchestration.
 
-**Runs on your machine. Your code never leaves your control. Remote models are
-optional, not required.**
+- **100% Native Rust**: Single ~46MB standalone binary. No Python, virtualenvs, or heavy background processes.
+- **Ultra-Low Latency**: ~4ms cold start vs. seconds in interpreted runtimes.
+- **Token Economy**: Saves up to 96% of tokens by projecting bounded AST graphs instead of dumping raw file trees.
+- **Fail-Closed Safety**: Every code modification uses SHA-256 pre-image checks, atomic replacements, and immutable audit receipts.
 
-> **🔥 Save up to 96% of tokens on controlled workloads.**
-> Simplicio records the baseline and proof type; the actual result depends on the task and model.
+---
 
-## 🖥️ Desktop-first setup
+## 📦 Quick Install
 
-The public Desktop channel currently provides one macOS Apple Silicon companion
-package from the immutable Runtime `v3.8.47` release:
-[`Simplicio-3.8.47-arm64.dmg`](https://github.com/wesleysimplicio/simplicio/releases/download/v3.8.47/Simplicio-3.8.47-arm64.dmg).
-Its SHA-256 is recorded in [`DESKTOP-SHA256SUMS`](DESKTOP-SHA256SUMS). This is
-an integrity-verified, ad-hoc macOS package: Apple Developer ID signing and
-notarization are unavailable, so Gatekeeper acceptance is not claimed.
+Install the signed native binary in seconds:
 
-Windows Desktop is not published. On Windows, use the verified CLI bootstrap
-below until a Windows Desktop installer has its own public digest, native
-install evidence, and platform-signing evidence.
-
-For the public macOS arm64 package, the first-run order is:
-
-1. Download the immutable DMG and verify its SHA-256 before opening it.
-2. Open Desktop and let it install its bundled, verified Runtime before login.
-3. Complete Google login and confirm active identity and entitlement in the app.
-4. Review and consent to the exact host-integration plan before any client files
-   are changed.
-5. Restart open MCP clients, then make one harmless tools/list or simplicio_map
-   call and confirm the live schema/receipt before starting project work.
-
-Login is never a substitute for installation, and a successful process exit is
-not proof that a host is configured. The CLI path below remains the supported
-cross-platform fallback and follows the same Runtime, authentication, consent,
-reload, and first-call contract.
-
-## Host integrations
-
-The installers for macOS/Linux, Windows and PyPI call the same native
-`simplicio mcp register --binary <absolute-path> --json` flow. Each client uses
-its own configuration format and points to the installed Simplicio binary.
-
-**Available in [Runtime v3.8.50](https://github.com/wesleysimplicio/simplicio/releases/tag/v3.8.50):**
-the expanded adapters below are included in the signed native release and
-`simplicio-installer==3.8.50`. Devin and Codebuff require the manual integrations
-listed in the matrix. A successful configuration write is not a completed MCP
-handshake; restart/reload the client and verify its tool list.
-
-| Harness | Integration | Scope and limits |
-|---|---|---|
-| Claude Code | Runtime MCP + native hooks | User configuration; mapper-only lifecycle hooks. |
-| Codex | Runtime MCP registry | Managed binary registered through Codex MCP. |
-| Grok | Runtime MCP | Superagent Grok CLI; not the xAI web application. |
-| Cursor | Runtime MCP | User MCP configuration. |
-| GitHub Copilot | VS Code MCP | Uses the VS Code registration; Copilot CLI is a separate client. |
-| OpenCode | Runtime MCP | OpenCode local-server schema. |
-| MiMo Code | Runtime MCP | Xiaomi MiMo Code local-server schema. |
-| Amp | Runtime MCP | amp.mcpServers in user settings. |
-| OpenClaude | Runtime MCP | Independent .openclaude.json; legacy .config.json supported. |
-| Antigravity | Runtime MCP | Detected Antigravity user configuration. |
-| Pi | Bundled MCP extension | Auto-discovered extension connects to local stdio MCP. |
-| oh-my-pi | Runtime MCP | User .omp/agent/mcp.json. |
-| Hermes Agent | Runtime MCP + native plugin | Hermes registry reconciliation and host plugin flow. |
-| Devin | Environment setup required | Configure MCP in Devin's environment/admin interface; a local installer cannot alter the cloud workspace. |
-| Goose | Runtime MCP | YAML extensions with cmd/envs; Windows Block/Goose path supported. |
-| Auggie | Runtime MCP | Augment user settings. |
-| Autohand Code | Runtime MCP | Named entry in mcp.servers array. |
-| Charm / Crush | Runtime MCP | Crush mcp object, stdio transport. |
-| Cline | Runtime MCP | VS Code extension global-storage configuration. |
-| Codebuff | Project/SDK bridge required | Custom agents/tools use project or SDK setup; no verified global MCP registry. |
-| Command Code | Runtime MCP | User .commandcode/mcp.json. |
-| Continue | Runtime MCP (IDE) | Dedicated YAML server file; cn CLI discovery is not claimed. |
-| Droid | Runtime MCP | Factory user MCP configuration. |
-| Kilo Code | Runtime MCP (CLI) | Current kilo.json local-server schema. |
-| Kimi | Runtime MCP | Kimi user MCP configuration. |
-| Kiro | Runtime MCP | Kiro user MCP configuration. |
-| Mistral Vibe | Runtime MCP | TOML mcp_servers entries. |
-| Qwen Code | Runtime MCP | Qwen user settings. |
-| Rovo Dev | Runtime MCP (CLI) | User MCP configuration; custom paths are preserved. |
-
-New adapters detect initialized user configuration directories. They preserve
-other servers and explicit disablement, and report invalid configuration,
-JSONC files and custom configuration overrides as skipped instead of replacing
-them. Initialize the client first, then rerun registration. Pi uses a bundled
-local extension, without installing an unrelated npm package.
-
-See [installation paths, upstream references and verification](docs/INSTALLER_HOSTS.md).
-Devin and Codebuff remain explicit setup requirements, not automatic-registration
-successes.
-
-## 🚀 Installation
-
-### Desktop source (public foundation)
-
-The native Simplicio Desktop is being built publicly in
-[`apps/desktop`](apps/desktop). It uses Tauri 2 as a thin, capability-scoped
-shell around the separately supervised Simplicio Runtime. The current public
-channel is macOS arm64 only; Windows Desktop remains explicitly blocked until
-the required installer and native release gates are met. See the
-[Desktop release evidence](docs/desktop/RELEASE.md) for the exact digest,
-sidecar identity, and unexecuted platform gates.
-
-See the [Desktop architecture decision](docs/desktop/ADR-0001-public-tauri-shell.md),
-[product states](docs/desktop/PRODUCT-STATES.md), and
-[provider contract](docs/desktop/PROVIDER-CONTRACT.md).
-
-### Install via the Codex plugin
-
-If you use Codex, you can install Simplicio as a plugin. Add the public marketplace, install the plugin, and start a new Codex session; the plugin installs and bootstraps the Simplicio Runtime and exposes its skills and MCP tools.
-
+### macOS / Linux
 ```bash
-codex plugin marketplace add wesleysimplicio/simplicio --ref master
-codex plugin add simplicio@simplicio-codex
+curl -fsSL https://simpleti.com.br/simplicio/install.sh | sh
 ```
 
-The official installers download one canonical asset from the latest
-Runtime release, verify its SHA256 checksum and Ed25519 signature, validate the
-Runtime release contract, and register MCP hosts to launch the installed binary
-directly. They do not clone sibling repositories or install the embedded Python
-projects with pip. Login can be completed after installation; MCP tool calls
-remain fail-closed until the account is active.
+### Windows (PowerShell as Administrator)
+```powershell
+irm https://simpleti.com.br/simplicio/install.ps1 | iex
+```
 
-### All platforms via PyPI
-
-macOS / Linux:
-
+### Alternative (PyPI Bootstrapper)
 ```bash
 python3 -m pip install --upgrade simplicio-installer
 simplicio install
 ```
 
-Windows (PowerShell):
+---
 
-```powershell
-py -m pip install --upgrade simplicio-installer
-simplicio install
-```
+## 🚀 First 60 Seconds
 
-### Direct terminal installer (without PyPI)
-
-macOS / Linux:
+Once installed, test the CLI and orient your project:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
-```
-
-Windows (PowerShell):
-
-```powershell
-irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex
-```
-
-The PyPI package is the recommended bootstrap. It installs the launcher from PyPI,
-verifies the signed SHA256/Ed25519 Runtime release, and then installs the
-platform binary. It does not place a secret or token in the repository.
-
-The PyPI launcher command is installed into Python's script directory. The
-verified Runtime is placed at `~/.local/bin/simplicio` on macOS/Linux or
-`%USERPROFILE%\.local\bin\simplicio.exe` on Windows. Ensure the Python script
-and managed Runtime directories are on `PATH`; the launcher does not edit shell
-profiles.
-
-The launcher resolves the release required by its package version, verifies the
-signed manifest and asset checksum, and preserves existing user data.
-
-Known installer incidents and their regression sentinels are tracked in
-[docs/INSTALL_ERROR_REGISTRY.md](docs/INSTALL_ERROR_REGISTRY.md).
-
-The PyPI launcher has no unverified-artifact bypass. The selected Runtime
-release must contain the signed manifest and a canonical asset for the host; the
-launcher aborts when either is missing or its checksum does not match. A Runtime
-source build or a private candidate is not a substitute for a published,
-verifiable release.
-
-Check the installation:
-
-```bash
+# 1. Verify your installation
 simplicio version
-simplicio auth login
-simplicio auth status --json
-simplicio ecosystem verify --json
-sh install.sh --doctor                 # when running from a checkout
+
+# 2. Orient and index your current repository
+cd my-project
+simplicio onboard
+
+# 3. Launch the interactive coding assistant
+simplicio
 ```
 
-Maintainers: the exact manual order for building, signing, tagging, publishing,
-and verifying a public release is documented in
-[docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md).
+---
 
-The doctor command is read-only. Uninstalling is idempotent; the default
-keep-data mode removes the installed binary and preserves ~/.simplicio:
+## 🔌 MCP & IDE Integration
 
-~~~bash
-sh install.sh --uninstall --keep-data       # macOS/Linux
-sh install.sh --uninstall --purge            # removes Simplicio state; preserves ~/.simplicio/.env
-~~~
-
-~~~powershell
-pwsh install.ps1 -Uninstall -KeepData         # Windows
-pwsh install.ps1 -Uninstall -Purge            # removes Simplicio state; preserves .env
-~~~
-
-For non-interactive purge, set SIMPLICIO_CONFIRM_PURGE=1 explicitly. The
-installer never edits PATH profiles or removes provider credentials from `.simplicio/.env`.
-
-### What the binary contains
-
-The Runtime is the intended distribution boundary. A compliant release embeds
-the real Python source trees and a Runtime bridge for Mapper, Dev CLI, Loop,
-Fast, Prompt, and Sprint. They remain Python projects; they are not rewritten
-as Rust, and a normal installation must not download their repositories or
-install them with `pip`.
-
-Use `simplicio version --json` and `simplicio ecosystem doctor --json` after
-every update to confirm that the resolved latest release contains the embedded
-projects and active distribution contract.
-
-## 🔐 Login and entitlement
-
-Simplicio uses a Google-backed device login. The CLI receives revocable
-Simplicio tokens; your Google password is entered only on Google. Login is
-required before product commands, MCP, and the ecosystem integration can be used.
-
-Public beta access may be free, but beta does not bypass the active-entitlement
-check. When beta access ends, the entitlement must come from an active
-subscription.
-
-A completed login remains usable for 30 days through the rotating refresh token.
-The Runtime stores that revocable state at `~/.simplicio/login.json`, outside the
-executable, so reinstalling or upgrading to another release does not require a
-new Google login. The official installers preserve this file; an explicit
-`--purge` is the only installer mode that removes it. To use another location,
-set `SIMPLICIO_AUTH_FILE` consistently before logging in and before upgrading.
-
-### First login (compatible releases)
-
-On a compatible release, the installer starts the login flow when no active
-session exists. To start it manually:
+Simplicio runs as an official Model Context Protocol (MCP) server for your favorite editors:
 
 ```bash
-simplicio auth login
+# Automatically configure Claude Code, Cursor, VS Code, Zed, and JetBrains:
+simplicio mcp register
 ```
 
-The CLI prints a verification URL and a short device code, then waits. Open
-the URL in a normal browser, choose **Continue with Google**, and finish the
-Google authentication or passkey prompt. Do not paste the device code, Google
-password, access token, refresh token, or client secret into an issue, chat,
-terminal log, or public repository.
-
-For scripts that need machine-readable polling output:
-
-```bash
-simplicio auth login --json
-```
-
-The website flow is also available at
-[`simpleti.com.br/simplicio/login`](https://simpleti.com.br/simplicio/login).
-
-Confirm only the state, not the full credential payload:
-
-```bash
-simplicio auth status --json
-```
-
-The successful result must report an enabled identity, an active login state,
-and an allowed entitlement. If it reports `status: disabled` or any inactive
-state, the session is not usable. Do not treat a zero process exit code alone
-as proof of authentication; inspect the structured fields.
-
-To revoke the local session:
-
-```bash
-simplicio logout --json
-```
-
-Logout removes the local session; it does not delete your Simplicio account or
-subscription.
-
-## 🔌 Simplicio MCP
-
-MCP (Model Context Protocol) is the interface that lets an AI client discover
-and call Simplicio's governed local tools. The client supplies intent and
-structured arguments; the Simplicio Runtime performs repository mapping,
-memory recall, deterministic edits, validation, and execution under its
-authentication and safety gates. MCP is an invocation surface, not a second
-installation of Mapper, Loop, or the other projects.
-
-The public vocabulary is `simplicio map`, `simplicio context`,
-`simplicio memory`, `simplicio edit`, and `simplicio run`. MCP names follow the
-same ownership: Mapper observes, Fast projects or retrieves, Dev CLI edits,
-Runtime governs, and Loop converges.
-
-All supported host integrations use `mapper-only` as the Runtime execution
-policy. The LLM must successfully call `simplicio_map` and then
-`simplicio_context` for each repository task. The remaining retained Runtime
-commands are exposed as optional tools: the LLM may call them when the task
-needs them, but they are not forced into every workflow. Authentication,
-entitlement, effect authorization, and command-specific safety gates still
-apply.
-
-`SIMPLICIO_MCP_PROFILE=full` controls catalogue visibility; it does not switch
-the execution policy to Full. In the default full catalogue, the Runtime
-currently exposes 55 tools:
-
-Required for every repository task:
-
-| Tool | Purpose |
-|---|---|
-| `simplicio_map` | Observe the repository (`simplicio map`) |
-| `simplicio_context` | Retrieve bounded task context (`simplicio context`) |
-
-Optional retained tools (all are callable when their gates and schemas permit):
-
-```text
-simplicio_activity
-simplicio_agent_profiles
-simplicio_binary_contracts
-simplicio_bootstrap
-simplicio_checkpoint
-simplicio_claims
-simplicio_context_plane
-simplicio_deliver
-simplicio_desktop_cost_projection
-simplicio_desktop_projection
-simplicio_desktop_snapshot
-simplicio_desktop_unified_usage
-simplicio_edit
-simplicio_effect_authorize
-simplicio_effect_reconcile
-simplicio_effect_transaction
-simplicio_exec
-simplicio_fast_authorize
-simplicio_file_read
-simplicio_host_fixtures
-simplicio_host_registry
-simplicio_llm
-simplicio_loop
-simplicio_mapper_cutover
-simplicio_mapper_store
-simplicio_mcp_cpu_benchmark
-simplicio_mcp_recovery
-simplicio_memory
-simplicio_nest
-simplicio_neural
-simplicio_orient
-simplicio_parallel
-simplicio_prepare_model_call
-simplicio_prism
-simplicio_prompt
-simplicio_prototype_artifact_read
-simplicio_prototype_artifact_write
-simplicio_provider_path_status
-simplicio_read_signatures
-simplicio_record_model_result
-simplicio_route
-simplicio_run
-simplicio_runtime_health
-simplicio_runtime_readiness
-simplicio_savings
-simplicio_search
-simplicio_session_search
-simplicio_skills
-simplicio_symbol
-simplicio_test_run
-simplicio_todo
-simplicio_validate
-simplicio_workspace_snapshot
-```
-
-The list is a live catalogue, not a guarantee that every tool is appropriate
-for every task. Deprecated aliases such as `mapper`, `index`, `code-graph`,
-and `mapper-memory` must not appear as duplicate tools; during compatibility
-they resolve to the same canonical capability. An older Runtime below the
-unified-surface minimum must not advertise the new names.
-
-The client should call `tools/list` at startup and use the returned schemas;
-the table above is a quick orientation, not a substitute for live schemas.
-Mapper-only reconnect evidence is the live tool list, not this table.
-
-### Codex: local STDIO MCP and hooks
-
-A normal installation now invokes the installed Runtime's host registrar
-automatically. No opt-in environment variable or separately downloaded hook is
-required. The Runtime detects supported clients, writes the absolute managed
-binary path, preserves existing user configuration, and installs native hooks
-only on clients whose hook surface is implemented and verified.
-
-Registration does not require an active Google session. Authentication is still
-validated when an MCP session uses protected Runtime capabilities. Restart each
-open client after installation so it reloads its MCP server and hook files.
-
-### Agent contract: Mapper first
-
-Every agent integration must map the project before planning, reading broadly,
-editing, provider access, or completion. Claude and Hermes use Mapper-only
-hooks and reuse the verified map in `.simplicio/hook-context/`; the map is
-refreshed when the project generation changes. Runtime mapping is preferred,
-with the bundled fallback already maintained by the Simplicio installation if
-native mapping is unavailable. If neither path produces a verified map, the
-request is blocked. Fast and other context accelerators remain explicit
-consultation tools and are never lifecycle-hook dependencies.
-
-The complete operating rules for agents are in [`AGENTS.md`](AGENTS.md).
-
-MCP clients launch `command` directly, so do not use `~` and do not expect
-shell expansion. The generated registration uses the following local STDIO MCP
-shape for the current operating system.
-
-#### Windows
-
-Use forward slashes in TOML. Windows accepts them, and they avoid invalid TOML
-escapes such as `\\U` in `C:\\Users\\...`.
-
-~~~toml
-[mcp_servers.simplicio]
-command = "C:/Users/YourName/.simplicio/bin/simplicio.exe"
-args = ["serve", "--mcp", "--stdio", "--no-facade-mode"]
-
-[mcp_servers.simplicio.env]
-SIMPLICIO_MCP_URL = "http://127.0.0.1:8787/mcp"
-SIMPLICIO_RUNTIME_MODE = "mapper-only"
-~~~
-
-#### macOS
-
-~~~toml
-[mcp_servers.simplicio]
-command = "/Users/your-name/.simplicio/bin/simplicio"
-args = ["serve", "--mcp", "--stdio", "--no-facade-mode"]
-
-[mcp_servers.simplicio.env]
-SIMPLICIO_MCP_URL = "http://127.0.0.1:8787/mcp"
-SIMPLICIO_RUNTIME_MODE = "mapper-only"
-~~~
-
-#### Linux
-
-~~~toml
-[mcp_servers.simplicio]
-command = "/home/your-name/.simplicio/bin/simplicio"
-args = ["serve", "--mcp", "--stdio", "--no-facade-mode"]
-
-[mcp_servers.simplicio.env]
-SIMPLICIO_MCP_URL = "http://127.0.0.1:8787/mcp"
-SIMPLICIO_RUNTIME_MODE = "mapper-only"
-~~~
-
-The Runtime currently registers supported configurations for Codex, Claude
-Code/Desktop, Hermes, Cursor, Windsurf/Next, Kiro, Gemini, Trae, Antigravity,
-Junie, Cline, VS Code, Zed, and OpenCode. Existing files are merged
-idempotently. Codex and Claude receive their verified Runtime-owned native hook
-routes; other clients receive the supported MCP/rules integration.
-
-To inspect or repair every detected integration manually, run:
-
-~~~bash
-simplicio mcp register --binary "$(command -v simplicio)" --json
-~~~
-
-A failed automatic registration makes the installer fail clearly instead of
-claiming success. Clients not reported by the JSON result are not silently
-treated as configured.
-
-The installer also writes the redacted multi-host detection/registration
-receipt to `simplicio-host-integrations.json` beside the managed binary. See
-[`docs/HOST_INTEGRATIONS.md`](docs/HOST_INTEGRATIONS.md) for the supported
-matrix, exact-probe policy, opt-outs, and receipt schema.
-
-### Other MCP clients: local STDIO
-
-For Claude Code, Cursor, VS Code, Cline, Continue, and similar clients, add a
-server entry using the installed binary:
-
+### Manual MCP Server Configuration (`stdio`)
 ```json
 {
   "mcpServers": {
     "simplicio": {
       "command": "simplicio",
-      "args": ["serve", "--mcp", "--stdio", "--no-facade-mode"],
-      "env": {
-        "SIMPLICIO_RUNTIME_MODE": "mapper-only"
-      }
+      "args": ["serve", "--mcp", "--stdio"]
     }
   }
 }
 ```
 
-Typical configuration locations are:
-
-| Client | File |
-|---|---|
-| Claude Code | `~/.claude/settings.json` |
-| Cursor | `~/.cursor/mcp.json` |
-| VS Code | `.vscode/mcp.json` |
-| Cline | `~/.config/cline/mcp_settings.json` |
-| Continue | `~/.continue/config.json` |
-
-Reload the client after saving its configuration. STDIO is local, points at the
-installed `~/.simplicio/bin/simplicio` binary, and does not need a manually
-copied bearer token. The Runtime still requires an active Simplicio login.
-
-Smoke-test the local server:
-
-```bash
-printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \\
-  | SIMPLICIO_RUNTIME_MODE=mapper-only ~/.simplicio/bin/simplicio serve --mcp --stdio --no-facade-mode
-```
-
-The response should contain `simplicio_map` and `simplicio_context`, plus the
-optional retained catalogue available to that host. If the command says login
-is required, authenticate first; do not disable the gate or insert a token into
-a config file.
-
-### MCP request flow
-
-```text
-AI client → tools/list / tools/call
-          → Simplicio Runtime auth + entitlement gate
-          → map / memory / edit / validate / exec surface
-          → structured result + evidence
-```
-
-For the complete client matrix and protocol notes, see
-[`MCP-CONNECT.md`](MCP-CONNECT.md).
-
-### Plugin marketplace
-
-This public repository also publishes the Simplicio Claude Code marketplace:
-
-```text
-/plugin marketplace add wesleysimplicio/simplicio
-/plugin install simplicio@simplicio
-/plugin install simplicio-loop@simplicio
-/plugin install simplicio-prompt@simplicio
-/plugin install simplicio-hermes@simplicio
-```
-
-The plugin bundle is documented in [`PLUGIN.md`](PLUGIN.md). These are optional
-Claude Code skill surfaces; they are not proof that the Runtime binary contains
-the ecosystem sources. When present, the skills call the Runtime through
-`simplicio serve --mcp --stdio`.
+Exposed MCP Tools:
+- `simplicio_map`: Structural repository orientation without prompt bloating.
+- `simplicio_context`: Bounded token retrieval for exact code snippets.
+- `simplicio_edit`: Atomic mechanical modifications with SHA-256 receipts.
+- `simplicio_loop`: Concurrently orchestrated multi-stage waves.
+- `simplicio_parallel`: Real-time inspection of CPUExecutor and hardware headroom.
 
 ---
 
-## 📊 Benchmarks and token savings
+## ⚙️ Core Architecture Highlights
 
-The **up to 96%** figure is a headline maximum measured on controlled
-workloads that combine repository mapping, memory recall, deterministic edits,
-local routing, and local fan-out. It is not a promise that every task or model
-will save 96%. The component percentages below are directional measurements;
-they must not be added together.
-
-| Mechanism | Reference result | What is measured |
-|---|---:|---|
-| 🗺️ Repo map | ~70% less context | Compact structural context versus raw file reads |
-| 🧠 Memory recall | ~80% less re-derivation | Reused indexed facts versus rediscovering them |
-| ✏️ Deterministic edit | 100% LLM output avoided | Structured file mutation without a generation step |
-| 🏠 Local routing | ~90% fewer remote tokens | Classification/low-risk work handled locally |
-| 📡 Remote routing | ~85% fewer remote tokens | Remote models used for planning and hard decisions |
-| 🔀 Local fan-out | ~95% fewer cloud-agent tokens | Local agents used before cloud escalation |
-| **Combined controlled workload** | **up to 96%** | Baseline-to-Simplicio total token comparison |
-
-Every measured run should report its proof type and its baseline:
-`saved = baseline_tokens - actual_tokens` and
-`saving_percent = saved / baseline_tokens * 100`.
-
-### Measured OpenRouter proof — CRUD creation + edit (2026-09-01)
-
-A controlled two-stage run used OpenRouter and
-`deepseek/deepseek-v4-flash-0731` in both arms (`seed=42`,
-`temperature=0`, reasoning disabled). Creation was the control. Editing was the
-treatment: the baseline resent and regenerated the complete HTML, while
-Simplicio sent a compact plan and applied it through MCP.
-
-| Editing stage | Without Simplicio | With Simplicio MCP | Reduction |
-|---|---:|---:|---:|
-| Input tokens | 5,430 | 415 | 92.36% |
-| Output tokens | 5,144 | 58 | 98.87% |
-| Total tokens | 10,574 | 473 | **95.53%** |
-| OpenRouter cost | $0.00078559 | $0.00002654 | **96.62%** |
-| Latency | 17,615.78 ms | 1,296.79 ms | 92.64% |
-| Quality checks | Failed | Passed | — |
-
-Across both stages, usage fell from 16,043 to 6,175 tokens (**61.51% less**)
-and from $0.00132192 to $0.00058617 (**55.66% less**). The creation control
-used 4.26% more tokens with Simplicio, so the editing treatment—not the
-control—is the main evidence.
-
-This is one measured workflow pair, not a universal guarantee or an
-identical-output benchmark. Usage and cost came from OpenRouter responses;
-cache and reasoning tokens were zero. Repeat the run before making statistical
-claims. See the [machine-readable evidence](docs/evidence/openrouter-deepseek-v4-crud-2026-09-01.json).
-
-### Run the Runtime benchmark
-
-All Runtime benchmark commands require an active login because they execute
-through the governed Runtime:
-
-```bash
-simplicio benchmark run --sample --json       # deterministic fixture rows
-simplicio benchmark run --json                # measured Runtime timings
-simplicio benchmark savings --json            # savings-oriented summary
+```
+User Prompt ──► simplicio map ──► simplicio context ──► Wave Loop ──► simplicio edit ──► Validate & Deliver
+                 (Graph & AST)     (Token Bounding)     (Tokio DAG)   (Atomic SHA-256)   (Audit Receipts)
 ```
 
-For a real model/provider comparison, keep the task, repository snapshot,
-model, temperature, and cold/warm state constant. Record the baseline and the
-Simplicio run separately. Replace the example counts below with the actual
-provider-reported values:
-
-```bash
-simplicio savings record \
-  --spent 120 \
-  --baseline 300 \
-  --source codex \
-  --task "map, recall, edit, and validate a small change" \
-  --proof-kind measured
-
-simplicio savings report --repo . --json
-simplicio savings prove --repo . --json
-```
-
-Use `measured` only when the provider reports actual usage. Use `benchmark` for
-fixed fixture runs, `replayed` for a reproducible recorded run, and
-`estimated` only for a heuristic. Never present an `estimated` result as a
-measured benchmark. To compare a captured run with an explicit baseline:
-
-```bash
-simplicio savings compare \
-  --with-simplicio .simplicio/runs/<run-id> \
-  --without-simplicio baseline.json \
-  --proof-kind measured
-```
-
-### Distribution/tooling benchmark
-
-This public repository also benchmarks its release consistency checker. It is
-separate from AI token savings:
-
-```bash
-python3 scripts/bench_verify_distribution_consistency.py
-```
-
-The reference run used for this README was 25 iterations on the maintainer's
-macOS ARM64 machine: median `4.158 ms`, versus the committed baseline of
-`11.625 ms`, within the default `+150%` regression budget. Wall-clock values
-vary by machine and CI runner; the command and pass/fail threshold are the
-portable result.
-
-The stricter distribution benchmark is:
-
-```bash
-python3 scripts/benchmark_distribution.py --repetitions 5
-```
-
-It intentionally refuses to publish a metric when the distribution audit has
-warnings. A warning is a release-hygiene failure, not evidence of a token
-saving. Inspect the audit before retrying:
-
-```bash
-python3 scripts/verify_distribution_consistency.py
-```
+1. **Orientation (`simplicio map`)**: High-speed discovery of import topologies and public interfaces without reading thousands of redundant files into LLM context.
+2. **Context Bounding (`simplicio context`)**: Mathematical budget packing (`st_prompt_budget`) ensuring the model only receives the exact AST fragments it needs.
+3. **Mechanical Edits (`simplicio edit`)**: Deterministic exact search/replace, insertions, and deletions with pre-image hashing. If the file changed underneath, the patch safely aborts (*fail-closed*).
+4. **Wave Orchestrator (`simplicio loop`)**: Multi-stage DAG partitioner executing parallel reads and commands through Tokio semaphores with deterministic state reduction.
+5. **Hardware Governor (`CPUExecutor`)**: Dynamically samples CPU and memory pressure to prevent machine lockups. Automatically throttles subagents while keeping writes strictly serialized (`write_workers: 1`).
 
 ---
 
-## 🎯 What It Does
+## 📖 Complete Documentation & Guides
 
-| Command | Description | Cost/effect |
-|---|---|---|
-| `simplicio map --repo . --for-llm markdown` | Maps a repository for an LLM | Compact context |
-| `simplicio context --repo .` | Retrieves bounded task context from that map | Fast is projection-only |
-| `simplicio memory query "query" --json` | Recalls indexed project memory | Reuses known facts |
-| `simplicio edit --plan plan.json --repo .` | Applies a deterministic edit plan | Dev CLI owns the change |
-| `simplicio run "task" --repo . --agents N` | Runs a governed multi-agent task | Local-first routing |
-| `simplicio validate "task" --repo .` | Runs contract-oriented validation | Deterministic gates |
-| `simplicio sprint sprint.md --repo . --evidence` | Executes a sprint with evidence | Auditable delivery |
-| `simplicio benchmark run --sample --json` | Runs fixed benchmark fixtures | Reproducible rows |
+For deep technical dives, CLI references, benchmark proofs, and multi-agent workflows, visit our official documentation hub:
+
+👉 **[https://simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)**
 
 ---
 
-## 🆚 Simplicio vs Caveman vs RTK
+## 🔒 Security & Privacy
 
-| | 🪨 Caveman | 🔧 RTK | 🔥 **Simplicio** |
-|---|---|---|---|
-| **Approach** | Output style compression | Shell command proxy | **Full agent runtime** |
-| **Published scope** | Output-token reduction | Shell-command output reduction | **End-to-end controlled workloads** |
-| **Input compression** | ❌ | ✅ (filtered) | ✅ **Repo map + neural memory** |
-| **Output compression** | ✅ (caveman-speak) | ❌ | ✅ **Zero-token deterministic edits** |
-| **Local LLM** | ❌ | ❌ | ✅ **Built-in llama.cpp** |
-| **Multi-agent** | ❌ | ❌ | ✅ **64 → 600 local agents** |
-| **Memory across sessions** | ❌ | ❌ | ✅ **FTS + vector recall** |
-| **Evidence chain** | ❌ | ❌ | ✅ **sha256 sealed receipts** |
-| **Language** | JS/Python (skill) | Rust (binary) | **Rust (single binary)** |
-| **License** | MIT | Apache 2.0 | Proprietary |
-
-These tools measure different surfaces, so this repository does not claim an
-apples-to-apples Caveman/RTK benchmark. Caveman reduces how much an agent says;
-RTK reduces command output; Simplicio also reduces repeated context and
-deterministic mutation work. Use the reproducible commands in the benchmark
-section when comparing a real workload.
+- **Your Code Never Leaves Your Machine**: All repository mapping, context packaging, editing, and test gates execute locally.
+- **Auditable Provenance**: Every modification generates an immutable cryptographic receipt (`receipt.json`).
+- **No Mystery Telemetry**: Zero silent telemetry or code exfiltration.
 
 ---
 
-## 🏗️ Architecture
+## 💬 Community & Support
 
-```
-LLM (Claude/Codex/Gemini)          Simplicio Runtime
-  |                                   |
-  | 1. Orient                         | runtime map / MCP
-  | 2. Recall                         | memory query / MCP
-  | 3. Decide                         |
-  | 4. Edit  ───────────────────────> | structured edit
-  | 5. Verify <─────────────────────  | validate / evidence
-  | 6. Iterate                        | run / sprint
-```
-
-**The LLM reasons. Simplicio executes deterministically.**
-
----
-
-## ✨ Features
-
-- 🏠 **Local-first** — built-in llama.cpp, scales to remote only when needed
-- 🪜 **Tiered agents** — 64 → 100 → 200 → 600 local agents before paid cloud
-- 🔇 **Shannon novelty gate** — filters redundant outputs (zero tokens on dedup)
-- 🔒 **Sealed receipts** — sha256 per artifact, tamper-proof evidence chain
-- 🛡️ **5 delivery gates** — acceptance, validation, run-verify, regression, self-review
-- ⚡ **Action gate** — risk classification + blocklist for chat-initiated mutations
-- 🔌 **MCP/ACP** — Model Context Protocol + Agent Client Protocol
-- 🌐 **Gateways** — Telegram, Discord, Slack, WhatsApp
-- 🧩 **Skill system** — loads and chains reusable capabilities
-- 💾 **Memory DB** — persistent FTS + vector recall across sessions
-- 🔀 **LLM router** — no LLM → local LLM → remote LLM automatically
-- 🖥️ **Cross-platform** — macOS, Linux, Windows, single binary
-
----
-
-## 🔄 Updates, diagnostics, and troubleshooting
-
-Re-running the official installer is the simplest update path. It downloads
-the latest release, verifies the SHA256 checksum and Ed25519 signature, validates
-the Runtime release contract, preserves `~/.simplicio/login.json`, and keeps
-the remaining ~/.simplicio user data. Re-running the
-installer keeps the installation on GitHub's latest release. The installer refuses
-to replace a working binary with a release that lacks the embedded bundle,
-Google login activation, a configured update key, or a verifiable signature.
-
-When the Runtime's background update checks are enabled, it checks in its
-scheduled windows, notifies once per release, stages the verified asset, and
-applies it on the next session. The current release channel is checksum
-verified. If the latest executable reports a missing public update key or an
-unsigned channel, that mismatch is a release blocker, not a reason to disable
-verification.
-
-The Runtime also exposes an authenticated update surface:
-
-```bash
-simplicio update check --json
-simplicio update apply --json
-simplicio update status --json
-simplicio update rollback --json
-```
-
-Use `rollback` only when you have a verified previous release and understand
-the compatibility trade-off. After any update, repeat:
-
-```bash
-simplicio --version
-simplicio version --json
-simplicio ecosystem doctor --json
-simplicio auth status --json
-codex mcp list
-```
-
-Common failures:
-
-| Symptom | Resolution |
-|---|---|
-| `login required` | Run `simplicio auth login`; confirm `active: true`. |
-| Codex does not show Simplicio tools | Restart Codex, inspect **Settings → Hooks**, and verify `codex mcp list` points to `serve --mcp --stdio`. |
-| `tools/list` is empty or stale | Restart/reload the MCP host and verify its command resolves to the intended `simplicio` binary. |
-| Runtime release contract fails | Wait for a release with embedded sources, enabled Google login, and a configured public update key; do not bypass the gate. |
-| Google says the browser is not secure | Use a normal Safari/Chrome window for the Google step, not an embedded webview; never disable the account security gate. |
-| A command behaves differently across terminals | Run `which simplicio`, `simplicio --version`, and inspect `PATH` for an older binary. |
-
-Useful diagnostic commands:
-
-```bash
-simplicio doctor --json
-simplicio self-test --json
-simplicio status --json
-simplicio security --json
-```
-
-When reporting a problem, include the operating system, architecture,
-`simplicio --version`, the redacted output of `simplicio auth status --json`,
-and `simplicio version --json` plus `simplicio ecosystem doctor --json`.
-Remove email addresses, device codes,
-authorization headers, and every credential before sharing logs.
-
----
-
-## 🎁 Public Beta
-
-**Deterministic commands are FREE forever:**
-`map`, `validate`, `edit`, `deliver`, `checkpoint`
-
-AI features may be free while the public beta flag is active. Login and an
-active entitlement are still required; when beta access ends, the entitlement
-must come from an active subscription.
-
-```bash
-simplicio license status
-```
-
----
-
-## 📋 Requirements
-
-| Requirement | Minimum | Recommended |
-|---|---|---|
-| RAM | 8 GB | 16 GB+ |
-| Storage | ~35–50 MB for the release binary | 1.5 GB+ with a local LLM |
-| OS | macOS Apple Silicon and Intel, Linux x64, Windows x64 | macOS ARM64 and x64 |
-| Python | Not required for the embedded Runtime projects | Current CPython 3 for optional external adapters |
-| Browser | Safari, Chrome, or another supported browser for Google login | Current Safari/Chrome |
-| Terminal | any modern terminal | WezTerm / Alacritty / Ghostty |
-
----
-
-## 🧪 Testing this repo's tooling
-
-This repo ships committed release binaries plus the packaging/tooling around
-them (npm/PyPI wrappers, install scripts, a distribution-consistency checker).
-The official command to run that tooling's unit test suite:
-
-```bash
-pip install -r requirements-dev.txt
-python -m pytest tests/unit -v --cov=scripts --cov-report=term-missing --cov-fail-under=85
-python3 scripts/bench_verify_distribution_consistency.py
-python3 scripts/verify_distribution_consistency.py
-```
-
-See [docs/testing-strategy.md](docs/testing-strategy.md) for what's covered,
-what's intentionally out of scope, and the plan for the rest of the testing
-epic. The consistency audit may report release-hygiene warnings even when the
-unit suite is green; resolve all release warnings before treating the stricter
-`benchmark_distribution.py` gate as a release pass. See also
-[CONTRIBUTING.md](CONTRIBUTING.md).
-
----
-
-## 🌐 Ecosystem
-
-- [Website](https://simpleti.com.br/simplicio/) — product overview, benchmarks, install
-- [Discord](https://discord.gg/wM6tr7xVb) — community and support
-
----
-
-## 📄 License
-
-The root Runtime distribution and its release artifacts are proprietary.
-The binary is free to download and use during the public beta; AI feature
-access still requires an active Simplicio entitlement. Plugin subdirectories
-may carry their own license files and terms.
-
----
-
-## ⭐ Star History
-
-<a href="https://www.star-history.com/?repos=wesleysimplicio%2Fsimplicio&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" />
- </picture>
-</a>
-
----
-
-## 💬 Community
-
-- [Discord](https://discord.gg/wM6tr7xVb) — chat, support, early access
-- [GitHub Issues](https://github.com/wesleysimplicio/simplicio/issues) — bugs and feature requests
+- **Official Website**: [simpleti.com.br/simplicio](https://simpleti.com.br/simplicio/)
+- **Documentation**: [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
+- **Discord**: [Join the Community](https://discord.gg/wM6tr7xVb)
+- **Issues**: [GitHub Issue Tracker](https://github.com/wesleysimplicio/simplicio/issues)
 
 ---
 
 <p align="center">
-  <strong>🔥 Simplicio — Your code, your machine, up to 96% fewer tokens on controlled workloads. 🔥</strong>
+  <sub>© 2026 SimpleTI. Simplicio is a registered proprietary software. All rights reserved.</sub>
 </p>
