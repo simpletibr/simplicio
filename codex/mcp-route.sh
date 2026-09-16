@@ -6,7 +6,7 @@
 # Lifecycle events may inject a bounded Map excerpt once per generation when
 # explicitly opted in; default Mapper-only emits no context. Callers can retrieve
 # the complete artifact with simplicio_context. Native shell/terminal
-# execution is governed: only direct Simplicio Shell/CLI invocations pass.
+# execution remains the host's optional native tool surface.
 set -uo pipefail
 
 SIMPLICIO_BIN="${SIMPLICIO_BIN:-${SIMPLICIO_BIN_DIR:-${HOME}/.simplicio/bin}/simplicio}"
@@ -18,9 +18,7 @@ INPUT="$(cat 2>/dev/null || true)"
 [ -n "$INPUT" ] || exit 0
 
 if ! command -v python3 >/dev/null 2>&1; then
-  [ "${SIMPLICIO_RUNTIME_MODE:-}" = "mapper-only" ] && exit 0
-  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Simplicio hook parser unavailable; native shell/terminal execution is blocked until the governed route is restored."}}'
-  exit 2
+  exit 0
 fi
 
 export SIMPLICIO_MCP_ROUTE_INPUT="$INPUT"
@@ -29,7 +27,6 @@ import hashlib
 import json
 import os
 import pathlib
-import re
 import subprocess
 import sys
 import time
@@ -41,31 +38,20 @@ RUNTIME_BIN = os.environ.get("SIMPLICIO_BIN") or str(
 MAP_RECEIPT_SCHEMA = "simplicio.hook-map-receipt/v1"
 INJECTION_RECEIPT_SCHEMA = "simplicio.hook-context-injection/v1"
 
-def deny_unclassifiable_payload(reason: str) -> None:
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": "deny",
-                    "permissionDecisionReason": reason,
-                }
-            },
-            separators=(",", ":"),
-        )
-    )
-    raise SystemExit(2)
+def ignore_unclassifiable_payload(_reason: str) -> None:
+    # Cache warming is advisory; malformed input must not block host tools.
+    raise SystemExit(0)
 
 
 try:
     hook = json.loads(raw)
 except Exception:
-    deny_unclassifiable_payload(
+    ignore_unclassifiable_payload(
         "Simplicio hook received an invalid payload; native shell/terminal execution "
         "is blocked until the hook input is repaired."
     )
 if not isinstance(hook, dict):
-    deny_unclassifiable_payload(
+    ignore_unclassifiable_payload(
         "Simplicio hook received an unclassifiable payload; native shell/terminal "
         "execution is blocked until the hook input is repaired."
     )
@@ -112,7 +98,7 @@ def runtime_mode(repo: str) -> str:
             except FileNotFoundError:
                 continue
             except OSError:
-                deny_unclassifiable_payload("Simplicio runtime mode configuration is unreadable.")
+                ignore_unclassifiable_payload("Simplicio runtime mode configuration is unreadable.")
             section = ""
             for raw_line in body.splitlines():
                 line = raw_line.split("#", 1)[0].strip()
@@ -126,132 +112,8 @@ def runtime_mode(repo: str) -> str:
                     if full_key in {"runtime.mode", "mode"}:
                         mode = value.strip().strip('"').strip("'").strip()
     if mode not in {"full", "mapper-only"}:
-        deny_unclassifiable_payload("Invalid runtime.mode; expected full or mapper-only.")
+        ignore_unclassifiable_payload("Invalid runtime.mode; expected full or mapper-only.")
     return mode
-
-
-def hook_tool_name() -> str:
-    return str(
-        hook.get("toolName")
-        or hook.get("tool_name")
-        or hook.get("name")
-        or ""
-    )
-
-
-def hook_tool_input_value():
-    for key in ("toolInput", "tool_input", "input"):
-        if key in hook and hook[key] is not None:
-            return hook[key]
-    return {}
-
-
-def hook_tool_input() -> dict:
-    value = hook_tool_input_value()
-    return value if isinstance(value, dict) else {}
-
-
-def hook_tool_input_text() -> str:
-    value = hook_tool_input_value()
-    if isinstance(value, str):
-        return value
-    if isinstance(value, (dict, list)):
-        if isinstance(value, dict):
-            for key in ("input", "code", "source", "script", "javascript", "text"):
-                candidate = value.get(key)
-                if isinstance(candidate, str):
-                    return candidate
-        try:
-            return json.dumps(value, sort_keys=True, separators=(",", ":"))
-        except (TypeError, ValueError):
-            return ""
-    return ""
-
-
-def is_native_shell_tool(name: str) -> bool:
-    normalized = name.strip().lower().replace("-", "_")
-    if not normalized or normalized.startswith(("mcp__", "app__", "plugin__")):
-        return False
-    leaf = re.split(r"(?:::|__|\.)", normalized)[-1]
-    shell_names = {
-        "bash", "cmd", "exec_command", "execute_command", "fish",
-        "powershell", "pwsh", "run_command", "run_shell_command",
-        "run_terminal_command", "sh", "shell", "shell_command",
-        "terminal", "terminal_command", "wsl", "write_stdin", "zsh",
-    }
-    return normalized in shell_names or leaf in shell_names
-
-
-def is_orchestrator_exec_tool(name: str) -> bool:
-    normalized = name.strip().lower().replace("-", "_")
-    return normalized in {"functions.exec", "functions__exec"}
-
-
-def nested_native_shell_request() -> bool:
-    payload = hook_tool_input_text()
-    if not payload:
-        return False
-    property_access = re.compile(
-        r"""\btools(?:\?\.)?(?:\.(?:exec_command|write_stdin)\b|"""
-        r"""\[\s*['"](?:exec_command|write_stdin)['"]\s*\])""",
-        re.IGNORECASE,
-    )
-    destructured = re.compile(
-        r"""\{[^}]*\b(?:exec_command|write_stdin)\b[^}]*\}\s*=\s*tools\b""",
-        re.IGNORECASE | re.DOTALL,
-    )
-    return bool(property_access.search(payload) or destructured.search(payload))
-
-
-def requested_command() -> str:
-    values = hook_tool_input()
-    for key in ("command", "cmd", "script"):
-        value = values.get(key)
-        if isinstance(value, str):
-            return value
-    return ""
-
-
-def is_direct_simplicio_command(command: str) -> bool:
-    value = command.strip()
-    if not value:
-        return False
-    if value.startswith("&"):
-        value = value[1:].lstrip()
-    if not value or any(marker in value for marker in (
-        "\r", "\n", ";", "&&", "||", "|", "$(", ">", "<", "&"
-    )) or "`" in value:
-        return False
-    if value[0] in ("'", '"'):
-        quote = value[0]
-        end = value.find(quote, 1)
-        if end < 2:
-            return False
-        executable = value[1:end]
-    else:
-        executable = value.split(None, 1)[0]
-    leaf = re.split(r"[\\/]", executable)[-1].lower()
-    return leaf in {"simplicio", "simplicio.exe", "simplicio-shell", "simplicio-shell.exe"}
-
-
-def deny_native_shell() -> None:
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": "deny",
-                    "permissionDecisionReason": (
-                        "Native shell/terminal is blocked; use the governed "
-                        "Simplicio Shell/CLI or a Simplicio MCP tool."
-                    ),
-                }
-            },
-            separators=(",", ":"),
-        )
-    )
-    raise SystemExit(0)
-
 
 
 def repository_generation(root: pathlib.Path) -> str:
@@ -581,7 +443,7 @@ def mapper_context_once(root: pathlib.Path, generation: str, auth_state: str) ->
             )
     elif auth_state == "login_required":
         body = base + (
-            "Mapper requires login: run simplicio auth login to enable mapping. "
+            "Mapper requires login: run simplicio login google to enable mapping. "
             "No Map was delivered. Native work can continue."
         )
     else:
@@ -691,15 +553,6 @@ if event in context_events:
     raise SystemExit(0)
 
 
-# Native shell/terminal is blocked unless the command enters through the governed
-# Simplicio Shell/CLI. Third-party MCP/apps and non-shell tools pass unchanged.
-if event in {"", "pretooluse", "pre_tool_use"}:
-    tool_name = hook_tool_name()
-    if is_orchestrator_exec_tool(tool_name) and nested_native_shell_request():
-        deny_native_shell()
-    if is_native_shell_tool(tool_name) and not is_direct_simplicio_command(requested_command()):
-        deny_native_shell()
-
-# PreToolUse is safety-only: never scan Git or warm/build a Map here.
+# PreToolUse is advisory-only: never block the host operation.
 raise SystemExit(0)
 PY

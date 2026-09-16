@@ -2,13 +2,13 @@
   "schema": "simplicio.provenance/v1",
   "subject": {
     "name": "simplicio-windows-x64.exe",
-    "sha256": "529bf24c41548fea2a4260ebefce1ea91857647b58074952a0dfe57075773185",
-    "size": 78311936
+    "sha256": "e7c5fa5288164238279a61e660425a5ff9cad656bead2855aaae20fe5601d54e",
+    "size": 63927296
   },
   "build": {
-    "version": "3.8.50",
+    "version": "3.8.52",
     "target": "windows-x64",
-    "source_commit": "df1502c357e679efbf62308acd8a75f6959dabec",
+    "source_commit": "e6b6c419a0191507ae62f687d939e81c707cebca",
     "builder": "local manual release"
   },
   "optimization_profile": {
@@ -19,10 +19,10 @@
   },
   "host_plugins": {
     "schema": "simplicio.host-plugin-release-binding/v1",
-    "runtime_commit": "df1502c357e679efbf62308acd8a75f6959dabec",
-    "public_commit": "80269af6f36af3a99be36f016808682c93952095",
-    "bundle_manifest_sha256": "a128c59559215d281263173ebab9edee224987c3dbf707bf94e517d04fcc5226",
-    "payload_tree_sha256": "c056bd59904cc4af08a90fa5d4d2cfa75c80b07e745e40d887a0bc662d8491c4"
+    "runtime_commit": "e6b6c419a0191507ae62f687d939e81c707cebca",
+    "public_commit": "787dd3cedddd9e2788c42baafc508a2c7f6b73e1",
+    "bundle_manifest_sha256": "18030a5d2f18aec6d71eb34413da506e5f2b98eae885a3ce33fbe12b020e7894",
+    "payload_tree_sha256": "e6797c2e98155164e2436bfc7e83a0be40f8eb7af00deeec5f7145a97a6ee879"
   },
-  "generated_at": "2026-09-09T22:30:25.217185Z"
+  "generated_at": "2026-09-16T23:00:45.675696Z"
 }
