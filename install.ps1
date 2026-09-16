@@ -945,6 +945,12 @@ $script:InstallStage = "mcp_registration"
 if (Test-McpToolSurface $DestPath) {
   $script:McpRegistered = $true
   Write-Host "  ✓ MCP and hooks registered automatically for detected clients"
+  # Inicialização determinística de memória, migrations e seeds
+  try {
+    & $DestPath memory steward migrate --json 2>$null | Out-Null
+    & $DestPath memory steward seed --json 2>$null | Out-Null
+    & $DestPath memory init --json 2>$null | Out-Null
+  } catch {}
 } else {
   Fail-Install $script:McpFailureReason $script:McpFailureCode
   exit 1

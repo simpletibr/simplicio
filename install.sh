@@ -640,6 +640,10 @@ verify_mcp_tools() {
   if [ "$mcp_exit_code" -eq 0 ]; then
     rm -f "$stdout_path" "$stderr_path" "$stdout_path.truncated" "$stderr_path.truncated" "$code_path" "$reason_path"
     rmdir "$capture_dir" 2>/dev/null || true
+    # Inicialização determinística de memória, seed e reuse
+    "$binary_path" memory steward migrate --json >/dev/null 2>&1 || true
+    "$binary_path" memory steward seed --json >/dev/null 2>&1 || true
+    "$binary_path" memory init --json >/dev/null 2>&1 || true
     return 0
   fi
 
@@ -881,6 +885,15 @@ run_doctor() {
     else
       warn "sessão Google não verificada de forma fresh (ausente, cacheada, expirada, revogada ou sem entitlement)"
       status=1
+    fi
+
+    if "$DEST_PATH" memory status --json >/dev/null 2>&1; then
+      ok "memória neural verificada e operacional"
+    else
+      warn "memória neural não inicializada — executando bootstrap/migrations/seed"
+      "$DEST_PATH" memory steward migrate --json >/dev/null 2>&1 || true
+      "$DEST_PATH" memory steward seed --json >/dev/null 2>&1 || true
+      "$DEST_PATH" memory init --json >/dev/null 2>&1 || true
     fi
   fi
 
