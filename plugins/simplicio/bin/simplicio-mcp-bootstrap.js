@@ -9,18 +9,18 @@ const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
 
 const POLICY = Object.freeze({
-  runtimeVersion: "3.8.50",
+  runtimeVersion: "3.8.52",
   minimumRuntimeVersion: "3.8.40",
   unifiedSurfaceMinimumVersion: "3.8.40",
-  installerCommit: "d3aa619c68e166a299c7a3089709f060b68adcf5",
+  installerCommit: "2b3c1ada893263d09e82df456c82b4c9f2067ed7",
   installers: Object.freeze({
     posix: Object.freeze({
       filename: "install.sh",
-      sha256: "3ce5c4a81a545b4608c95dcbd6a41e42858e62384397e06703b4d6746e65e535"
+      sha256: "30f4b7b33782db7a272190342f536b3b6ae4d248cb23626ef0bcf4bd13386546"
     }),
     win32: Object.freeze({
       filename: "install.ps1",
-      sha256: "2056f5128e4754c45d10e42ddffdbbb646d194536bb4e3e99f11552710fdba06"
+      sha256: "2e2a23babe6999a2a7ca560111982a2c4e41e2ccf6c002ec2ff944569d51422e"
     })
   })
 });
