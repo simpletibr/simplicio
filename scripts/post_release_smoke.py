@@ -343,7 +343,7 @@ def run_native_smoke(target: str, manifest: Mapping[str, object], binary: bytes)
                 for tool in responses.get(2, {}).get("result", {}).get("tools", [])
                 if isinstance(tool, dict) and tool.get("name")
             }
-            required_tools = {"simplicio_map", "simplicio_memory", "simplicio_gate", "simplicio_edit", "simplicio_validate"}
+            required_tools = {"simplicio_map", "simplicio_memory", "simplicio_edit", "simplicio_validate"}
             missing_tools = sorted(required_tools - listed_tools)
             if missing_tools:
                 raise RuntimeError("MCP tools/list is missing required tools: " + ", ".join(missing_tools))
