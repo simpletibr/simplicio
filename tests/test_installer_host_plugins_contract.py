@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -668,6 +669,13 @@ def test_powershell_repeat_is_idempotent_and_gates_host_plugins(
     install_bin = bundle / "bin"
     source_runtime = tmp_path / "simplicio-runtime"
     runtime_log = tmp_path / "runtime-pwsh-success.log"
+    installer_text = (ROOT / "install.ps1").read_text(encoding="utf-8")
+    hook_ref = re.search(r'\$PublicRouteRef = "([^"]+)"', installer_text).group(1)
+    hook_digest = re.search(r'\$PublicRouteSha256 = "([^"]+)"', installer_text).group(1)
+    hook_source = tmp_path / "pinned-mcp-route.ps1"
+    hook_bytes = subprocess.check_output(["git", "show", hook_ref + ":codex/mcp-route.ps1"], cwd=ROOT)
+    assert hashlib.sha256(hook_bytes).hexdigest() == hook_digest
+    hook_source.write_bytes(hook_bytes)
     _fake_runtime(source_runtime)
     digest = hashlib.sha256(source_runtime.read_bytes()).hexdigest()
     hook = bundle / "hooks" / "mcp-route.ps1"
@@ -687,6 +695,7 @@ def test_powershell_repeat_is_idempotent_and_gates_host_plugins(
             "FAKE_HOST_PLUGINS_EXIT": str(host_plugins_exit),
             "FAKE_HOST_PLUGINS_HELP_MODE": host_plugins_help_mode,
             "FAKE_RUNTIME_SHA256": digest,
+            "FAKE_HOOK_SOURCE": str(hook_source),
             "INSTALLER_PATH": str(ROOT / "install.ps1"),
         }
     )
@@ -706,7 +715,11 @@ function Invoke-RestMethod {
 }
 function Invoke-WebRequest {
   param([string]$Uri, [string]$OutFile, [switch]$UseBasicParsing, [object]$ErrorAction)
-  Copy-Item -Force -Path $env:FAKE_RUNTIME_SOURCE -Destination $OutFile
+  if ($Uri -like "*mcp-route.ps1") {
+    Copy-Item -Force -Path $env:FAKE_HOOK_SOURCE -Destination $OutFile
+  } else {
+    Copy-Item -Force -Path $env:FAKE_RUNTIME_SOURCE -Destination $OutFile
+  }
 }
 & $env:INSTALLER_PATH -Version "3.8.40"
 """

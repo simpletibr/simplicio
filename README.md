@@ -42,15 +42,18 @@ Install the signed native binary in seconds:
 
 ### macOS / Linux
 ```bash
-curl -fsSL https://simpleti.com.br/simplicio/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
 ```
 
 ### Windows (PowerShell as Administrator)
 ```powershell
-irm https://simpleti.com.br/simplicio/install.ps1 | iex
+irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex
 ```
 
 ### Alternative (PyPI Bootstrapper)
+
+On Windows, use `py -m pip install --upgrade simplicio-installer` followed by `simplicio install`.
+
 ```bash
 python3 -m pip install --upgrade simplicio-installer
 simplicio install
