@@ -2,8 +2,8 @@
 # simplicio-hook-version: 3240-v12
 # Lifecycle events may inject a bounded Map excerpt once per generation when
 # explicitly opted in; default Mapper-only emits no context.
-# Native shell/terminal execution is governed: only direct Simplicio Shell/CLI
-# invocations pass; third-party MCP/apps remain available unchanged.
+# Native shell/terminal execution remains the host's optional tool surface;
+# third-party MCP/apps remain available unchanged.
 param([switch]$WarmWorker)
 
 $ErrorActionPreference = 'Stop'
@@ -165,21 +165,15 @@ if ([string]::IsNullOrWhiteSpace($raw)) {
 }
 if ([string]::IsNullOrWhiteSpace($raw)) { Allow-Unchanged }
 function Emit-UnclassifiablePayload([string]$Reason) {
-  @{
-    hookSpecificOutput = @{
-      hookEventName = 'PreToolUse'
-      permissionDecision = 'deny'
-      permissionDecisionReason = $Reason
-    }
-  } | ConvertTo-Json -Compress
-  exit 2
+  # Cache warming is advisory; malformed input must not block host tools.
+  exit 0
 }
 
 try { $hook = $raw | ConvertFrom-Json } catch {
-  Emit-UnclassifiablePayload 'Simplicio hook received an invalid payload; native shell/terminal execution is blocked until the hook input is repaired.'
+  Emit-UnclassifiablePayload 'Simplicio hook received an invalid payload; the hook input was ignored.'
 }
 if ($null -eq $hook -or $hook -isnot [pscustomobject]) {
-  Emit-UnclassifiablePayload 'Simplicio hook received an unclassifiable payload; native shell/terminal execution is blocked until the hook input is repaired.'
+  Emit-UnclassifiablePayload 'Simplicio hook received an unclassifiable payload; the hook input was ignored.'
 }
 
 $event = [string]($hook.hookEventName)
@@ -245,129 +239,6 @@ function Get-RuntimeMode {
   }
   return $mode
 }
-
-function Get-HookToolName {
-  $name = [string]($hook.toolName)
-  if ([string]::IsNullOrWhiteSpace($name)) { $name = [string]($hook.tool_name) }
-  if ([string]::IsNullOrWhiteSpace($name)) { $name = [string]($hook.name) }
-  return $name
-}
-
-function Get-HookToolInputValue {
-  if ($null -ne $hook.toolInput) { return $hook.toolInput }
-  if ($null -ne $hook.tool_input) { return $hook.tool_input }
-  if ($null -ne $hook.input) { return $hook.input }
-  return $null
-}
-
-function Get-HookToolInputText {
-  $value = Get-HookToolInputValue
-  if ($null -eq $value) { return '' }
-  if ($value -is [string]) { return [string]$value }
-  foreach ($key in @('input', 'code', 'source', 'script', 'javascript', 'text')) {
-    $property = $value.PSObject.Properties[$key]
-    if ($null -ne $property -and $property.Value -is [string]) {
-      return [string]$property.Value
-    }
-  }
-  try { return ($value | ConvertTo-Json -Compress -Depth 20) } catch { return '' }
-}
-
-function Test-NativeShellTool([string]$Name) {
-  $normalized = $Name.Trim().ToLowerInvariant().Replace('-', '_')
-  if (
-    [string]::IsNullOrWhiteSpace($normalized) -or
-    $normalized.StartsWith('mcp__') -or
-    $normalized.StartsWith('app__') -or
-    $normalized.StartsWith('plugin__')
-  ) { return $false }
-  $parts = @($normalized -split '(?:__|::|\.)')
-  $leaf = if ($parts.Count -gt 0) { $parts[-1] } else { $normalized }
-  $shellNames = @(
-    'bash', 'cmd', 'exec_command', 'execute_command', 'fish', 'powershell', 'pwsh',
-    'run_command', 'run_shell_command', 'run_terminal_command', 'sh', 'shell',
-    'shell_command', 'terminal', 'terminal_command', 'wsl', 'write_stdin', 'zsh'
-  )
-  return $shellNames -contains $leaf
-}
-
-function Test-OrchestratorExecTool([string]$Name) {
-  $normalized = $Name.Trim().ToLowerInvariant().Replace('-', '_')
-  return @('functions.exec', 'functions__exec') -contains $normalized
-}
-
-function Test-NestedNativeShellRequest {
-  $payload = Get-HookToolInputText
-  if ([string]::IsNullOrWhiteSpace($payload)) { return $false }
-  $compact = [regex]::Replace($payload, '\s+', '')
-  foreach ($token in @(
-    'tools.exec_command', 'tools?.exec_command', 'tools["exec_command"]',
-    "tools['exec_command']", 'tools.write_stdin', 'tools?.write_stdin',
-    'tools["write_stdin"]', "tools['write_stdin']"
-  )) {
-    if ($compact.IndexOf($token, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
-      return $true
-    }
-  }
-  return [regex]::IsMatch(
-    $compact,
-    '\{[^}]*\b(?:exec_command|write_stdin)\b[^}]*\}=tools\b',
-    [Text.RegularExpressions.RegexOptions]::IgnoreCase
-  )
-}
-
-function Get-HookCommand {
-  $toolInput = $hook.toolInput
-  if ($null -eq $toolInput) { $toolInput = $hook.tool_input }
-  if ($null -eq $toolInput) { $toolInput = $hook.input }
-  if ($null -eq $toolInput) { return '' }
-  foreach ($key in @('command', 'cmd', 'script')) {
-    $property = $toolInput.PSObject.Properties[$key]
-    if ($null -ne $property -and $property.Value -is [string]) {
-      return [string]$property.Value
-    }
-  }
-  return ''
-}
-
-function Test-DirectSimplicioCommand([string]$Command) {
-  if ([string]::IsNullOrWhiteSpace($Command)) { return $false }
-  $value = $Command.Trim()
-  if ($value.StartsWith('&')) { $value = $value.Substring(1).TrimStart() }
-  if ([string]::IsNullOrWhiteSpace($value)) { return $false }
-  if ($value.Contains([char]13) -or $value.Contains([char]10)) { return $false }
-  foreach ($marker in @(';', '&&', '||', '|', '$(', '>', '<', '&')) {
-    if ($value.Contains($marker)) { return $false }
-  }
-  if ($value.Contains([char]96)) { return $false }
-
-  $executable = ''
-  if ($value[0] -eq '"' -or $value[0] -eq "'") {
-    $quote = $value[0]
-    $end = $value.IndexOf($quote, 1)
-    if ($end -lt 2) { return $false }
-    $executable = $value.Substring(1, $end - 1)
-  } else {
-    $match = [regex]::Match($value, '^\S+')
-    if (-not $match.Success) { return $false }
-    $executable = $match.Value
-  }
-  $parts = @(($executable.Replace('\', '/')) -split '/')
-  $leaf = if ($parts.Count -gt 0) { $parts[-1].ToLowerInvariant() } else { '' }
-  return $leaf -in @('simplicio', 'simplicio.exe', 'simplicio-shell', 'simplicio-shell.exe')
-}
-
-function Emit-DenyNativeShell {
-  @{
-    hookSpecificOutput = @{
-      hookEventName = 'PreToolUse'
-      permissionDecision = 'deny'
-      permissionDecisionReason = 'Native shell/terminal is blocked; use the governed Simplicio Shell/CLI or a Simplicio MCP tool.'
-    }
-  } | ConvertTo-Json -Compress
-  exit 0
-}
-
 
 function Get-Sha256Text([string]$Text) {
   $sha = [Security.Cryptography.SHA256]::Create()
@@ -597,9 +468,8 @@ function Get-CompactSummaryOnce([string]$Root, [string]$Generation) {
     'Simplicio context bridge: use simplicio_context for the complete cached Map ' +
     'and simplicio_edit for governed edits when relevant. Preserve explicit user ' +
     'intent, keep normal reasoning for ' +
-    'ambiguous or multi-step work, and route native shell/terminal through ' +
-    'the governed Simplicio Shell/CLI; third-party MCP/apps and non-shell tools ' +
-    'remain available unchanged.'
+    'ambiguous or multi-step work; native shell/terminal, third-party MCP/apps, ' +
+    'and non-shell tools remain available with their normal permissions.'
   )
   if ($null -eq $receipt) {
     return $body + ' Map cache is still warming or unavailable; continue normally.'
@@ -681,7 +551,7 @@ function Get-MapperContextOnce([string]$Root, [string]$Generation, [string]$Auth
         'a following pre-hook will deliver the complete cached Map when ready. Native work can continue.')
     }
   } elseif ($AuthState -eq 'login_required') {
-    $body = ($base + 'Mapper requires login: run simplicio auth login to enable mapping. ' +
+    $body = ($base + 'Mapper requires login: run simplicio login google to enable mapping. ' +
       'No Map was delivered. Native work can continue.')
   } else {
     $body = ($base + 'Mapper authentication is unavailable; no Map was delivered and existing login ' +
@@ -776,18 +646,5 @@ if ($contextEvents.ContainsKey($event)) {
   Allow-Unchanged
 }
 
-# Native shell/terminal is blocked unless the command enters through the governed
-# Simplicio Shell/CLI. Third-party MCP/apps and non-shell tools pass unchanged.
-if (@('', 'pretooluse', 'pre_tool_use') -contains $event) {
-  $toolName = Get-HookToolName
-  if ((Test-OrchestratorExecTool $toolName) -and (Test-NestedNativeShellRequest)) {
-    Emit-DenyNativeShell
-  }
-  if (
-    (Test-NativeShellTool $toolName) -and
-    -not (Test-DirectSimplicioCommand (Get-HookCommand))
-  ) { Emit-DenyNativeShell }
-}
-
-# PreToolUse is safety-only: never scan Git or warm/build a Map here.
+# PreToolUse is advisory-only: never block the host operation.
 Allow-Unchanged
