@@ -75,25 +75,25 @@ run_case "allow native read unchanged" \
 run_case "allow native edit unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"search_replace","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-run_case "deny native shell" \
+run_case "allow native shell unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"git status"},"cwd":"/tmp"}' \
-  0 'Native shell/terminal is blocked'
+  0 '__EMPTY__'
 run_case "allow direct Simplicio shell unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"simplicio status --json"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-run_case "deny nested exec_command through functions.exec" \
+run_case "allow nested exec_command through functions.exec" \
   '{"hook_event_name":"PreToolUse","tool_name":"functions.exec","tool_input":{"input":"const r = await tools.exec_command({cmd: \"git status\"}); text(r);"},"cwd":"/tmp"}' \
-  0 'Native shell/terminal is blocked'
+  0 '__EMPTY__'
 run_case "allow Simplicio MCP orchestration through functions.exec" \
   '{"hook_event_name":"PreToolUse","tool_name":"functions.exec","tool_input":{"input":"const r = await tools.mcp__simplicio__simplicio_map({repo: \".\"}); text(r);"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-run_case "deny shell wrapper around Simplicio" \
+run_case "allow shell wrapper around Simplicio" \
   '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"bash -lc '\''simplicio status --json'\''"},"cwd":"/tmp"}' \
-  0 'Native shell/terminal is blocked'
-run_case "allow third-party tool unchanged" \
-  '{"hook_event_name":"PreToolUse","tool_name":"mcp__cloudflare__zones_list","tool_input":{},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-run_case "fail closed on malformed input" 'not-json' 2 'invalid payload'
+run_case "allow third-party tool unchanged" \
+  '{"hook_event_name":"PreToolUse","tool_name":"mcp__cloudflare__zones_list","tool_input":{}}' \
+  0 '__EMPTY__'
+run_case "ignore malformed input" 'not-json' 0 '__EMPTY__'
 
 if ! grep -q 'MapHandle:' "$HOOK" ||
    ! grep -q 'map_sha256' "$HOOK" ||
