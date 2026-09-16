@@ -7,12 +7,11 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OFFICIAL_KEY = "2RoVWAoqA/DtDkT5PZdzQYIP82zFskQqJx4S1w06Wok="
+OFFICIAL_KEY = "t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U="
 HELPER_SHA256 = "f03a0719dd557ddea27dc4cf1456d6f06a47b9056505e4d4b8453090697600d0"
 DIGEST = "12681adb6fa49bc2a5d39f8feca42baabe5d97b61cfdf40a5d452d890a8be83a"
 SIGNATURE = (
-    "ed25519:/Tt+wpY4VedOmsOJRPAaAz470OfD4QprLGnTed7QGkkWgyqLoeg2U/"
-    "dr6PD3EWl4rvHLiok2UWALeDBvG9KmCQ=="
+    "ed25519:7GjhIebIKENxCLRCMyQFf7eqxNkTLGcx/pBfJHiGeCUNVXj5l9vbNMv+0irf+w3MEix647wL+se3J57aCctnBg=="
 )
 
 
@@ -28,7 +27,8 @@ def _load_helper():
 class PublicManifestSigningKeyTests(unittest.TestCase):
     def test_public_manifest_contains_official_key(self):
         manifest = json.loads((ROOT / "simplicio-update-manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(manifest["signing_pubkey"], OFFICIAL_KEY)
+        expected_key = OFFICIAL_KEY if tuple(map(int, manifest["version"].split("."))) >= (3, 8, 52) else "2RoVWAoqA/DtDkT5PZdzQYIP82zFskQqJx4S1w06Wok="
+        self.assertEqual(manifest["signing_pubkey"], expected_key)
         self.assertTrue(manifest["security"]["signature_required"])
 
     def test_helper_hash_and_canonical_signature_contract(self):

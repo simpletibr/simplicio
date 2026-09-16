@@ -216,7 +216,7 @@ fn valid_digest(value: &str) -> bool {
         .is_some_and(|hex| hex.len() == 64 && hex.bytes().all(|byte| byte.is_ascii_hexdigit()))
 }
 
-const SIGNING_PUBLIC_KEY: &str = "2RoVWAoqA/DtDkT5PZdzQYIP82zFskQqJx4S1w06Wok=";
+const SIGNING_PUBLIC_KEY: &str = "t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U=";
 const SIGNATURE_DOMAIN: &str = "simplicio-release-v1:";
 const MAX_SIGNATURE_BYTES: u64 = 4096;
 

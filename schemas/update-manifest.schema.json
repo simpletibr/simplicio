@@ -48,7 +48,7 @@
         },
         "signing_pubkey": {
           "type": "string",
-          "const": "2RoVWAoqA/DtDkT5PZdzQYIP82zFskQqJx4S1w06Wok="
+          "const": "t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U="
         },
         "generated_at": {
           "type": "string",

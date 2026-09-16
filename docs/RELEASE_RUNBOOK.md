@@ -34,7 +34,7 @@ For each release `vX.Y.Z`, publish:
 The manifest must use the immutable `vX.Y.Z` download URLs, require Ed25519,
 refuse unsigned artifacts, match the checksums and sidecars byte-for-byte, and
 publish the root `signing_pubkey` exactly as
-`2RoVWAoqA/DtDkT5PZdzQYIP82zFskQqJx4S1w06Wok=`.
+`t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U=`.
 Do not publish a new release from a checkout where `version.txt` and the
 manifest disagree.
 
