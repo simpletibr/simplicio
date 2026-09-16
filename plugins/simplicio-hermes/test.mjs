@@ -216,3 +216,36 @@ test("missing and duplicate results emit bounded correlation receipts", async ()
   assert.equal(final.provider_prompt_cache_status, "unknown");
   assert.equal(final.run_outcome, "completed");
 });
+
+test("local mapper cache hit does not force remote provider KV cache hit when cached tokens are 0", async () => {
+  const runtime = runtimeFixture();
+  const originalPrepare = runtime.prepare_model_call;
+  runtime.prepare_model_call = async (input) => {
+    const res = await originalPrepare(input);
+    return {
+      ...res,
+      mapper_cache: { status: "hit", map_build_count: 0, file_count: 5, context_bytes: 1200 },
+    };
+  };
+  const plugin = createHermesPlugin({ runtime });
+  await plugin.prepare_model_call({
+    messages: [], session_id: "s-cache", turn_id: "t-cache", api_request_id: "req-1",
+  });
+  await plugin.record_model_result({
+    session_id: "s-cache", turn_id: "t-cache", api_request_id: "req-1",
+    usage: {
+      prompt_tokens: 500,
+      completion_tokens: 50,
+      prompt_tokens_details: { cached_tokens: 0 },
+    },
+  });
+  const final = plugin.correlationReceipts().find((item) => item.schema === "simplicio.hermes-usage-receipt/v1");
+  assert.ok(final, "receipt must be generated");
+  assert.equal(final.cache_local_status, "hit");
+  assert.equal(final.mapper_cache_hit, true);
+  assert.equal(final.cache_provider_tokens, 0);
+  assert.equal(final.provider_prompt_cache.status, "zero");
+  assert.notEqual(final.provider_prompt_cache.status, "hit");
+  assert.equal(final.provider_prompt_cache.cache_read_tokens, 0);
+});
+

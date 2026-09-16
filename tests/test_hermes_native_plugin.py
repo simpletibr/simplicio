@@ -554,6 +554,31 @@ def test_provider_prompt_cache_hit_does_not_require_local_mapper_hit():
     assert final["provider_prompt_cache"]["cache_read_tokens"] == 0
 
 
+def test_local_mapper_hit_does_not_force_remote_provider_cache_hit_when_zero():
+    adapter, bridge, context = setup_plugin()
+    def call(tool, arguments):
+        if tool == "simplicio_prepare_model_call":
+            return {**mapper_receipt(arguments), "mapper_cache": {"status": "hit", "map_build_count": 0}}
+        return {"status": "recorded"}
+    bridge.call = call
+    context.middleware["llm_request"](
+        request={"messages": []}, session_id="s", turn_id="t", api_request_id="a-cache",
+        logical_request_id="l", attempt_id="attempt", model="m", provider="p", cwd=str(ROOT),
+    )
+    context.hooks["post_api_request"](
+        session_id="s", turn_id="t", api_request_id="a-cache",
+        usage={"input_tokens": 100, "output_tokens": 10, "prompt_tokens_details": {"cached_tokens": 0}},
+    )
+    final = adapter.correlation_receipts()[-1]
+    assert final["cache_local_status"] == "hit"
+    assert final["mapper_cache_hit"] is True
+    assert final["cache_provider_tokens"] == 0
+    assert final["provider_prompt_cache_status"] == "zero"
+    assert final["provider_prompt_cache"]["status"] != "hit"
+    assert final["provider_prompt_cache"]["cache_read_tokens"] == 0
+
+
+
 def test_normal_and_strict_modes_handle_absent_usage_truthfully():
     adapter, _, context = setup_plugin()
     context.middleware["llm_request"](
