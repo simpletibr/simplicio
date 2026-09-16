@@ -972,8 +972,16 @@ def _provider_cache_status(record_receipt: dict[str, Any], usage: dict[str, int]
         status = record_receipt.get("provider_prompt_cache_status")
     if not isinstance(status, str):
         status = record_receipt.get("provider_cache_status")
+    cached_tokens = usage.get("cache_read_input_tokens")
+    if cached_tokens is None:
+        cached_tokens = usage.get("cached_tokens")
+    if status == "reported" and cached_tokens == 0:
+        status = "zero"
     if status not in _CACHE_STATUSES and status not in {"reported", "zero"}:
-        status = "reported" if "cache_read_input_tokens" in usage else "unknown"
+        if cached_tokens is not None:
+            status = "reported" if cached_tokens > 0 else "zero"
+        else:
+            status = "unknown"
     return status
 
 
@@ -991,6 +999,14 @@ def _final_usage_receipt(arguments: dict[str, Any], prepared: dict[str, Any],
             "output_tokens", "reasoning_tokens",
         )
     }
+    cache_local_status = "hit" if mapper_cache["status"] == "hit" else ("miss" if mapper_cache["status"] == "miss" else "bypassed")
+    cache_provider_tokens = usage.get("cache_read_input_tokens")
+    if cache_provider_tokens is None:
+        cache_provider_tokens = usage.get("cached_tokens")
+    if cache_provider_tokens is None and provider_cache_status == "zero":
+        cache_provider_tokens = 0
+    savings_obj = record_receipt.get("savings", {}) if isinstance(record_receipt.get("savings"), dict) else {}
+    cache_provider_discount_usd = savings_obj.get("cache_provider_discount_usd") or savings_obj.get("discount_usd")
     synthetic_ids = set(arguments.get("synthetic_ids") or [])
     unstable_ids = sorted(synthetic_ids & _STABLE_CORRELATION_IDS)
     missing_usage = [key for key in ("input_tokens", "output_tokens") if usage.get(key) is None]
@@ -1042,10 +1058,13 @@ def _final_usage_receipt(arguments: dict[str, Any], prepared: dict[str, Any],
         "mapper_cache": mapper_cache,
         "mapper_cache_status": mapper_cache["status"],
         "mapper_cache_hit": mapper_cache["status"] == "hit",
+        "cache_local_status": cache_local_status,
+        "cache_provider_tokens": cache_provider_tokens,
+        "cache_provider_discount_usd": cache_provider_discount_usd,
         "provider_prompt_cache": {
             "status": provider_cache_status,
-            "status_source": "provider_reported" if "cache_read_input_tokens" in usage else "unavailable",
-            "cache_read_tokens": usage.get("cache_read_input_tokens"),
+            "status_source": "provider_reported" if ("cache_read_input_tokens" in usage or "cached_tokens" in usage) else "unavailable",
+            "cache_read_tokens": cache_provider_tokens,
         },
         "provider_prompt_cache_status": provider_cache_status,
         "usage": {

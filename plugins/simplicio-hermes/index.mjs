@@ -156,8 +156,16 @@ function providerCacheStatus(recordReceipt, usage) {
   const raw = recordReceipt?.provider_prompt_cache;
   let status = raw?.status ?? recordReceipt?.provider_prompt_cache_status ??
     recordReceipt?.savings?.provider_cache_status;
+  const cachedTokens = usage.cache_read_input_tokens ?? usage.cached_tokens;
+  if (status === "reported" && cachedTokens === 0) {
+    status = "zero";
+  }
   if (typeof status !== "string" || !(CACHE_STATUSES.has(status) || ["reported", "zero"].includes(status))) {
-    status = Object.hasOwn(usage, "cache_read_input_tokens") ? "reported" : "unknown";
+    if (cachedTokens !== undefined && cachedTokens !== null) {
+      status = cachedTokens > 0 ? "reported" : "zero";
+    } else {
+      status = "unknown";
+    }
   }
   return status;
 }
@@ -169,6 +177,9 @@ function finalUsageReceipt(identity, prepared, recordReceipt, usage, eventStatus
     ["input_tokens", "cache_read_input_tokens", "cache_write_tokens", "output_tokens", "reasoning_tokens"]
       .map((key) => [key, usage[key] ?? null]),
   );
+  const cacheLocalStatus = mapperCache.status === "hit" ? "hit" : (mapperCache.status === "miss" ? "miss" : "bypassed");
+  const cacheProviderTokens = usage.cache_read_input_tokens ?? usage.cached_tokens ?? (providerStatus === "zero" ? 0 : null);
+  const cacheProviderDiscountUsd = recordReceipt?.savings?.cache_provider_discount_usd ?? recordReceipt?.savings?.discount_usd ?? null;
   return {
     schema: "simplicio.hermes-usage-receipt/v1",
     event_name: eventStatus === "succeeded" ? "model_call_completed" : "model_call_failed",
@@ -187,10 +198,13 @@ function finalUsageReceipt(identity, prepared, recordReceipt, usage, eventStatus
     model: identity.model,
     mapper_cache: mapperCache,
     mapper_cache_hit: mapperCache.status === "hit",
+    cache_local_status: cacheLocalStatus,
+    cache_provider_tokens: cacheProviderTokens,
+    cache_provider_discount_usd: cacheProviderDiscountUsd,
     provider_prompt_cache: {
       status: providerStatus,
-      status_source: Object.hasOwn(usage, "cache_read_input_tokens") ? "provider_reported" : "unavailable",
-      cache_read_tokens: usage.cache_read_input_tokens ?? null,
+      status_source: (Object.hasOwn(usage, "cache_read_input_tokens") || Object.hasOwn(usage, "cached_tokens")) ? "provider_reported" : "unavailable",
+      cache_read_tokens: cacheProviderTokens,
     },
     provider_prompt_cache_status: providerStatus,
     usage: { source: Object.keys(usage).length ? "provider_reported" : "not_collected", scope: "request", ...usageValues },
