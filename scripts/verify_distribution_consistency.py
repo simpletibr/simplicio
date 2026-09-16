@@ -73,7 +73,8 @@ changed = stage_bundle(bundle)
 changed.extend(stage_codex_hooks(bundle))
 changed.extend(update_public_metadata(tag, version, source_commit))
 changed.extend(prepare_package(version))
-changed.extend(prepare_plugin_release_policy(version))
+if version_parts(version) < (3, 8, 52):
+    changed.extend(prepare_plugin_release_policy(version))
 ''' + LOCAL_CHECKS + '''with tempfile.TemporaryDirectory(prefix="simplicio-public-wheel-") as raw:
     wheel = build_wheel(Path(raw), version)
     wheel_help_smoke(wheel)
