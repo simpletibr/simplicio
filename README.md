@@ -90,12 +90,35 @@ simplicio mcp register
 {
   "mcpServers": {
     "simplicio": {
-      "command": "simplicio",
+      "command": "/absolute/path/to/.simplicio/bin/simplicio",
       "args": ["serve", "--mcp", "--stdio"]
     }
   }
 }
 ```
+
+For Codex, use an absolute executable path in your TOML configuration and replace the example username:
+
+```toml
+[mcp_servers.simplicio]
+# Windows:
+command = "C:/Users/YourName/.simplicio/bin/simplicio.exe"
+args = ["serve", "--mcp", "--stdio"]
+```
+
+On macOS, replace the command line with:
+
+```toml
+command = "/Users/your-name/.simplicio/bin/simplicio"
+```
+
+On Linux, replace it with:
+
+```toml
+command = "/home/your-name/.simplicio/bin/simplicio"
+```
+
+See [MCP-CONNECT.md](MCP-CONNECT.md) for complete platform examples.
 
 Exposed MCP Tools:
 - `simplicio_map`: Structural repository orientation without prompt bloating.
