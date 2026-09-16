@@ -15,7 +15,7 @@ simplicio-release-v1:D
 
 The signature is published as `ed25519:<base64-signature>` in both the artifact
 sidecar (`<artifact>.sig`) and the corresponding manifest entry. The manifest must publish the root `signing_pubkey` field. Stable releases accept exactly
-`2RoVWAoqA/DtDkT5PZdzQYIP82zFskQqJx4S1w06Wok=`, which is the key compiled into the
+`t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U=`, which is the key compiled into the
 Runtime and pinned by both installers.
 
 ## Verification order

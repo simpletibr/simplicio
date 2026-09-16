@@ -35,7 +35,7 @@ set -eu
 
 REPO="wesleysimplicio/simplicio"
 GITHUB="https://github.com/$REPO"
-ED25519_PUBLIC_KEY="2RoVWAoqA/DtDkT5PZdzQYIP82zFskQqJx4S1w06Wok="
+ED25519_PUBLIC_KEY="t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U="
 ED25519_HELPER_URL="https://raw.githubusercontent.com/$REPO/master/scripts/verify_ed25519.py"
 ED25519_HELPER_SHA256="f03a0719dd557ddea27dc4cf1456d6f06a47b9056505e4d4b8453090697600d0"
 PUBLIC_ROUTE_REF="68b4c7f7ac27d07624ffa4ddf0673a43e180c3e5"
