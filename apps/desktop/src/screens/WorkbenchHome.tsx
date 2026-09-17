@@ -30,6 +30,7 @@ function SessionCenter({ usage, contextReport }: { usage?: DesktopUsageState; co
     : null;
   const statusLabel = status === "live" ? (hasData ? "consultado" : contextStatus ?? "sem dados") : status === "reconnecting" ? "reconectando" : status === "stale" ? "último dado conhecido" : contextStatus ?? "offline";
   const providerToken = (report: ProviderUsageReport, metric: ProviderUsageMetric) => {
+    if (report.missing_metrics.includes(metric)) return "—";
     const value = report.totals[metric];
     return value === undefined ? "—" : value.toLocaleString("pt-BR");
   };

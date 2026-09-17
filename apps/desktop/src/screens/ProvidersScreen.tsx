@@ -5,7 +5,7 @@ import { providerRegistry } from "../provider_registry";
 import { IntegrationSetup } from "../components/IntegrationSetup";
 import { searchMatches } from "../workbench";
 import type { InstallFailureRecovery } from "../install_failures";
-import type { DesktopHostPlugins, HostPluginOperationResult } from "../integration_setup";
+import { hostPluginFreshness, hostPluginFreshnessLabel, type DesktopHostPlugins, type HostPluginOperationResult } from "../integration_setup";
 
 const stateCopy: Record<ProviderState, string> = {
   connected: "Conectado", registered: "Registrado", detected: "Detectado",
@@ -60,9 +60,10 @@ function HostPluginFreshness({ plugins }: { plugins?: DesktopHostPlugins }) {
     {hosts.length > 0
       ? <div className="settings-slab">{hosts.map((host) => <div className="preference-row" key={host.host}>
         <div><strong>{host.host}</strong><p>{host.reasonCode}{host.failureCode ? ` · ${host.failureCode}` : ""}</p></div>
-        <span className="neutral-badge">{pluginStatusCopy[host.status] ?? host.status} · {host.verification === "none" ? "sem verificação" : host.verification}</span>
+        <span className="neutral-badge">{pluginStatusCopy[host.status] ?? host.status} · {hostPluginFreshnessLabel(hostPluginFreshness(host))}</span>
       </div>)}</div>
       : <p className="token-proof-note">Nenhum host no recibo atual. O Desktop não inventa versões de catálogo.</p>}
+    <p className="token-proof-note">O frescor vem do recibo do Runtime. Sem comparação com catálogo ao vivo, nenhuma ação de atualização é inferida.</p>
   </section>;
 }
 

@@ -120,17 +120,19 @@ export async function readProviderQuotas(): Promise<Quotas> {
 }
 
 function providerLabel(provider: ProviderQuota | undefined): string {
-  if (provider?.status === "stale") return "Dados anteriores; atualize para uma leitura atual.";
-  if (provider?.error === "refresh_in_grok") return "Abra o Grok neste computador para renovar a sessão e consulte novamente.";
-  if (provider?.error === "login_required") return "Entre no cliente neste computador para consultar sua cota.";
+  if (!provider) return "Cota desconhecida. Nenhum percentual presumido.";
+  if (provider.status === "stale") return "Dados anteriores; atualize para uma leitura atual.";
+  if (provider.error === "refresh_in_grok") return "Abra o Grok neste computador para renovar a sessão e consulte novamente.";
+  if (provider.error === "login_required") return "Entre no cliente neste computador para consultar sua cota.";
   return "Cota indisponível. Nenhum percentual presumido.";
 }
 
-function providerStatusLabel(provider: ProviderQuota | undefined): string {
-  if (provider?.status === "fresh") return "Atual";
-  if (provider?.status === "stale") return "Desatualizado";
-  if (provider?.error === "refresh_in_grok") return "Atualize no Grok";
-  if (provider?.error === "login_required") return "Login necessário";
+export function quotaProviderStatusLabel(provider: ProviderQuota | undefined): string {
+  if (!provider) return "Desconhecido";
+  if (provider.status === "fresh") return "Atual";
+  if (provider.status === "stale") return "Desatualizado";
+  if (provider.error === "refresh_in_grok") return "Atualize no Grok";
+  if (provider.error === "login_required") return "Login necessário";
   return "Indisponível";
 }
 
@@ -185,7 +187,7 @@ export function ProviderUsage({ onAccounts, onHistory }: { onAccounts: () => voi
     ?? [codex, grok].find(provider => provider?.windows.length);
   const summary = summaryProvider?.windows.find(window => window.windowDurationMins === 10080) ?? summaryProvider?.windows[0];
   const renderWindows = (provider: ProviderQuota | undefined, label: string) => <section className={`quota-provider quota-provider-${provider?.id ?? label.toLowerCase()}`} data-provider={provider?.id ?? label.toLowerCase()}>
-    <div className="quota-provider-heading"><h3>{label}</h3><span className={`quota-status quota-status-${provider?.status ?? "unavailable"}`}>{providerStatusLabel(provider)}</span></div>
+    <div className="quota-provider-heading"><h3>{label}</h3><span className={`quota-status quota-status-${provider?.status ?? "unknown"}`}>{quotaProviderStatusLabel(provider)}</span></div>
     {provider?.windows.map((window, index) => <div className={"quota-window" + (compact ? " quota-window-compact" : "")} key={window.windowDurationMins + "-" + window.resetsAt + "-" + index}>
       <span>{window.windowDurationMins === 10080 ? "Semanal" : window.windowDurationMins === 300 ? "5 horas" : window.windowDurationMins + " min"} · {window.usedPercent}% usado</span>
       <progress max={100} value={window.usedPercent} aria-label={"Uso da janela de " + window.windowDurationMins + " minutos"} />

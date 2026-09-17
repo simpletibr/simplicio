@@ -56,7 +56,12 @@ mark each of these checks as `verified` before the report can be `READY`:
 `bundle_identity`, `runtime_snapshot`, `provider_quotas_contract`,
 `provider_quotas_current`, `signed_update_download`, `signed_update_install`,
 `signed_update_relaunch`, `signed_update_health`, `signed_update_rollback`,
-`logout_relogin`, and `permissions`.
+`logout_relogin`, `permissions`, and `host_plugin_freshness`.
+
+`host_plugin_freshness` records receipt-backed freshness (`current`, `stale`,
+`unknown`, or `absent`). Missing receipts stay unknown. A live catalog comparison
+is a separate installed observation (`catalog_compared`); do not invent a catalog
+version when that comparison was not run.
 
 `provider_quotas_contract` records only the v2 schema, fixed source/scope,
 redaction and status/window counts. `provider_quotas_current` separately
