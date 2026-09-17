@@ -1,6 +1,6 @@
 {
   "name": "@simplicio/desktop",
-  "version": "3.8.52",
+  "version": "3.8.53",
   "private": true,
   "type": "module",
   "scripts": {
