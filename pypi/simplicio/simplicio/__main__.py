@@ -51,6 +51,7 @@ TRUSTED_MANIFEST_SHA256 = {
     "3.8.49": "6e1619471440cf50408c8a877f7898adb178e84f8c8223cf24f7c85d429cd7c3",
     "3.8.50": "1cff3533c38f485cc2f1ebe2f39ec452876ad7ef353836838a11713679c76355",
     "3.8.52": "288c5dc4288f8e2efedfe2b3ae76596f265b9c3150228af3a04a136da194370a",
+    "3.8.53": "b2416705a3e8e923dcf3b8032c2903f713628218d4984ab03e1fa6cadb560a9d",
 }
 
 # Kept in lockstep with distribution/targets.json.  The PyPI wheel must retain
