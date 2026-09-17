@@ -29,13 +29,13 @@ simplicio install
 macOS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
 Windows (PowerShell):
 
 ```powershell
-irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex
 ```
 
 Until a signed Desktop package is published, the verified CLI bootstrap is the
@@ -87,7 +87,7 @@ Known installer incidents and regression sentinels are tracked in
 ### Manual Download
 
 Download the binary for your platform from the
-[releases](https://github.com/wesleysimplicio/simplicio/releases). Asset names
+[releases](https://github.com/simpletibr/simplicio/releases). Asset names
 are canonical — see [`distribution/targets.json`](distribution/targets.json),
 the single source of truth used by the local/manual publisher, both installers and
 `simplicio-update-manifest.json`:

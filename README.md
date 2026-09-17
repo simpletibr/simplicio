@@ -8,9 +8,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wesleysimplicio/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/wesleysimplicio/simplicio?color=2fe6a0&label=release" alt="Latest Release"></a>
+  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=2fe6a0&label=release" alt="Latest Release"></a>
   <a href="https://simpleti.com.br/simplicio/docs"><img src="https://img.shields.io/badge/docs-simpleti.com.br-ffd23f" alt="Documentation"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/stargazers"><img src="https://img.shields.io/github/stars/wesleysimplicio/simplicio?style=social" alt="Stars"></a>
+  <a href="https://github.com/simpletibr/simplicio/stargazers"><img src="https://img.shields.io/github/stars/simpletibr/simplicio?style=social" alt="Stars"></a>
   <img src="https://img.shields.io/badge/runtime-100%25%20Rust-orange" alt="Runtime">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="License">
 </p>
@@ -42,12 +42,12 @@ Install the signed native binary in seconds:
 
 ### macOS / Linux
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
 ### Windows (PowerShell as Administrator)
 ```powershell
-irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex
 ```
 
 ### Alternative (PyPI Bootstrapper)
@@ -168,7 +168,7 @@ For deep technical dives, CLI references, benchmark proofs, and multi-agent work
 - **Official Website**: [simpleti.com.br/simplicio](https://simpleti.com.br/simplicio/)
 - **Documentation**: [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
 - **Discord**: [Join the Community](https://discord.gg/wM6tr7xVb)
-- **Issues**: [GitHub Issue Tracker](https://github.com/wesleysimplicio/simplicio/issues)
+- **Issues**: [GitHub Issue Tracker](https://github.com/simpletibr/simplicio/issues)
 
 ---
 
