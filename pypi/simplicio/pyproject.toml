@@ -13,7 +13,7 @@ keywords = ["ai", "coding-agent", "cli", "token-savings"]
 
 [project.urls]
 Homepage = "https://simpleti.com.br/simplicio/#start"
-Source = "https://github.com/wesleysimplicio/simplicio"
+Source = "https://github.com/simpletibr/simplicio"
 
 [project.scripts]
 simplicio = "simplicio:main"
