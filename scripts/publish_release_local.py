@@ -685,10 +685,7 @@ def publish(bundle: Path, tag: str, version: str, source_commit: str) -> dict:
     changed.extend(stage_codex_hooks(bundle))
     changed.extend(update_public_metadata(tag, version, source_commit))
     changed.extend(prepare_package(version))
-    # From v3.8.52 the plugin bytes are committed before the Runtime build.
-    # Preserve the immutable payload embedded in the four native assets.
-    if version_parts(version) < (3, 8, 52):
-        changed.extend(prepare_plugin_release_policy(version))
+    changed.extend(prepare_plugin_release_policy(version))
     verify_plugin_release_policy(version)
 
     verify_codex_hook_contract()
