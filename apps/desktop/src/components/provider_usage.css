@@ -9,7 +9,7 @@
 .quota-status { padding: 4px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; }
 .quota-status-fresh { color: #245d49; background: #e9f2ed; }
 .quota-status-stale { color: #815d25; background: #fbf1dc; }
-.quota-status-unavailable { color: #6f6256; background: #f2efeb; }
+.quota-status-unavailable, .quota-status-unknown { color: #6f6256; background: #f2efeb; }
 .provider-usage-panel > button { display: block; margin-top: 14px; }
 .quota-window { display: grid; gap: 8px; padding: 10px 0; }
 .quota-window progress { width: 100%; accent-color: #287259; }

@@ -11,6 +11,8 @@ import {
   HOST_PLUGIN_IDS,
   createPreviewIntegrationPlan,
   isHostPluginDigest,
+  hostPluginFreshness,
+  hostPluginFreshnessLabel,
   hostPluginOutcomeLabel,
   integrationChangeLabel,
   parseHostPluginOperationResult,
@@ -174,5 +176,27 @@ describe("canonical apply and reconcile result", () => {
         schema: "simplicio.host-plugin-command-result/v1", result: "receipt", receipt: {}, snapshot,
       })).toThrow("host_plugin_contract_invalid");
     }
+  });
+});
+
+describe("host plugin freshness from the receipt contract", () => {
+  it("keeps unknown and unverified distinct from current, stale, absent, and zero", () => {
+    expect(hostPluginFreshness({
+      status: "verified", reasonCode: "exact_readback", verification: "installed_tree_and_manager",
+    })).toBe("current");
+    expect(hostPluginFreshness({
+      status: "applied_unverified", reasonCode: "manager_readback_unknown", verification: "none",
+    })).toBe("unknown");
+    expect(hostPluginFreshness({
+      status: "unknown", reasonCode: "state_unknown", verification: "none",
+    })).toBe("unknown");
+    expect(hostPluginFreshness({
+      status: "not_detected", reasonCode: "host_or_manager_not_detected", verification: "none",
+    })).toBe("absent");
+    expect(hostPluginFreshness({
+      status: "drifted", reasonCode: "manager_plugin_drifted", verification: "manager_version",
+    })).toBe("stale");
+    expect(hostPluginFreshnessLabel("unknown")).toBe("Desconhecido");
+    expect(hostPluginFreshnessLabel("absent")).toBe("Não detectado");
   });
 });

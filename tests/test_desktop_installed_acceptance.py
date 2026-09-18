@@ -41,6 +41,26 @@ def valid_document() -> dict:
             record["observation"] = observation
         if check_id == "provider_quotas_current":
             record["fresh_provider_ids"] = ["codex"]
+        if check_id == "host_plugin_freshness":
+            record["observation"] = {
+                "schema": "simplicio.host-plugin-freshness/v1",
+                "receipt": "present",
+                "catalog_compared": False,
+                "hosts": [
+                    {
+                        "id": "codex",
+                        "status": "verified",
+                        "freshness": "current",
+                        "verification": "installed_tree_and_manager",
+                    },
+                    {
+                        "id": "claude",
+                        "status": "unknown",
+                        "freshness": "unknown",
+                        "verification": "none",
+                    },
+                ],
+            }
         checks.append(record)
     return {
         "schema": SCHEMA,
@@ -104,3 +124,29 @@ def test_sensitive_evidence_is_rejected() -> None:
     document["checks"][0]["raw_output"] = "not publishable"
     report = verify_evidence(document)
     assert report["errors"][0]["code"] == "sensitive_field"
+    path_document = deepcopy(valid_document())
+    path_document["config_path"] = "/private/home"
+    assert verify_evidence(path_document)["errors"][0]["code"] == "sensitive_field"
+
+
+def test_clean_home_and_window_count_are_not_secret_fields() -> None:
+    report = verify_evidence(valid_document())
+    assert report["ready"] is True
+    assert report["errors"] == []
+
+
+def test_unknown_host_plugin_receipt_cannot_be_current() -> None:
+    document = valid_document()
+    freshness = next(check for check in document["checks"] if check["id"] == "host_plugin_freshness")
+    freshness["observation"]["hosts"][0]["status"] = "unknown"
+    freshness["observation"]["hosts"][0]["freshness"] = "current"
+    codes = {item["code"] for item in verify_evidence(document)["errors"]}
+    assert "host_plugin_current_from_unknown" in codes
+    freshness["observation"]["receipt"] = "missing"
+    freshness["observation"]["hosts"][0]["status"] = "verified"
+    codes = {item["code"] for item in verify_evidence(document)["errors"]}
+    assert "host_plugin_current_without_receipt" in codes
+    freshness["observation"]["receipt"] = "present"
+    freshness["observation"]["hosts"][0]["catalog_version"] = "3.8.47"
+    codes = {item["code"] for item in verify_evidence(document)["errors"]}
+    assert "host_plugin_catalog_version_invented" in codes

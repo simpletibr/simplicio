@@ -28,6 +28,7 @@ CHECKS = (
     "signed_update_rollback",
     "logout_relogin",
     "permissions",
+    "host_plugin_freshness",
 )
 STATUSES = {"verified", "blocked", "unexecuted"}
 REASONS = {
@@ -52,10 +53,18 @@ IDENTIFIER = re.compile(r"^[a-z0-9][a-z0-9_-]{0,127}$")
 VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$")
 DIGEST = re.compile(r"^[0-9a-f]{64}$")
 UNSAFE_KEY = re.compile(
-    r"(?:path|cwd|home|argv|secret|password|credential|authorization|"
-    r"api[_-]?key|access[_-]?token|refresh[_-]?token|raw[_-]?(?:output|payload))",
+    r"(?:^|[_-])(?:path|cwd|home|argv|secret|password|credential|authorization|"
+    r"api[_-]?key|access[_-]?token|refresh[_-]?token|raw[_-]?(?:output|payload))(?:[_-]|$)",
     re.I,
 )
+HOST_PLUGIN_IDS = {
+    "codex", "claude", "gemini", "copilot", "qwen", "hermes", "kilo", "opencode",
+}
+HOST_PLUGIN_FRESHNESS = {"current", "stale", "unknown", "absent"}
+HOST_PLUGIN_RECEIPT = {"present", "missing", "unavailable"}
+UNKNOWN_CURRENT_STATUSES = {
+    "unknown", "not_detected", "applied_unverified", "pending", "applying",
+}
 
 
 def _error(code: str, message: str) -> dict[str, str]:
@@ -128,6 +137,51 @@ def _quota_errors(observation: Any) -> list[dict[str, str]]:
         expected_root = "available" if "fresh" in statuses else "stale" if "stale" in statuses else "unavailable"
         if root_status != expected_root:
             errors.append(_error("quota_root_status_mismatch", "root status does not summarize provider states"))
+    return errors
+
+
+def _freshness_errors(observation: Any) -> list[dict[str, str]]:
+    errors: list[dict[str, str]] = []
+    if not isinstance(observation, dict):
+        return [_error("host_plugin_observation_missing", "host plugin freshness observation is required")]
+    if observation.get("schema") != "simplicio.host-plugin-freshness/v1":
+        errors.append(_error("host_plugin_schema_invalid", "host plugin freshness must use v1"))
+    receipt = observation.get("receipt")
+    if receipt not in HOST_PLUGIN_RECEIPT:
+        errors.append(_error("host_plugin_receipt_invalid", "host plugin receipt must be present, missing or unavailable"))
+    catalog = observation.get("catalog_compared")
+    if catalog is not True and catalog is not False:
+        errors.append(_error("host_plugin_catalog_flag_invalid", "catalog_compared must be an explicit boolean"))
+    elif catalog is True and receipt != "present":
+        errors.append(_error("host_plugin_catalog_without_receipt", "live catalog comparison requires a present receipt"))
+    hosts = observation.get("hosts")
+    if not isinstance(hosts, list) or len(hosts) > 8:
+        errors.append(_error("host_plugin_hosts_invalid", "host plugin freshness must list at most eight hosts"))
+        hosts = []
+    seen: set[str] = set()
+    for host in hosts:
+        if not isinstance(host, dict):
+            errors.append(_error("host_plugin_host_invalid", "each host freshness record must be an object"))
+            continue
+        host_id = host.get("id")
+        freshness = host.get("freshness")
+        status = host.get("status")
+        if not isinstance(host_id, str) or host_id in seen or host_id not in HOST_PLUGIN_IDS:
+            errors.append(_error("host_plugin_identity_invalid", "host plugin id must be a unique canonical host"))
+        else:
+            seen.add(host_id)
+        if freshness not in HOST_PLUGIN_FRESHNESS:
+            errors.append(_error("host_plugin_freshness_invalid", "host freshness must be current, stale, unknown or absent"))
+        if freshness == "current" and status in UNKNOWN_CURRENT_STATUSES:
+            errors.append(_error("host_plugin_current_from_unknown", "unknown or unverified receipts cannot be current"))
+        if freshness == "absent" and status not in {None, "not_detected"}:
+            errors.append(_error("host_plugin_absent_mismatch", "absent freshness requires not_detected status"))
+        if catalog is False and "catalog_version" in host:
+            errors.append(_error("host_plugin_catalog_version_invented", "catalog version cannot be inferred without a live comparison"))
+    if receipt in {"missing", "unavailable"} and any(
+        isinstance(host, dict) and host.get("freshness") == "current" for host in hosts
+    ):
+        errors.append(_error("host_plugin_current_without_receipt", "missing receipts cannot claim current plugins"))
     return errors
 
 
@@ -207,6 +261,8 @@ def verify_evidence(document: Any) -> dict[str, Any]:
                 or any(not isinstance(item, str) or item not in PROVIDER_CONTRACT for item in fresh)
             ):
                 errors.append(_error("quota_current_missing", "current quota evidence needs at least one fresh provider id"))
+        if check_id == "host_plugin_freshness" and status == "verified":
+            errors.extend(_freshness_errors(record.get("observation")))
 
     ready = not errors and len(verified) == len(CHECKS)
     return {

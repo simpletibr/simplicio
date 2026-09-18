@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parsePermissions, permissionIds } from "./system_permissions";
-import { parseQuotas } from "./components/ProviderUsage";
+import { parseQuotas, quotaProviderStatusLabel } from "./components/ProviderUsage";
 describe("native permission and quota projections", () => {
   it("accepts OS observations without turning unknown permissions into denied", () => {
     const rows = permissionIds.map(id => ({ id, status: "unknown", canOpenSettings: true }));
@@ -32,5 +32,16 @@ describe("native permission and quota projections", () => {
   it("requires root status to agree with provider states", () => {
     const quota = { schema: "simplicio.provider-quotas/v2", status: "unavailable", observedAt: 1900000000, providers: [{ id: "codex", source: "codex_app_server", accountScope: "local_authenticated_account", observedAt: 1900000000, redacted: true, status: "fresh", windows: [{ usedPercent: 21, windowDurationMins: 10080, resetsAt: 1900000000 }] }] };
     expect(() => parseQuotas(quota)).toThrow();
+  });
+  it("does not treat a missing quota observation as zero or unavailable", () => {
+    expect(quotaProviderStatusLabel(undefined)).toBe("Desconhecido");
+    const unavailable = parseQuotas({
+      schema: "simplicio.provider-quotas/v2",
+      status: "unavailable",
+      observedAt: 1900000000,
+      providers: [{ id: "grok", source: "grok_cli_billing", accountScope: "local_cli_session", observedAt: 1900000000, redacted: true, status: "unavailable", windows: [], error: "login_required" }],
+    });
+    expect(quotaProviderStatusLabel(unavailable.providers[0])).toBe("Login necessário");
+    expect(unavailable.providers[0].windows).toHaveLength(0);
   });
 });

@@ -11,6 +11,8 @@ import { BotCenterScreen } from "./screens/BotCenterScreen";
 import { createDemoBotCenter, createUnavailableBotCenter } from "./bot_center";
 import { ProductSurfaceScreen } from "./screens/ProductScreens";
 import { SignInScreen } from "./screens/AccessScreens";
+import { createUsageChangefeedState } from "./usage_changefeed";
+import { IDLE_SESSION_TIMEOUT_MS } from "./session_idle";
 
 describe("Simplicio Desktop product states", () => {
   it("offers welcome then browser login when there is no identity", () => {
@@ -129,6 +131,55 @@ describe("Simplicio Desktop product states", () => {
     expect(html).toContain("Ainda sem dados verificados.");
     expect(html).toContain("Valores indisponíveis aparecem como —, nunca como zero.");
     expect(html).not.toContain("0% telemetria do provider");
+  });
+
+  it("does not render missing provider metrics as zero", () => {
+    const html = renderToStaticMarkup(<WorkbenchHome
+      snapshot={createDemoSnapshot("active")}
+      usage={{
+        changefeed: createUsageChangefeedState(),
+        idleFinalization: {
+          schema: "simplicio.session-idle-finalization/v1",
+          status: "logical_closed",
+          finalization_id: "sha256:idle",
+          profile_id: "default",
+          workspace_id: "/workspace",
+          now_millis: 1,
+          idle_ms: IDLE_SESSION_TIMEOUT_MS,
+          closed_sessions: [{ session_id: "s1", status: "idle", updated_at: 1 }],
+          usage: {
+            status: "complete",
+            metrics: ["input_tokens", "output_tokens", "reasoning_tokens", "cache_read_tokens", "cache_write_tokens"],
+            scope: "scanned_local_sources",
+            provider_reports: [{
+              provider: "codex",
+              adapter_id: "simplicio.codex-usage-adapter/v1",
+              status: "complete",
+              scope: "scanned_local_sources",
+              sources_discovered: 1,
+              sources_scanned: 1,
+              sources_skipped: 0,
+              events: 1,
+              matched_session_count: 1,
+              totals: { input_tokens: 4, output_tokens: 2, reasoning_tokens: 0 },
+              missing_metrics: ["reasoning_tokens", "cache_read_tokens", "cache_write_tokens"],
+              failure_codes: [],
+              redacted: true,
+            }],
+          },
+          provider_processes_terminated: false,
+          redacted: true,
+        },
+        idleHistory: [],
+      }}
+      onAddProject={() => undefined}
+      onViewChange={() => undefined}
+      onRemoveProject={() => undefined}
+      onTokens={() => undefined}
+    />);
+    expect(html).toContain("reason —");
+    expect(html).not.toContain("reason 0");
+    expect(html).toContain("in 4");
   });
 
   it("renders bounded memory metadata without exposing the map", () => {

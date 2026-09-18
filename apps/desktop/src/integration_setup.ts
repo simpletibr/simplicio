@@ -252,6 +252,45 @@ export function hostPluginOutcomeLabel(snapshot: HostPluginSnapshot): string {
   return snapshot.state === "complete" ? "Configuração concluída" : "Operação em andamento";
 }
 
+export type HostPluginFreshnessState = "current" | "stale" | "unknown" | "absent";
+
+const STALE_FRESHNESS_REASONS = new Set([
+  "manager_plugin_drifted",
+  "manager_readback_drifted",
+  "portable_payload_not_exact",
+]);
+const CURRENT_FRESHNESS_REASONS = new Set([
+  "already_exact",
+  "exact_readback",
+  "manager_version_verified",
+  "portable_tree_verified",
+]);
+
+/** Receipt-backed freshness. Missing verification stays unknown, never current or zero. */
+export function hostPluginFreshness(host: Pick<DesktopHostPluginHost, "status" | "reasonCode" | "verification" | "reconcile">): HostPluginFreshnessState {
+  if (host.status === "not_detected") return "absent";
+  if (host.status === "drifted" || host.reconcile === "drifted" || STALE_FRESHNESS_REASONS.has(host.reasonCode)) {
+    return "stale";
+  }
+  if (
+    host.status === "verified"
+    && CURRENT_FRESHNESS_REASONS.has(host.reasonCode)
+    && host.verification !== "none"
+  ) {
+    return "current";
+  }
+  return "unknown";
+}
+
+export function hostPluginFreshnessLabel(state: HostPluginFreshnessState): string {
+  switch (state) {
+    case "current": return "Atual";
+    case "stale": return "Desatualizado";
+    case "absent": return "Não detectado";
+    case "unknown": return "Desconhecido";
+  }
+}
+
 export function createPreviewDesktopHostPlugins(): DesktopHostPlugins {
   const plan = createPreviewIntegrationPlan();
   const snapshot = createPreviewHostPluginResult(plan.planDigest).snapshot;
