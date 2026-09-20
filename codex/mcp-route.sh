@@ -505,6 +505,121 @@ context_events = {
     "subagentstart": "SubagentStart",
     "subagent_start": "SubagentStart",
 }
+
+NATIVE_FILE_TOOLS = {
+    "read",
+    "read_file",
+    "write",
+    "write_file",
+    "edit",
+    "strreplace",
+    "str_replace",
+    "search_replace",
+    "file_read",
+    "replace",
+    "notebookedit",
+    "notebook_edit",
+    "multiedit",
+    "multi_edit",
+    "create_file",
+    "delete_file",
+}
+
+
+def mcp_profile() -> str:
+    explicit = os.environ.get("SIMPLICIO_MCP_PROFILE")
+    if explicit is not None and explicit.strip():
+        value = explicit.strip().lower().replace("_", "-")
+        if value == "mapperonly":
+            return "mapper-only"
+        if value in {"core", "full", "mapper-only", "diagnostic"}:
+            return value
+    return "full"
+
+
+def tool_name_from_hook() -> str:
+    return str(
+        hook.get("toolName") or hook.get("tool_name") or hook.get("tool") or ""
+    ).strip()
+
+
+def normalize_tool(name: str) -> str:
+    n = name.strip().lower().replace("-", "_")
+    if n.startswith("functions."):
+        n = n.split(".", 1)[1]
+    if n.startswith("functions_"):
+        n = n[len("functions_") :]
+    if "." in n:
+        n = n.rsplit(".", 1)[-1]
+    return n
+
+
+def is_runtime_or_third_party(name: str) -> bool:
+    n = name.lower()
+    return "simplicio" in n or "__" in n or n.startswith("mcp__")
+
+
+def is_native_file_tool(name: str) -> bool:
+    if not name or is_runtime_or_third_party(name):
+        return False
+    return normalize_tool(name) in NATIVE_FILE_TOOLS
+
+
+def enforce_disabled() -> bool:
+    value = os.environ.get("SIMPLICIO_ENFORCE", "").strip().lower()
+    return value in {"0", "false", "off"}
+
+
+def deny_native_file_tool(name: str) -> None:
+    writes = {
+        "write",
+        "write_file",
+        "edit",
+        "strreplace",
+        "str_replace",
+        "search_replace",
+        "replace",
+        "notebookedit",
+        "notebook_edit",
+        "multiedit",
+        "multi_edit",
+        "create_file",
+        "delete_file",
+    }
+    replacement = (
+        "simplicio_edit / simplicio_run"
+        if normalize_tool(name) in writes
+        else "simplicio_file_read / simplicio_context / simplicio_read_signatures"
+    )
+    reason = (
+        f"MCP profile {mcp_profile()} blocks host-native file tool {name}. "
+        f"Use {replacement} after simplicio_map. Third-party MCP/plugins remain allowed."
+    )
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": reason,
+                }
+            },
+            separators=(",", ":"),
+        )
+    )
+    print(reason, file=sys.stderr)
+    raise SystemExit(2)
+
+
+if (
+    event in {"", "pretooluse", "pre_tool_use", "beforeshellexecution"}
+    and mcp_profile() in {"core", "full"}
+    and not enforce_disabled()
+):
+    tool = tool_name_from_hook()
+    if is_native_file_tool(tool):
+        deny_native_file_tool(tool)
+
 if runtime_mode(repo_from_hook()) == "mapper-only":
     mapper_event = context_events.get(event)
     if event in {"", "pretooluse", "pre_tool_use", "beforeshellexecution"}:
@@ -553,6 +668,6 @@ if event in context_events:
     raise SystemExit(0)
 
 
-# PreToolUse is advisory-only: never block the host operation.
+# Remaining PreToolUse events (shell, third-party MCP, Simplicio tools) pass.
 raise SystemExit(0)
 PY
