@@ -38,7 +38,7 @@ Verbs:
     selftest  Prove the decide() logic deterministically against fixture snapshots — no network.
 
 Usage:
-    python3 scripts/coordinator.py survey --repo wesleysimplicio/simplicio-loop \\
+    python3 scripts/coordinator.py survey --repo simpletibr/simplicio-loop \\
         --issues 466,467,468,469 > .simplicio/orchestrator/coordinator/snapshot.json
     python3 scripts/coordinator.py decide --snapshot-file .simplicio/orchestrator/coordinator/snapshot.json \\
         --self-branch claude/simplicio-loop-skill-issues-4cff87

@@ -4,9 +4,9 @@
 
 ## Purpose
 
-This is the **public distribution repo** for [Simplicio](https://github.com/wesleysimplicio/simplicio), a Rust-based terminal AI coding agent. It contains installers, packages, documentation (15 languages), release metadata, and the first-party Desktop source in `apps/desktop`.
+This is the **public distribution repo** for [Simplicio](https://github.com/simpletibr/simplicio), a Rust-based terminal AI coding agent. It contains installers, packages, documentation (15 languages), release metadata, and the first-party Desktop source in `apps/desktop`.
 
-The Rust Runtime source lives in the private [`simplicio-runtime`](https://github.com/wesleysimplicio/simplicio-runtime) repo. Runtime and Desktop executables are GitHub Release assets, not tracked source files.
+The Rust Runtime source lives in the private [`simplicio-runtime`](https://github.com/simpletibr/simplicio-runtime) repo. Runtime and Desktop executables are GitHub Release assets, not tracked source files.
 
 ## Runtime snapshot: v3.9.0
 
@@ -84,6 +84,6 @@ rewrite or download the embedded Python projects separately.
 
 ## Quick Links
 
-- **GitHub:** https://github.com/wesleysimplicio/simplicio
-- **Runtime source (private):** https://github.com/wesleysimplicio/simplicio-runtime
+- **GitHub:** https://github.com/simpletibr/simplicio
+- **Runtime source (private):** https://github.com/simpletibr/simplicio-runtime
 - **Official site:** https://simpleti.com.br/simplicio/

@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 DMG_NAME = "Simplicio-3.8.47-arm64.dmg"
-DMG_URL = "https://github.com/wesleysimplicio/simplicio/releases/download/v3.8.47/Simplicio-3.8.47-arm64.dmg"
+DMG_URL = "https://github.com/simpletibr/simplicio/releases/download/v3.8.47/Simplicio-3.8.47-arm64.dmg"
 DMG_SHA256 = "9c8b02e8b804ddcf992c26f5d156ab0261fe498bee30237727d74abbbc38d779"
 
 

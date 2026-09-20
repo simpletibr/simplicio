@@ -17,8 +17,8 @@ use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const SCHEMA: &str = "simplicio.desktop-update/v1";
-const API_URL: &str = "https://api.github.com/repos/wesleysimplicio/simplicio/releases?per_page=30";
-const RELEASES_URL: &str = "https://github.com/wesleysimplicio/simplicio/releases";
+const API_URL: &str = "https://api.github.com/repos/simpletibr/simplicio/releases?per_page=30";
+const RELEASES_URL: &str = "https://github.com/simpletibr/simplicio/releases";
 const MAX_MANIFEST_BYTES: u64 = 2 * 1024 * 1024;
 const MAX_ARTIFACT_BYTES: u64 = 5 * 1024 * 1024 * 1024;
 const MAX_ASSET_NAME: usize = 180;

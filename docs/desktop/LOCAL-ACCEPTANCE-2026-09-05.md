@@ -2,10 +2,10 @@
 
 ## Scope and provenance
 
-Public repository: `wesleysimplicio/simplicio`, base `f8549765ce817b4b0d306a31560b7d0ee69972e8`.
+Public repository: `simpletibr/simplicio`, base `f8549765ce817b4b0d306a31560b7d0ee69972e8`.
 All Desktop changes are in this repository. No Desktop project was found under Runtime's apps directory; no Runtime source was deleted.
 Reference: [Orca](https://github.com/stablyai/orca) at `7bb54cc2f73c08a3df026c28766afd48b0e24471`, plus its live macOS UI.
-Remaining product acceptance: [issue #375](https://github.com/wesleysimplicio/simplicio/issues/375).
+Remaining product acceptance: [issue #375](https://github.com/simpletibr/simplicio/issues/375).
 
 ## Implemented locally
 

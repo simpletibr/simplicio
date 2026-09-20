@@ -66,7 +66,7 @@ effect is unverified), `overload` (a rising capacity signal shrinks `recommended
 
 This module is the pure policy layer only. It deliberately does **not** attempt the cross-repo
 acceptance criteria from issue #261, which belong in
-[simplicio-runtime](https://github.com/wesleysimplicio/simplicio-runtime) (parent:
+[simplicio-runtime](https://github.com/simpletibr/simplicio-runtime) (parent:
 simplicio-runtime#3134, related: simplicio-runtime#3042):
 
 - Migrating the Runtime to be the sole owner of queue, lease, attempt budget, and fan-out — this

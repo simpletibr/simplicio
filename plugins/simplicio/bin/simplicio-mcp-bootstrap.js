@@ -356,7 +356,7 @@ async function installRuntime(env = process.env, home = resolveHome(env)) {
     const installer = process.platform === "win32"
       ? POLICY.installers.win32
       : POLICY.installers.posix;
-    const url = `https://raw.githubusercontent.com/wesleysimplicio/simplicio/${POLICY.installerCommit}/${installer.filename}`;
+    const url = `https://raw.githubusercontent.com/simpletibr/simplicio/${POLICY.installerCommit}/${installer.filename}`;
     appendLog(logPath, `downloading ${url}`);
     const body = await download(url);
     const actualDigest = sha256(body);

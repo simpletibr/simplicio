@@ -39,11 +39,11 @@ class DistributionFixture:
             "pypi/simplicio/simplicio/__main__.py",
             "READMEs/README.pt-BR.md",
         ):
-            self.put(relative, "https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh\n")
+            self.put(relative, "https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh\n")
         self.put(audit.LOCAL_PUBLISHER, (audit.ROOT / audit.LOCAL_PUBLISHER).read_text(encoding="utf-8"))
         self.put("version.txt", self.version + "\n")
         artifact_url = (
-            "https://github.com/wesleysimplicio/simplicio/releases/download/"
+            "https://github.com/simpletibr/simplicio/releases/download/"
             f"v{self.version}/simplicio-macos-arm64"
         )
         artifact_sha = "9" * 64
@@ -58,7 +58,7 @@ class DistributionFixture:
                         {
                             "target": target,
                             "artifact": asset,
-                            "url": f"https://github.com/wesleysimplicio/simplicio/releases/download/v{self.version}/{asset}",
+                            "url": f"https://github.com/simpletibr/simplicio/releases/download/v{self.version}/{asset}",
                             "sha256": artifact_sha,
                             "signature": "ed25519:fixture",
                             "signed": True,
@@ -110,7 +110,7 @@ class DistributionConsistencyTests(unittest.TestCase):
         self.assertEqual(self.levels(), ["OK"] * 8)
 
     def test_regression_wrong_branch_and_version_fail(self):
-        self.fixture.put("README.md", "https://raw.githubusercontent.com/wesleysimplicio/simplicio/main/install.sh\n")
+        self.fixture.put("README.md", "https://raw.githubusercontent.com/simpletibr/simplicio/main/install.sh\n")
         self.fixture.put("version.txt", "3.0.2\n")
         findings = audit.run_audit(self.root, today=date(2026, 7, 14))
         self.assertEqual(sum(item.level == "ERROR" for item in findings), 2)

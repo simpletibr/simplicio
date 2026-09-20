@@ -6,7 +6,7 @@ The actual bundled Runtime 3.8.47 rejected `bootstrap plan --repo <isolated-home
 
 The user now requires preparation before login to cover Python detection, dependency installation, memory setup, seeds and migrations, with actual step status visible, rather than the current core-binary-only installation. At the time of this capture, this remained unimplemented. The current source now provides the Runtime-backed redacted receipt and state gate described in Current preparation implementation follow-up below; clean-user native acceptance is still required.
 
-The current public `install.sh` verifies and installs the signed Runtime, registers MCP/native hooks, reconciles the public hook overlay, and reports separate host-plugin consent. Python is used by verification helpers. It does not contain named seed/migration steps; inspect Runtime bootstrap entry points to establish their actual contracts before exposing them as performed by Desktop. Keep the current repository origin `wesleysimplicio/simplicio`; the requested future `simpletibr/simplicio` migration is not authorized for immediate execution.
+The current public `install.sh` verifies and installs the signed Runtime, registers MCP/native hooks, reconciles the public hook overlay, and reports separate host-plugin consent. Python is used by verification helpers. It does not contain named seed/migration steps; inspect Runtime bootstrap entry points to establish their actual contracts before exposing them as performed by Desktop. Keep the current repository origin `simpletibr/simplicio`; the requested future `simpletibr/simplicio` migration is not authorized for immediate execution.
 
 The login button source now uses a four-color SVG instead of the generic letter G, with the site's rectangular outline/320px style. Four focused entry-screen tests pass. This visual change is not yet in a rebuilt native bundle.
 
@@ -158,7 +158,7 @@ Latest local verification: frontend unit suite 398 passed across 62 files, full 
 
 ## Live native audit after unlock — 2026-09-06
 
-The Mac was unlocked and the newest public-repository debug bundle was built and opened at /Users/wesleysimplicio/Projetos/ai/simplicio/apps/desktop/src-tauri/target/debug/bundle/macos/Simplicio.app. The entry surface showed only the full-bleed Simplicio mark and **Install Now**; preparation then completed through the packaged Runtime and opened Runtime 3.8.47. The ad-hoc bundle was closed and removed after review.
+The Mac was unlocked and the newest public-repository debug bundle was built and opened at /Users/simpletibr/Projetos/ai/simplicio/apps/desktop/src-tauri/target/debug/bundle/macos/Simplicio.app. The entry surface showed only the full-bleed Simplicio mark and **Install Now**; preparation then completed through the packaged Runtime and opened Runtime 3.8.47. The ad-hoc bundle was closed and removed after review.
 
 With the authenticated snapshot loaded, the live UI reported 9 installed clients, 8 MCP registrations and 1 confirmed handshake. The Orca reference was open during the comparison: its Usage popover showed Codex weekly quota and Grok refresh-required behavior. Simplicio's Usage footer/popover matched the observed Codex quota, Codex account query confirmed quota without importing identity, and Grok returned an explicit expired-session message. MCP filters (all/installed/available/attention), provider detail expansion, refresh, guided-plan review, and receipt reconciliation were exercised without applying a new host-plugin plan.
 

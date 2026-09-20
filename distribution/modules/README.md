@@ -2,7 +2,7 @@
 
 Zig-cross optional binaries. GitHub Release assets.
 
-- Latest public release: https://github.com/wesleysimplicio/simplicio/releases/tag/v3.8.49
+- Latest public release: https://github.com/simpletibr/simplicio/releases/tag/v3.8.49
 - Zip: `simplicio-modules-3.8.49.zip`
 - Manifest: `manifest.json` (sha256 + PE/Mach-O/ELF magic)
 

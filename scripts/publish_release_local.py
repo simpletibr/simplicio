@@ -19,7 +19,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_REPOSITORY = "wesleysimplicio/simplicio"
+PUBLIC_REPOSITORY = "simpletibr/simplicio"
 PACKAGE_ROOT = ROOT / "pypi/simplicio"
 ASSETS = (
     "simplicio-macos-arm64",
@@ -178,7 +178,7 @@ def pypi_release_files(version: str) -> list[dict]:
 def resume_public_preflight(tag: str, version: str, source_commit: str) -> dict:
     if run(["git", "branch", "--show-current"]).stdout.strip() != "master":
         raise PublishError("public repository must be on master")
-    if "wesleysimplicio/simplicio" not in run(["git", "remote", "get-url", "origin"]).stdout.strip():
+    if "simpletibr/simplicio" not in run(["git", "remote", "get-url", "origin"]).stdout.strip():
         raise PublishError("origin is not the public distribution repository")
     blocking = blocking_tracked_changes()
     if blocking:
@@ -241,7 +241,7 @@ def resume_public_preflight(tag: str, version: str, source_commit: str) -> dict:
 def public_preflight(tag: str, version: str, *, require_clean: bool) -> None:
     if run(["git", "branch", "--show-current"]).stdout.strip() != "master":
         raise PublishError("public repository must be on master")
-    if "wesleysimplicio/simplicio" not in run(["git", "remote", "get-url", "origin"]).stdout.strip():
+    if "simpletibr/simplicio" not in run(["git", "remote", "get-url", "origin"]).stdout.strip():
         raise PublishError("origin is not the public distribution repository")
     with (PACKAGE_ROOT / "pyproject.toml").open("rb") as handle:
         package = tomllib.load(handle)

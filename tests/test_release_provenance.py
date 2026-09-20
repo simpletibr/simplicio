@@ -12,7 +12,7 @@ from urllib.error import HTTPError
 
 from scripts import verify_release_provenance as provenance
 
-REPOSITORY = "wesleysimplicio/simplicio"
+REPOSITORY = "simpletibr/simplicio"
 STAGING = "https://artifacts.example/simplicio/v3.5.2"
 SIGNED_TEST_PUBLIC_KEY = "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="
 SIGNED_TEST_SIGNATURE = "ed25519:UKIyIZkSH3nmk+E1LybN3bjQlPpiumLoLIu+bdQUC/j4/6nQkNX3MBhU7kZv+OZ6S9iLYVGwwzPZD5n//MGGAQ=="
@@ -178,11 +178,11 @@ class ReleaseProvenanceTests(unittest.TestCase):
             ("http://artifacts.example/v3.5.2", "absolute HTTPS"),
             ("https://artifacts.example/latest", "immutable version segment"),
             (
-                "https://github.com/wesleysimplicio/simplicio/releases/download/v3.5.2",
+                "https://github.com/simpletibr/simplicio/releases/download/v3.5.2",
                 "distinct from the target release",
             ),
             (
-                "https://github.com/wesleysimplicio/simplicio/releases/download/v3.5.2/staging",
+                "https://github.com/simpletibr/simplicio/releases/download/v3.5.2/staging",
                 "distinct from the target release",
             ),
             ("https://user:secret@artifacts.example/v3.5.2?token=x", "credentials, query, or fragment"),

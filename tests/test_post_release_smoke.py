@@ -28,7 +28,7 @@ def fixture() -> tuple[dict, dict, dict[str, bytes], list[dict]]:
         "schema": "simplicio.update-manifest/v1",
         "version": "3.8.17",
         "release_tag": "v3.8.17",
-        "repository": "wesleysimplicio/simplicio",
+        "repository": "simpletibr/simplicio",
         "security": {
             "signature_algorithm": "ed25519",
             "signature_required": True,
@@ -40,7 +40,7 @@ def fixture() -> tuple[dict, dict, dict[str, bytes], list[dict]]:
         "artifacts": [{
             "target": target["id"],
             "artifact": artifact,
-            "url": f"https://github.com/wesleysimplicio/simplicio/releases/download/v3.8.17/{artifact}",
+            "url": f"https://github.com/simpletibr/simplicio/releases/download/v3.8.17/{artifact}",
             "size": len(PAYLOAD),
             "sha256": DIGEST,
             "signature": SIGNATURE,
@@ -80,7 +80,7 @@ class PostReleaseSmokeTests(unittest.TestCase):
     def test_published_payload_verifies_all_integrity_records(self):
         release, manifest, payloads, targets = fixture()
         report = smoke.verify_release_payload(
-            release, manifest, payloads, repository="wesleysimplicio/simplicio", tag="v3.8.17", targets=targets
+            release, manifest, payloads, repository="simpletibr/simplicio", tag="v3.8.17", targets=targets
         )
         self.assertEqual(report["errors"], [])
         self.assertEqual(report["verified_artifacts"], ["simplicio-macos-arm64"])
@@ -89,15 +89,15 @@ class PostReleaseSmokeTests(unittest.TestCase):
         release, manifest, payloads, targets = fixture()
         payloads["simplicio-macos-arm64.sig"] = b"ed25519:tampered\n"
         report = smoke.verify_release_payload(
-            release, manifest, payloads, repository="wesleysimplicio/simplicio", tag="v3.8.17", targets=targets
+            release, manifest, payloads, repository="simpletibr/simplicio", tag="v3.8.17", targets=targets
         )
         self.assertTrue(any("signature" in error for error in report["errors"]))
 
     def test_latest_url_is_rejected_as_non_immutable(self):
         release, manifest, payloads, targets = fixture()
-        manifest["artifacts"][0]["url"] = "https://github.com/wesleysimplicio/simplicio/releases/latest/download/simplicio-macos-arm64"
+        manifest["artifacts"][0]["url"] = "https://github.com/simpletibr/simplicio/releases/latest/download/simplicio-macos-arm64"
         report = smoke.verify_release_payload(
-            release, manifest, payloads, repository="wesleysimplicio/simplicio", tag="v3.8.17", targets=targets
+            release, manifest, payloads, repository="simpletibr/simplicio", tag="v3.8.17", targets=targets
         )
         self.assertTrue(any("immutable" in error for error in report["errors"]))
 
@@ -106,7 +106,7 @@ class PostReleaseSmokeTests(unittest.TestCase):
         payloads.pop("simplicio-macos-arm64.provenance.json")
         release["assets"] = [{"name": name} for name in payloads]
         report = smoke.verify_release_payload(
-            release, manifest, payloads, repository="wesleysimplicio/simplicio", tag="v3.8.17", targets=targets
+            release, manifest, payloads, repository="simpletibr/simplicio", tag="v3.8.17", targets=targets
         )
         self.assertTrue(any("provenance" in error for error in report["errors"]))
 
@@ -114,7 +114,7 @@ class PostReleaseSmokeTests(unittest.TestCase):
         release, manifest, payloads, targets = fixture()
         targets[0]["provenance_target_aliases"] = []
         report = smoke.verify_release_payload(
-            release, manifest, payloads, repository="wesleysimplicio/simplicio", tag="v3.8.17", targets=targets
+            release, manifest, payloads, repository="simpletibr/simplicio", tag="v3.8.17", targets=targets
         )
         self.assertTrue(any("provenance" in error for error in report["errors"]))
 

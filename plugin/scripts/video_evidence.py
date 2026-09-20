@@ -229,7 +229,7 @@ def cmd_scaffold(opts):
         start = round(start + seconds, 3)
     width = int(opts.get("width", 1280))
     height = int(opts.get("height", 720))
-    brand = opts.get("brand", "github.com/wesleysimplicio/simplicio-loop")
+    brand = opts.get("brand", "github.com/simpletibr/simplicio-loop")
     html = COMPOSITION.format(width=width, height=height, duration=_fmt(start),
                               clips="\n".join(clips), fades="\n".join(fades), brand=_esc(brand))
     comp_path = os.path.join(proj, "index.html")

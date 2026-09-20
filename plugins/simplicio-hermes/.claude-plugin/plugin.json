@@ -4,10 +4,10 @@
   "description": "Authenticated Mapper-only context and provider cache telemetry for Hermes.",
   "author": "Wesley Simplicio",
   "license": "MIT",
-  "homepage": "https://github.com/wesleysimplicio/simplicio/tree/master/plugins/simplicio-hermes",
+  "homepage": "https://github.com/simpletibr/simplicio/tree/master/plugins/simplicio-hermes",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wesleysimplicio/simplicio"
+    "url": "https://github.com/simpletibr/simplicio"
   },
   "keywords": [
     "hermes",

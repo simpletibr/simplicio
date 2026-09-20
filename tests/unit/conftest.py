@@ -56,7 +56,7 @@ class RepoBuilder:
         _write(root / "version.txt", v)
 
         artifact_url = (
-            "https://github.com/wesleysimplicio/simplicio/releases/download/"
+            "https://github.com/simpletibr/simplicio/releases/download/"
             f"v{v}/simplicio-macos-arm64"
         )
         artifact_sha = "9" * 64
@@ -70,7 +70,7 @@ class RepoBuilder:
                     {
                         "target": target,
                         "artifact": asset,
-                        "url": f"https://github.com/wesleysimplicio/simplicio/releases/download/v{v}/{asset}",
+                        "url": f"https://github.com/simpletibr/simplicio/releases/download/v{v}/{asset}",
                         "sha256": artifact_sha,
                         "signature": "ed25519:fixture",
                         "signed": True,
@@ -82,7 +82,7 @@ class RepoBuilder:
 
         install_body = (
             "Install:\n"
-            "curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh\n"
+            "curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh\n"
         )
         _write(root / "README.md", install_body)
         _write(root / "INSTALL.md", install_body)
@@ -143,7 +143,7 @@ class RepoBuilder:
     def with_main_branch_reference(self, filename: str = "README.md") -> "RepoBuilder":
         _write(
             self.root / filename,
-            "Install:\ncurl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/main/install.sh | sh\n",
+            "Install:\ncurl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/main/install.sh | sh\n",
         )
         return self
 

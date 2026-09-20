@@ -35,7 +35,7 @@ class QualityPolicyTests(unittest.TestCase):
             path.parent.mkdir(parents=True)
             marker = "@unittest." + "skip('external')"
             path.write_text(
-                "# JUSTIFICATION: tracked at https://github.com/wesleysimplicio/simplicio/issues/10\n"
+                "# JUSTIFICATION: tracked at https://github.com/simpletibr/simplicio/issues/10\n"
                 "# OWNER: @release-maintainer\n"
                 "# REMOVE-BY: 2026-07-30\n"
                 + marker
@@ -63,7 +63,7 @@ class QualityPolicyTests(unittest.TestCase):
     def test_exception_requires_owner_and_near_term_removal(self):
         base = (
             "# JUSTIFICATION: external service\n"
-            "# https://github.com/wesleysimplicio/simplicio/issues/10\n"
+            "# https://github.com/simpletibr/simplicio/issues/10\n"
         )
         self.assertEqual(
             quality_policy.justification_error(base + "# REMOVE-BY: 2026-07-20", date(2026, 7, 14)),

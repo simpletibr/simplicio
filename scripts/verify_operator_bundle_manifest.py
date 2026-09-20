@@ -77,7 +77,7 @@ def _validate_component(raw: Any, failures: list[dict[str, str]]) -> str | None:
     if not isinstance(component.get("source_commit"), str) or not COMMIT.fullmatch(component["source_commit"]):
         failures.append(_failure("component_commit_invalid", f"{name} needs a 40-character source commit"))
     repository = component.get("repository")
-    if not isinstance(repository, str) or not repository.startswith("https://github.com/wesleysimplicio/"):
+    if not isinstance(repository, str) or not repository.startswith("https://github.com/simpletibr/"):
         failures.append(_failure("component_repository_invalid", f"{name} repository is not approved"))
     schemas = component.get("schemas")
     if not isinstance(schemas, list) or not schemas or any(not isinstance(item, str) or not item for item in schemas):

@@ -2,12 +2,12 @@
 
 - Status: accepted for implementation
 - Date: 2026-08-28
-- Owners: `wesleysimplicio/simplicio` and `wesleysimplicio/simplicio-runtime`
+- Owners: `simpletibr/simplicio` and `simpletibr/simplicio-runtime`
 
 ## Decision
 
 The Simplicio Desktop source, product specifications, public issue tracker and
-Desktop release metadata live in the public `wesleysimplicio/simplicio`
+Desktop release metadata live in the public `simpletibr/simplicio`
 repository under `apps/desktop`.
 
 The app uses Tauri 2 with a React/TypeScript frontend. The signed Simplicio

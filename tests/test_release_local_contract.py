@@ -78,7 +78,7 @@ def test_public_repository_owns_local_pypi_and_release_publication():
     source = publisher.read_text(encoding="utf-8")
     assert "pypi/simplicio" in source
     assert "twine" in source
-    assert "wesleysimplicio/simplicio" in source
+    assert "simpletibr/simplicio" in source
     assert "workflow" not in source.lower()
     assert "simplicio-runtime" not in source
 

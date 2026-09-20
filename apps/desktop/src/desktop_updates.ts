@@ -1,6 +1,6 @@
 export const DESKTOP_UPDATE_EVENT = "simplicio://check-for-updates";
-export const DESKTOP_RELEASES_URL = "https://github.com/wesleysimplicio/simplicio/releases";
-export const DESKTOP_RELEASES_API = "https://api.github.com/repos/wesleysimplicio/simplicio/releases?per_page=30";
+export const DESKTOP_RELEASES_URL = "https://github.com/simpletibr/simplicio/releases";
+export const DESKTOP_RELEASES_API = "https://api.github.com/repos/simpletibr/simplicio/releases?per_page=30";
 export const MAX_RELEASES = 30;
 export const MAX_RELEASE_BYTES = 2 * 1024 * 1024;
 export const MAX_RELEASE_NOTES = 3_000;

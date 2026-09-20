@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
-ISSUE_URL = "https://github.com/wesleysimplicio/simplicio/issues/"
+ISSUE_URL = "https://github.com/simpletibr/simplicio/issues/"
 ISSUE_RE = re.compile(re.escape(ISSUE_URL) + r"\d+\b")
 OWNER_RE = re.compile(r"\bOWNER:\s*([^\s#]+)")
 REMOVE_BY_RE = re.compile(r"\bREMOVE-BY:\s*(\d{4}-\d{2}-\d{2})\b")

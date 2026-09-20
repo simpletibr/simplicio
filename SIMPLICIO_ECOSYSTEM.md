@@ -1,10 +1,10 @@
 # simplicio no Ecossistema Simplicio
 
 ## Quem depende deste repo
-Consumidores finais via release do Runtime e, opcionalmente, via `npx @wesleysimplicio/simplicio`.
+Consumidores finais via release do Runtime e, opcionalmente, via `npx @simpletibr/simplicio`.
 
 ## De quem este repo depende
-- [simplicio-runtime](https://github.com/wesleysimplicio/simplicio-runtime) — fonte do binário compilado e do bundle Python que a próxima release compatível deve incluir
+- [simplicio-runtime](https://github.com/simpletibr/simplicio-runtime) — fonte do binário compilado e do bundle Python que a próxima release compatível deve incluir
 
 ## Versão atual
 

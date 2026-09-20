@@ -28,7 +28,7 @@ def test_rewrite_manifest_keeps_signatures_and_retargets_urls():
             {
                 "target": "linux-x64",
                 "artifact": "simplicio-linux-x64",
-                "url": "https://github.com/wesleysimplicio/simplicio/releases/download/v3.8.47/simplicio-linux-x64",
+                "url": "https://github.com/simpletibr/simplicio/releases/download/v3.8.47/simplicio-linux-x64",
                 "sha256": "a" * 64,
                 "signature": "ed25519:keep-me",
             }

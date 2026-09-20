@@ -119,7 +119,7 @@ const STATUS_ARGS: &[&str] = auth_login::STATUS_ARGS;
 const HOST_PLUGIN_PLAN_ARGS: &[&str] = &["host-plugins", "plan", "--all"];
 static AUTH_OPERATION_GATE: std::sync::Mutex<()> = std::sync::Mutex::new(());
 const SUBSCRIPTION_URL: &str = "https://simpleti.com.br/simplicio";
-const RELEASES_URL: &str = "https://github.com/wesleysimplicio/simplicio/releases";
+const RELEASES_URL: &str = "https://github.com/simpletibr/simplicio/releases";
 
 fn install_journal_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     app.path()
@@ -1556,7 +1556,7 @@ mod tests {
         assert_eq!(SUBSCRIPTION_URL, "https://simpleti.com.br/simplicio");
         assert_eq!(
             RELEASES_URL,
-            "https://github.com/wesleysimplicio/simplicio/releases"
+            "https://github.com/simpletibr/simplicio/releases"
         );
     }
 

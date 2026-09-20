@@ -30,7 +30,7 @@ except ModuleNotFoundError:  # direct execution: python scripts/post_release_smo
     from verify_ed25519 import verify_signature_for_digest
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPOSITORY = "wesleysimplicio/simplicio"
+DEFAULT_REPOSITORY = "simpletibr/simplicio"
 MANIFEST_ASSET = "simplicio-update-manifest.json"
 CHECKSUMS_ASSET = "SHA256SUMS"
 VERSION_RE = re.compile(r"^v?[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$")

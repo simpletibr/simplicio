@@ -1,7 +1,7 @@
 # Integration / E2E — validating real flows across the Simplicio ecosystem
 
 > Implements the minimum scope of issue #9 for this repo:
-> `wesleysimplicio/simplicio` is the **public distribution repo** (compiled
+> `simpletibr/simplicio` is the **public distribution repo** (compiled
 > runtime binary + npm/PyPI wrappers). The runtime source, mapper,
 > dev-cli, loop and agent components live in sibling repos and are consumed
 > here only as optional PATH adapters (`simplicio version --json` →

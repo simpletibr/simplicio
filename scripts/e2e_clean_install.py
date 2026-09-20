@@ -48,7 +48,7 @@ def static_contract(target_id: str) -> dict:
             raise SystemExit(f'asset checksum mismatch: {asset.name}')
     else:
         url = str(artifact.get('url') or '')
-        if not url.startswith('https://github.com/wesleysimplicio/simplicio/releases/download/'):
+        if not url.startswith('https://github.com/simpletibr/simplicio/releases/download/'):
             raise SystemExit(f'manifest has no trusted release URL: {target_id}')
         if not url.endswith('/' + asset.name):
             raise SystemExit(f'manifest URL asset mismatch: {target_id}')

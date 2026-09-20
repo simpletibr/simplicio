@@ -31,10 +31,10 @@ from typing import Iterable, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL_PUBLISHER = "scripts/publish_release_local.py"
-PUBLIC_REPOSITORY = "wesleysimplicio/simplicio"
+PUBLIC_REPOSITORY = "simpletibr/simplicio"
 CANONICAL_BRANCH = "master"
 MAIN_INSTALL_RE = re.compile(
-    r"https://raw\.githubusercontent\.com/wesleysimplicio/simplicio/main/install\.(?:sh|ps1)"
+    r"https://raw\.githubusercontent\.com/simpletibr/simplicio/main/install\.(?:sh|ps1)"
 )
 BETA_NO_END_RE = re.compile(r"public beta with no end date", re.IGNORECASE)
 ECOSYSTEM_VERSION_RE = re.compile(r"## Versão atual\s+([^\n]+)", re.MULTILINE)
@@ -369,7 +369,7 @@ def run_audit(root: Path = ROOT, *, today: date | None = None) -> list[Finding]:
     for artifact in artifacts:
         name = str(artifact.get("artifact") or "")
         expected_url = (
-            f"https://github.com/wesleysimplicio/simplicio/releases/download/"
+            f"https://github.com/simpletibr/simplicio/releases/download/"
             f"v{manifest_version}/{name}"
         )
         if not name or artifact.get("url") != expected_url:

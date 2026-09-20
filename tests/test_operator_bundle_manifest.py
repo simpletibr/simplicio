@@ -22,7 +22,7 @@ def valid_manifest() -> dict:
             "version": version,
             "tag": f"v{version}",
             "source_commit": f"{index + 1:040x}",
-            "repository": f"https://github.com/wesleysimplicio/{name}",
+            "repository": f"https://github.com/simpletibr/{name}",
             "schemas": [f"{name}.contract/v1"],
             "entrypoint": f"/managed/operators/slot-b/{name}",
             "compatible_runtime": ">=3.8.41,<3.9.0",

@@ -20,7 +20,7 @@ Verbs:
              no real network/git calls, everything faked via function parameters.
 
 Usage:
-    python3 scripts/worktree_cleanup.py run --repo wesleysimplicio/simplicio-loop --pr 484 \\
+    python3 scripts/worktree_cleanup.py run --repo simpletibr/simplicio-loop --pr 484 \\
         --branch simplicio/loop-worktree-cleanup --json
     python3 scripts/worktree_cleanup.py run --repo owner/name --pr 12 --branch fix-x --dry-run
     python3 scripts/worktree_cleanup.py selftest

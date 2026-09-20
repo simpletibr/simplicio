@@ -47,12 +47,12 @@ def test_version_from_pyproject(tmp_path):
 
 
 def test_main_install_regex_flags_main_branch_reference():
-    offending = "curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/main/install.sh | sh"
+    offending = "curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/main/install.sh | sh"
     assert vdc.MAIN_INSTALL_RE.search(offending) is not None
 
 
 def test_main_install_regex_allows_master_branch_reference():
-    ok = "curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh"
+    ok = "curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh"
     assert vdc.MAIN_INSTALL_RE.search(ok) is None
 
 

@@ -499,7 +499,7 @@ function Plugins({ evidence, onNavigate }: { evidence: Evidence; onNavigate: Nav
       {!(tab === "catalog" ? packages.length : skills.length) && <div className="ref-empty"><Glyph name="search" size={24} /><h3>{query ? "Nenhum resultado neste filtro" : "Nenhuma skill informada nesta consulta"}</h3><p>{query ? "Tente outro nome ou categoria." : "O Desktop não preenche o inventário com pacotes de demonstração."}</p>{query && <button className="button button-secondary" type="button" onClick={() => setQuery("")}>Limpar busca</button>}</div>}
     </Section>
     <Section title="Instalação e verificação"><Row title="Configurar clientes MCP" description="Abra o plano existente, revise os alvos e confirme antes de aplicar."><LinkButton to="providers" onNavigate={onNavigate}>Revisar plano MCP</LinkButton></Row><CommandCard id="plugins" /></Section>
-    <details className="ref-help-details"><summary>Fontes e desenvolvimento</summary><p>Os pacotes são documentados no repositório público wesleysimplicio/simplicio. O instalador de terminal tenta instalar pacotes nos hosts detectados; isso é mais amplo que o reparo MCP. Nenhuma fonte, credencial ou pacote é adicionado ao abrir este painel.</p></details>
+    <details className="ref-help-details"><summary>Fontes e desenvolvimento</summary><p>Os pacotes são documentados no repositório público simpletibr/simplicio. O instalador de terminal tenta instalar pacotes nos hosts detectados; isso é mais amplo que o reparo MCP. Nenhuma fonte, credencial ou pacote é adicionado ao abrir este painel.</p></details>
   </>;
 }
 

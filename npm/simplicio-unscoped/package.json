@@ -21,7 +21,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wesleysimplicio/simplicio.git"
+    "url": "git+https://github.com/simpletibr/simplicio.git"
   },
   "publishConfig": {
     "access": "public"

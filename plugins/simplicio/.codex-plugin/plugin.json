@@ -4,10 +4,10 @@
   "description": "Up to 96% token savings. Install and connect the Simplicio Runtime for compact repository context, governed execution, every CLI subcommand, and evidence-backed validation.",
   "author": {
     "name": "Wesley Simplicio",
-    "url": "https://github.com/wesleysimplicio"
+    "url": "https://github.com/simpletibr"
   },
   "homepage": "https://simpleti.com.br/simplicio/",
-  "repository": "https://github.com/wesleysimplicio/simplicio",
+  "repository": "https://github.com/simpletibr/simplicio",
   "license": "MIT",
   "keywords": [
     "simplicio",

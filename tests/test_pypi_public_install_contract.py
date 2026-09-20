@@ -34,11 +34,11 @@ def test_primary_install_docs_use_pypi_on_all_supported_hosts():
         assert "simplicio install" in text
         assert (
             "curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh" in text
-            or "curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh" in text
+            or "curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh" in text
         )
         assert (
             "irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex" in text
-            or "irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex" in text
+            or "irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex" in text
         )
 
     for relative in ("README.md", "INSTALL.md"):
@@ -66,8 +66,8 @@ def test_translated_install_docs_use_the_pypi_bootstrap():
         text = (ROOT / f"READMEs/README.{language}.md").read_text(encoding="utf-8")
         assert "python3 -m pip install --upgrade simplicio-installer" in text
         assert "simplicio install" in text
-        assert "curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh" in text
-        assert "irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex" in text
+        assert "curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh" in text
+        assert "irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex" in text
 
 
 def test_pypi_publication_is_local_manual_and_fail_closed():

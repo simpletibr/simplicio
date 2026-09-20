@@ -19,7 +19,7 @@ def test_public_bootstrap_contract_has_exactly_two_shared_profiles() -> None:
     ]
     assert len(profiles) == 2
     assert profiles[0]["recommended"] is True
-    assert profiles[0]["source_repository"] == "https://github.com/wesleysimplicio/simplicio"
+    assert profiles[0]["source_repository"] == "https://github.com/simpletibr/simplicio"
     assert profiles[0]["target_release_repository"].endswith("/simplicio/releases")
     assert profiles[0]["channel_migration"] == "public-foundation-before-atomic-cutover"
     assert profiles[0]["component_lock"] == profiles[1]["component_lock"] == "shared"
