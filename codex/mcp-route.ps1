@@ -607,6 +607,82 @@ function Get-RepoFromHook {
 }
 
 $repo = Get-RepoFromHook
+
+function Get-McpProfile {
+  $explicit = [Environment]::GetEnvironmentVariable('SIMPLICIO_MCP_PROFILE')
+  if (-not [string]::IsNullOrWhiteSpace($explicit)) {
+    $value = $explicit.Trim().ToLowerInvariant().Replace('_', '-')
+    if ($value -eq 'mapperonly') { return 'mapper-only' }
+    if (@('core', 'full', 'mapper-only', 'diagnostic') -contains $value) { return $value }
+  }
+  return 'full'
+}
+
+function Get-HookToolName {
+  $name = [string]($hook.toolName)
+  if ([string]::IsNullOrWhiteSpace($name)) { $name = [string]($hook.tool_name) }
+  if ([string]::IsNullOrWhiteSpace($name)) { $name = [string]($hook.tool) }
+  return $name.Trim()
+}
+
+function Get-NormalizedTool([string]$Name) {
+  $n = $Name.Trim().ToLowerInvariant().Replace('-', '_')
+  if ($n.StartsWith('functions.')) { $n = $n.Substring(10) }
+  if ($n.StartsWith('functions_')) { $n = $n.Substring(10) }
+  $dot = $n.LastIndexOf('.')
+  if ($dot -ge 0) { $n = $n.Substring($dot + 1) }
+  return $n
+}
+
+function Test-NativeFileTool([string]$Name) {
+  if ([string]::IsNullOrWhiteSpace($Name)) { return $false }
+  $lower = $Name.ToLowerInvariant()
+  if ($lower.Contains('simplicio') -or $lower.Contains('__') -or $lower.StartsWith('mcp__')) {
+    return $false
+  }
+  $native = @(
+    'read', 'read_file', 'write', 'write_file', 'edit', 'strreplace',
+    'str_replace', 'search_replace', 'file_read', 'replace', 'notebookedit',
+    'notebook_edit', 'multiedit', 'multi_edit', 'create_file', 'delete_file'
+  )
+  return $native -contains (Get-NormalizedTool $Name)
+}
+
+function Deny-NativeFileTool([string]$Name) {
+  $writes = @(
+    'write', 'write_file', 'edit', 'strreplace', 'str_replace', 'search_replace', 'replace',
+    'notebookedit', 'notebook_edit', 'multiedit', 'multi_edit', 'create_file',
+    'delete_file'
+  )
+  $replacement = if ($writes -contains (Get-NormalizedTool $Name)) {
+    'simplicio_edit / simplicio_run'
+  } else {
+    'simplicio_file_read / simplicio_context / simplicio_read_signatures'
+  }
+  $reason = "MCP profile $(Get-McpProfile) blocks host-native file tool $Name. Use $replacement after simplicio_map. Third-party MCP/plugins remain allowed."
+  $payload = [ordered]@{
+    hookSpecificOutput = [ordered]@{
+      hookEventName = 'PreToolUse'
+      permissionDecision = 'deny'
+      permissionDecisionReason = $reason
+    }
+  } | ConvertTo-Json -Compress
+  Write-Output $payload
+  [Console]::Error.WriteLine($reason)
+  exit 2
+}
+
+$enforce = [Environment]::GetEnvironmentVariable('SIMPLICIO_ENFORCE')
+$enforceOff = @( '0', 'false', 'off' ) -contains ([string]$enforce).Trim().ToLowerInvariant()
+if (
+  (@('', 'pretooluse', 'pre_tool_use', 'beforeshellexecution') -contains $event) -and
+  (@('core', 'full') -contains (Get-McpProfile)) -and
+  -not $enforceOff
+) {
+  $tool = Get-HookToolName
+  if (Test-NativeFileTool $tool) { Deny-NativeFileTool $tool }
+}
+
 if ((Get-RuntimeMode) -eq 'mapper-only') {
   $mapperEvent = if ($contextEvents.ContainsKey($event)) { $contextEvents[$event] } else { '' }
   if (@('', 'pretooluse', 'pre_tool_use') -contains $event) { $mapperEvent = 'PreToolUse' }
@@ -646,5 +722,5 @@ if ($contextEvents.ContainsKey($event)) {
   Allow-Unchanged
 }
 
-# PreToolUse is advisory-only: never block the host operation.
+# Remaining PreToolUse events (shell, third-party MCP, Simplicio tools) pass.
 Allow-Unchanged
