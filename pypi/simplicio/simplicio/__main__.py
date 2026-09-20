@@ -26,7 +26,7 @@ from .host_integrations import build_summary, write_summary
 INSTALL_DIR = os.path.expanduser("~/.local/bin")
 BINARY_NAME = "simplicio" + (".exe" if platform.system() == "Windows" else "")
 BINARY_PATH = os.path.join(INSTALL_DIR, BINARY_NAME)
-RELEASE_API_BASE = "https://api.github.com/repos/wesleysimplicio/simplicio/releases/tags"
+RELEASE_API_BASE = "https://api.github.com/repos/simpletibr/simplicio/releases/tags"
 MANIFEST_ASSET = "simplicio-update-manifest.json"
 # The wheel anchors each release manifest before trusting its artifact hashes.
 TRUSTED_MANIFEST_SHA256 = {

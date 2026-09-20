@@ -14,7 +14,7 @@ their own host update/consent flow.
 ## Install in Codex
 
 ```bash
-codex plugin marketplace add wesleysimplicio/simplicio --ref master
+codex plugin marketplace add simpletibr/simplicio --ref master
 codex plugin add simplicio@simplicio-codex
 ```
 
@@ -57,7 +57,7 @@ Gemini discovers the bundled skills.
 In Claude Code:
 
 ```text
-/plugin marketplace add wesleysimplicio/simplicio
+/plugin marketplace add simpletibr/simplicio
 /plugin install simplicio@simplicio
 ```
 
@@ -89,8 +89,8 @@ revalidates the project generation and refreshes or reuses the Mapper cache.
 | Plugin | Owns | Source |
 |---|---|---|
 | `simplicio` (Codex, Claude, Agent Plugins v1, Gemini) | Verified Runtime bootstrap, complete live MCP surface, shared skills, and Runtime-managed pre-hooks | This repository |
-| `simplicio-loop` | Loop, tasks alias, orient, review, compress, learn, autoresearch, Prism, Mapper, Fast, Dev CLI, Runtime skills and safety hooks | [`simplicio-loop`](https://github.com/wesleysimplicio/simplicio-loop) |
-| `simplicio-prompt` | Tuple-Space/Yool prompt contract, fan-out commands, and opt-in prompt adapter | [`simplicio-prompt`](https://github.com/wesleysimplicio/simplicio-prompt) |
+| `simplicio-loop` | Loop, tasks alias, orient, review, compress, learn, autoresearch, Prism, Mapper, Fast, Dev CLI, Runtime skills and safety hooks | [`simplicio-loop`](https://github.com/simpletibr/simplicio-loop) |
+| `simplicio-prompt` | Tuple-Space/Yool prompt contract, fan-out commands, and opt-in prompt adapter | [`simplicio-prompt`](https://github.com/simpletibr/simplicio-prompt) |
 | `simplicio-hermes` | Native `pre_llm_call` context preparation and post-call Runtime receipts for Hermes Agent | This repository |
 
 The main `simplicio` plugin is the default integration entry point.

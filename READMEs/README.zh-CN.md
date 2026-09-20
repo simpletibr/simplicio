@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wesleysimplicio/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/wesleysimplicio/simplicio?color=blue&label=latest" alt="最新版本"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/stargazers"><img src="https://img.shields.io/github/stars/wesleysimplicio/simplicio?style=social" alt="星标"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/releases"><img src="https://img.shields.io/github/downloads/wesleysimplicio/simplicio/total?color=green" alt="下载量"></a>
+  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=blue&label=latest" alt="最新版本"></a>
+  <a href="https://github.com/simpletibr/simplicio/stargazers"><img src="https://img.shields.io/github/stars/simpletibr/simplicio?style=social" alt="星标"></a>
+  <a href="https://github.com/simpletibr/simplicio/releases"><img src="https://img.shields.io/github/downloads/simpletibr/simplicio/total?color=green" alt="下载量"></a>
   <a href="../plugins/simplicio/LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red" alt="许可证"></a>
 </p>
 
@@ -59,7 +59,7 @@
 如果你使用 Codex，可以将 Simplicio 作为插件安装。添加公共 Marketplace、安装插件，然后启动新的 Codex 会话；插件会安装并引导启动 Simplicio Runtime，并提供其 skills 和 MCP 工具。
 
 ```bash
-codex plugin marketplace add wesleysimplicio/simplicio --ref master
+codex plugin marketplace add simpletibr/simplicio --ref master
 codex plugin add simplicio@simplicio-codex
 ```
 
@@ -107,13 +107,13 @@ simplicio install
 macOS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex
 ```
 
 完成。一条命令。无需包管理器，无需模型配置。
@@ -275,11 +275,11 @@ simplicio license status
 
 ## ⭐ 星标历史
 
-<a href="https://star-history.com/#wesleysimplicio/simplicio&Date">
+<a href="https://star-history.com/#simpletibr/simplicio&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&theme=dark&legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" />
-    <img alt="星标历史图表" src="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" width="100%" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" />
+    <img alt="星标历史图表" src="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" width="100%" />
   </picture>
 </a>
 
@@ -288,7 +288,7 @@ simplicio license status
 ## 💬 社区
 
 - [Discord](https://discord.gg/wM6tr7xVb) — 聊天、支持、抢先体验
-- [GitHub Issues](https://github.com/wesleysimplicio/simplicio/issues) — 报告问题和功能请求
+- [GitHub Issues](https://github.com/simpletibr/simplicio/issues) — 报告问题和功能请求
 
 ---
 

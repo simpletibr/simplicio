@@ -54,7 +54,7 @@ A [Fabric-First Cipher Doctrine](https://github.com/JesseBrown1980/HYPER-BECHS--
 
 ### 1.4 Estado Atual do Simplicio
 
-O repositório **simplicio** (`wesleysimplicio/simplicio`) distribui binários compilados do runtime Rust para macOS (ARM64/x86_64), Linux (x86_64) e Windows (x86_64). O pipeline atual inclui:
+O repositório **simplicio** (`simpletibr/simplicio`) distribui binários compilados do runtime Rust para macOS (ARM64/x86_64), Linux (x86_64) e Windows (x86_64). O pipeline atual inclui:
 
 - **SHA256SUMS** — checksums SHA256 de todos os artefatos de distribuição
 - **`simplicio-update-manifest.json`** — manifesto de atualização com schema v1
@@ -138,10 +138,10 @@ O `install.sh` e `install.ps1` ganham suporte a Host-8 via variável de ambiente
 
 ```bash
 # Instalação tradicional (binário raw)
-curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 
 # Instalação via Host-8 (formato compacto)
-SIMPLICIO_HOST8=1 curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+SIMPLICIO_HOST8=1 curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
 O instalador com `SIMPLICIO_HOST8=1`:
@@ -188,7 +188,7 @@ O `simplicio-update-manifest.json` atual já possui campos de `signature` (vazio
     "signature_required": true,
     "refuse_unsigned": true,
     "signing_key_fingerprint": "SHA256:abc123...",
-    "signing_key_url": "https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/docs/signing-public-key.pem",
+    "signing_key_url": "https://raw.githubusercontent.com/simpletibr/simplicio/master/docs/signing-public-key.pem",
     "provenance_chain": [
       {"step": "build", "actor": "simplicio-runtime CI", "verified_by": "sha256( source_tree )"},
       {"step": "sign",  "actor": "release-bot",           "verified_by": "ed25519( sha256( binary ) )"},
@@ -303,8 +303,8 @@ Seguindo o substrato HYPER-BECHS, todo artefato de distribuição é representad
   "artifacts": [
     {
       "target": "macos-arm64",
-      "binary_url": "https://github.com/wesleysimplicio/simplicio/releases/download/v1.6.4/simplicio-macos-arm64",
-      "binary_url_host8": "https://github.com/wesleysimplicio/simplicio/releases/download/v1.6.4/simplicio-macos-arm64.h8",
+      "binary_url": "https://github.com/simpletibr/simplicio/releases/download/v1.6.4/simplicio-macos-arm64",
+      "binary_url_host8": "https://github.com/simpletibr/simplicio/releases/download/v1.6.4/simplicio-macos-arm64.h8",
       "hash": {
         "algorithm": "SHA256",
         "value": "50affbf647d9bb032049d7be86ce8f700b28ccec6df016d0c58cdcfd2d84db4c"
@@ -613,4 +613,4 @@ jobs:
 
 > **Status deste documento:** Rascunho inicial — documenta a arquitetura e o plano de implementação para a Integração Asolaria.
 > **Última atualização:** 2026-07-03
-> **Issue de referência:** [#3 — 🌌 Integração Asolaria: Binary/Host-8 Distribution](https://github.com/wesleysimplicio/simplicio/issues/3)
+> **Issue de referência:** [#3 — 🌌 Integração Asolaria: Binary/Host-8 Distribution](https://github.com/simpletibr/simplicio/issues/3)

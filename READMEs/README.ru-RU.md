@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wesleysimplicio/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/wesleysimplicio/simplicio?color=blue&label=latest" alt="Latest Release"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/stargazers"><img src="https://img.shields.io/github/stars/wesleysimplicio/simplicio?style=social" alt="Stars"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/releases"><img src="https://img.shields.io/github/downloads/wesleysimplicio/simplicio/total?color=green" alt="Downloads"></a>
+  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=blue&label=latest" alt="Latest Release"></a>
+  <a href="https://github.com/simpletibr/simplicio/stargazers"><img src="https://img.shields.io/github/stars/simpletibr/simplicio?style=social" alt="Stars"></a>
+  <a href="https://github.com/simpletibr/simplicio/releases"><img src="https://img.shields.io/github/downloads/simpletibr/simplicio/total?color=green" alt="Downloads"></a>
   <a href="../plugins/simplicio/LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red" alt="License"></a>
 </p>
 
@@ -59,7 +59,7 @@
 Если вы используете Codex, Simplicio можно установить как плагин. Добавьте публичный Marketplace, установите плагин и запустите новый сеанс Codex; плагин установит и запустит Simplicio Runtime и предоставит его skills и инструменты MCP.
 
 ```bash
-codex plugin marketplace add wesleysimplicio/simplicio --ref master
+codex plugin marketplace add simpletibr/simplicio --ref master
 codex plugin add simplicio@simplicio-codex
 ```
 
@@ -107,13 +107,13 @@ simplicio install
 macOS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex
 ```
 
 Готово. Одна команда. Никакого менеджера пакетов, никакой настройки модели.
@@ -278,11 +278,11 @@ simplicio license status
 
 ## ⭐ История звёзд
 
-<a href="https://star-history.com/#wesleysimplicio/simplicio&Date">
+<a href="https://star-history.com/#simpletibr/simplicio&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&theme=dark&legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" />
-    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" width="100%" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" />
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" width="100%" />
   </picture>
 </a>
 
@@ -291,7 +291,7 @@ simplicio license status
 ## 💬 Сообщество
 
 - [Discord](https://discord.gg/wM6tr7xVb) — чат, поддержка, ранний доступ
-- [GitHub Issues](https://github.com/wesleysimplicio/simplicio/issues) — баги и запросы функций
+- [GitHub Issues](https://github.com/simpletibr/simplicio/issues) — баги и запросы функций
 
 ---
 

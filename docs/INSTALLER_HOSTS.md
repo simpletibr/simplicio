@@ -2,7 +2,7 @@
 
 The public shell, PowerShell and PyPI installers delegate MCP configuration to
 the downloaded Runtime. The expanded adapters ship in the signed
-[Runtime v3.8.50 release](https://github.com/wesleysimplicio/simplicio/releases/tag/v3.8.50)
+[Runtime v3.8.50 release](https://github.com/simpletibr/simplicio/releases/tag/v3.8.50)
 and are available through the public shell, PowerShell and PyPI installers.
 Devin and Codebuff retain the manual integration requirements documented below.
 

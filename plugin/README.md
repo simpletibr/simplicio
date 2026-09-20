@@ -19,7 +19,7 @@ plugin/
 ## Install
 
 ```
-/plugin marketplace add wesleysimplicio/simplicio
+/plugin marketplace add simpletibr/simplicio
 /plugin install simplicio-loop@simplicio
 ```
 
@@ -75,6 +75,6 @@ run locally and make zero network calls.
 ## Maintainers
 
 The canonical implementation remains in
-<https://github.com/wesleysimplicio/simplicio-loop>. When that release changes,
+<https://github.com/simpletibr/simplicio-loop>. When that release changes,
 refresh this public bundle from the pinned source release and rerun the bundle
 contract tests before opening a distribution PR.

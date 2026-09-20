@@ -110,7 +110,7 @@ Simplicio first-party system skills, not the Runtime's unrelated external skill
 catalog.
 
 Source and official artwork:
-<https://github.com/wesleysimplicio/simplicio> and the Simplicio Runtime source
+<https://github.com/simpletibr/simplicio> and the Simplicio Runtime source
 repository.
 
 The host-side plugin material is MIT-licensed. The separately distributed

@@ -23,7 +23,7 @@ Read these canonical files before editing if they exist in the working tree:
 
 If they are not present, fetch the canonical spec from the
 `simplicio-prompt` npm package (`npx simplicio-prompt --raw`) or from
-`https://github.com/wesleysimplicio/simplicio-prompt`.
+`https://github.com/simpletibr/simplicio-prompt`.
 
 Execute the task using:
 

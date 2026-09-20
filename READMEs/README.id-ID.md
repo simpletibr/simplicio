@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wesleysimplicio/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/wesleysimplicio/simplicio?color=blue&label=latest" alt="Rilis Terbaru"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/stargazers"><img src="https://img.shields.io/github/stars/wesleysimplicio/simplicio?style=social" alt="Bintang"></a>
-  <a href="https://github.com/wesleysimplicio/simplicio/releases"><img src="https://img.shields.io/github/downloads/wesleysimplicio/simplicio/total?color=green" alt="Unduhan"></a>
+  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=blue&label=latest" alt="Rilis Terbaru"></a>
+  <a href="https://github.com/simpletibr/simplicio/stargazers"><img src="https://img.shields.io/github/stars/simpletibr/simplicio?style=social" alt="Bintang"></a>
+  <a href="https://github.com/simpletibr/simplicio/releases"><img src="https://img.shields.io/github/downloads/simpletibr/simplicio/total?color=green" alt="Unduhan"></a>
   <a href="../plugins/simplicio/LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red" alt="Lisensi"></a>
 </p>
 
@@ -59,7 +59,7 @@ bersifat opsional, tidak wajib.**
 Jika Anda menggunakan Codex, Anda dapat menginstal Simplicio sebagai plugin. Tambahkan Marketplace publik, instal plugin, lalu mulai sesi Codex baru; plugin akan menginstal dan melakukan bootstrap Simplicio Runtime serta menyediakan skills dan alat MCP.
 
 ```bash
-codex plugin marketplace add wesleysimplicio/simplicio --ref master
+codex plugin marketplace add simpletibr/simplicio --ref master
 codex plugin add simplicio@simplicio-codex
 ```
 
@@ -107,13 +107,13 @@ simplicio install
 macOS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex
 ```
 
 Selesai. Satu perintah. Tanpa manajer paket, tanpa konfigurasi model.
@@ -277,11 +277,11 @@ beta publik. Lihat [LICENSE](../plugins/simplicio/LICENSE).
 
 ## ⭐ Riwayat Bintang
 
-<a href="https://star-history.com/#wesleysimplicio/simplicio&Date">
+<a href="https://star-history.com/#simpletibr/simplicio&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&theme=dark&legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" />
-    <img alt="Grafik Riwayat Bintang" src="https://api.star-history.com/chart?repos=wesleysimplicio/simplicio&type=date&legend=top-left" width="100%" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" />
+    <img alt="Grafik Riwayat Bintang" src="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" width="100%" />
   </picture>
 </a>
 
@@ -290,7 +290,7 @@ beta publik. Lihat [LICENSE](../plugins/simplicio/LICENSE).
 ## 💬 Komunitas
 
 - [Discord](https://discord.gg/wM6tr7xVb) — obrolan, dukungan, akses awal
-- [GitHub Issues](https://github.com/wesleysimplicio/simplicio/issues) — laporan bug dan permintaan fitur
+- [GitHub Issues](https://github.com/simpletibr/simplicio/issues) — laporan bug dan permintaan fitur
 
 ---
 

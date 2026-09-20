@@ -5,7 +5,7 @@
 # It never downloads sibling simplicio-* repositories.
 #
 # Usage:
-#   powershell -c "irm https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.ps1 | iex"
+#   powershell -c "irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex"
 #   pwsh install.ps1 -Doctor
 #   pwsh install.ps1 -Uninstall
 #
@@ -37,12 +37,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$Repo = "wesleysimplicio/simplicio"
+$Repo = "simpletibr/simplicio"
 $BinName = "simplicio.exe"
 $Target = "windows-x64"
 $Asset = "simplicio-windows-x64.exe"
 $Ed25519PublicKey = "t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U="
-$Ed25519HelperUrl = "https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/scripts/verify_ed25519.py"
+$Ed25519HelperUrl = "https://raw.githubusercontent.com/simpletibr/simplicio/master/scripts/verify_ed25519.py"
 $Ed25519HelperSha256 = "f03a0719dd557ddea27dc4cf1456d6f06a47b9056505e4d4b8453090697600d0"
 $PublicRouteRef = "68b4c7f7ac27d07624ffa4ddf0673a43e180c3e5"
 $PublicRouteUrl = "https://raw.githubusercontent.com/$Repo/$PublicRouteRef/codex/mcp-route.ps1"

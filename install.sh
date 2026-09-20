@@ -6,7 +6,7 @@
 # pública de updates. O instalador recusa releases que não provem esses campos;
 # não reescreve projetos Python como Rust nem baixa repositórios irmãos.
 #
-#   curl -fsSL https://raw.githubusercontent.com/wesleysimplicio/simplicio/master/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 #
 # Idempotent subcommands:
 #   sh install.sh --doctor      # health check, safe to re-run
@@ -33,7 +33,7 @@
 
 set -eu
 
-REPO="wesleysimplicio/simplicio"
+REPO="simpletibr/simplicio"
 GITHUB="https://github.com/$REPO"
 ED25519_PUBLIC_KEY="t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U="
 ED25519_HELPER_URL="https://raw.githubusercontent.com/$REPO/master/scripts/verify_ed25519.py"

@@ -57,7 +57,7 @@ stale map.
 ## Install and validate
 
 ```bash
-hermes plugins install wesleysimplicio/simplicio/plugins/simplicio-hermes --force --enable
+hermes plugins install simpletibr/simplicio/plugins/simplicio-hermes --force --enable
 hermes plugins doctor simplicio-hermes --ci
 ```
 

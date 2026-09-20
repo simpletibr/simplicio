@@ -32,7 +32,7 @@ Do NOT trigger when the user explicitly stands down with phrases like "stop",
 
 If any are missing, fetch the canonical spec from
 `npx simplicio-prompt --raw` or
-`https://github.com/wesleysimplicio/simplicio-prompt`.
+`https://github.com/simpletibr/simplicio-prompt`.
 
 ## Execution contract
 

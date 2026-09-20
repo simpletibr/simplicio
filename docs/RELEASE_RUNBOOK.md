@@ -89,7 +89,7 @@ gate status and unexecuted native checks are recorded in
 ### Published Desktop v3.8.39
 
 The Desktop assets were added manually to the existing public `v3.8.39`
-release after [PR #263](https://github.com/wesleysimplicio/simplicio/pull/263)
+release after [PR #263](https://github.com/simpletibr/simplicio/pull/263)
 merged. Their source commit is `dd7dd0665630fcdd6c9a76d07956d840f80fc0a9`;
 the already published Runtime tag was not moved and no existing asset was
 overwritten.
@@ -283,5 +283,5 @@ simplicio ecosystem verify --json
 ```
 
 See the Runtime repository's
-[manual release runbook](https://github.com/wesleysimplicio/simplicio-runtime/blob/main/docs/PUBLIC_RELEASE_RUNBOOK.md)
+[manual release runbook](https://github.com/simpletibr/simplicio-runtime/blob/main/docs/PUBLIC_RELEASE_RUNBOOK.md)
 for signing-key handling and the full maintainer commands.

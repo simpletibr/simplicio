@@ -18,4 +18,4 @@ simplicio chat "build a login endpoint and test until it passes"
 ## Links
 
 - Website: https://simpleti.com.br/simplicio/
-- GitHub: https://github.com/wesleysimplicio/simplicio
+- GitHub: https://github.com/simpletibr/simplicio
