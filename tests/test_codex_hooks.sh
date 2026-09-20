@@ -69,11 +69,14 @@ rm -rf -- "$session_repo"
 run_case "allow Simplicio tool unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"simplicio__simplicio_read","tool_input":{"path":"x"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-run_case "allow native read unchanged" \
+run_case "deny native read on core/full" \
   '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
-  0 '__EMPTY__'
-run_case "allow native edit unchanged" \
+  2 'simplicio_file_read'
+run_case "deny native edit on core/full" \
   '{"hook_event_name":"PreToolUse","tool_name":"search_replace","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
+  2 'simplicio_edit'
+SIMPLICIO_MCP_PROFILE=mapper-only run_case "allow native read on mapper-only profile" \
+  '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
 run_case "allow native shell unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"git status"},"cwd":"/tmp"}' \
@@ -120,11 +123,11 @@ if command -v pwsh >/dev/null 2>&1; then
   ps_exit=$?
   chmod 0755 "$repo"
   rm -rf "$scratch"
-  if [ "$ps_exit" -eq 0 ] && [ -z "$ps_out" ]; then
-    printf 'PASS Windows read-only repository fails open\n'
+  if [ "$ps_exit" -eq 2 ] && printf '%s' "$ps_out" | grep -Fq 'simplicio_file_read'; then
+    printf 'PASS Windows native read denied on core/full\n'
     PASS=$((PASS + 1))
   else
-    printf 'FAIL Windows read-only repository exit=%s output=%s\n' \
+    printf 'FAIL Windows native read denied on core/full exit=%s output=%s\n' \
       "$ps_exit" "$ps_out" >&2
     FAIL=$((FAIL + 1))
   fi
