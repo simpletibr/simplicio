@@ -52,13 +52,14 @@ def _runtime_mcp(
     scopes: Sequence[str] = ("user",),
     default_scope: str = "user",
     mcp_environment: Sequence[Tuple[str, str]] = (),
+    capability: str = "runtime-mcp",
 ) -> HostSpec:
     return HostSpec(
         host_id=host_id,
         name=name,
         executable_names=tuple(executable_names),
         config_paths=tuple(config_paths),
-        capability="runtime-mcp",
+        capability=capability,
         contract="delegated-to-runtime",
         minimum_version=minimum_version,
         verification_command=(
@@ -122,6 +123,8 @@ HOSTS: Tuple[HostSpec, ...] = (
         ("opencode",),
         ("~/.config/opencode/opencode.json", "opencode.json"),
         "https://opencode.ai/docs/cli/",
+        capability="native-plugin",
+        mcp_environment=(("SIMPLICIO_RUNTIME_MODE", "full"),),
     ),
     _runtime_mcp(
         "vscode",

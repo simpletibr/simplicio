@@ -8,7 +8,7 @@
     {"id":"grok","name":"Grok","surface":"runtime-mcp","preHooks":"runtime-managed"},
     {"id":"cursor","name":"Cursor","surface":"agent-plugin-v1","manifest":"plugin.json","preHooks":"runtime-managed"},
     {"id":"github-copilot","name":"GitHub Copilot","surface":"agent-plugin-v1","manifest":"plugin.json","preHooks":"runtime-managed"},
-    {"id":"opencode","name":"OpenCode","surface":"runtime-mcp","preHooks":"runtime-managed"},
+    {"id":"opencode","name":"OpenCode","surface":"native-plugin","manifest":"opencode.json","preHooks":"runtime-managed"},
     {"id":"mimo-code","name":"MiMo Code","surface":"runtime-mcp","preHooks":"runtime-managed"},
     {"id":"amp","name":"Amp","surface":"runtime-mcp","preHooks":"runtime-managed"},
     {"id":"openclaude","name":"OpenClaude","surface":"runtime-mcp","preHooks":"runtime-managed"},

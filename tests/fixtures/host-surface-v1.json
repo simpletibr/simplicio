@@ -30,7 +30,8 @@
         "simplicio_context",
         "simplicio_memory",
         "simplicio_edit",
-        "simplicio_run"
+        "simplicio_run",
+        "simplicio_savings"
       ]
     }
   },
