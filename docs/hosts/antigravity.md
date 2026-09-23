@@ -1,12 +1,15 @@
-# Google Antigravity status
+# Google Antigravity (agy)
 
-Antigravity is represented in the compatibility matrix but remains
-unsupported until its canonical executable and official extension/MCP
-contract are verified. The installer intentionally does not guess a binary
-name or configuration file and therefore cannot mutate a user's setup based
-on a coincidental executable.
+Google Antigravity is a supported host running on MCP profile `core` with full lifecycle pre-hooks.
 
-Enabling this row requires upstream documentation, an exact probe, an
-atomic/idempotent fixture, and live Runtime handshake evidence. Until then,
-the UI should surface the reason as unsupported rather than as an install
-failure.
+## Configuration
+
+- **MCP Configuration**: `~/.gemini/config/mcp_config.json`
+  - Transport: `stdio`
+  - Command: `~/.simplicio/bin/simplicio serve --mcp --stdio --no-facade-mode`
+  - Profile: `SIMPLICIO_MCP_PROFILE=core`
+  - Mode: `SIMPLICIO_RUNTIME_MODE=core`
+- **Hooks Configuration**: `~/.gemini/config/hooks.json`
+  - PreInvocation: Injects ephemeral instruction enforcing `simplicio_*` MCP tools and performs non-blocking map cache warmup.
+  - PreToolUse: Intercepts and denies host-native file tools (`view_file`, `write_to_file`, `replace_file_content`), directing the agent to use `simplicio_file_read` / `simplicio_context` / `simplicio_read_signatures` and `simplicio_edit` / `simplicio_run`. Third-party apps, plugins, and non-file tools remain permitted.
+  - Stop: Records savings metrics non-blockingly upon session completion.

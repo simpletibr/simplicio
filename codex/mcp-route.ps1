@@ -641,6 +641,7 @@ function Test-NativeFileTool([string]$Name) {
     return $false
   }
   $native = @(
+    'view_file', 'write_to_file', 'replace_file_content',
     'read', 'read_file', 'write', 'write_file', 'edit', 'strreplace',
     'str_replace', 'search_replace', 'file_read', 'replace', 'notebookedit',
     'notebook_edit', 'multiedit', 'multi_edit', 'create_file', 'delete_file'
@@ -650,6 +651,7 @@ function Test-NativeFileTool([string]$Name) {
 
 function Deny-NativeFileTool([string]$Name) {
   $writes = @(
+    'write_to_file', 'replace_file_content',
     'write', 'write_file', 'edit', 'strreplace', 'str_replace', 'search_replace', 'replace',
     'notebookedit', 'notebook_edit', 'multiedit', 'multi_edit', 'create_file',
     'delete_file'

@@ -507,6 +507,9 @@ context_events = {
 }
 
 NATIVE_FILE_TOOLS = {
+    "view_file",
+    "write_to_file",
+    "replace_file_content",
     "read",
     "read_file",
     "write",
@@ -572,6 +575,8 @@ def enforce_disabled() -> bool:
 
 def deny_native_file_tool(name: str) -> None:
     writes = {
+        "write_to_file",
+        "replace_file_content",
         "write",
         "write_file",
         "edit",
