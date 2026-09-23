@@ -1,6 +1,6 @@
 {
   "name": "@simpletibr/simplicio",
-  "version": "3.9.0",
+  "version": "3.9.1",
   "description": "Simplicio CLI \u2014 up to 96% token savings on any LLM. One command install.",
   "bin": {
     "simplicio": "./install.js"
