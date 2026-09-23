@@ -9,7 +9,7 @@ have no guessed executable and no automatic configuration writer.
 | Claude Code | runtime-mcp | delegated-to-runtime | `claude` |
 | Cursor | runtime-mcp | delegated-to-runtime | `cursor` |
 | DeepSeek Harness | unsupported | unverified | — |
-| OpenCode | runtime-mcp | delegated-to-runtime | `opencode` |
+| OpenCode | native-plugin | delegated-to-runtime | `opencode` |
 | Visual Studio Code | runtime-mcp | delegated-to-runtime | `code`, `code-insiders` |
 | Google Antigravity | unsupported | unverified | — |
 | Kiro | runtime-mcp | delegated-to-runtime | `kiro-cli` |

@@ -85,13 +85,14 @@ def test_deepseek_harness_is_fail_closed_until_contract_is_verified() -> None:
     assert deepseek.verification_command == ()
 
 
-def test_opencode_has_runtime_registration_contract() -> None:
+def test_opencode_is_native_plugin_with_full_mode() -> None:
     opencode = next(spec for spec in HOSTS if spec.host_id == "opencode")
     assert opencode.executable_names == ("opencode",)
     assert opencode.config_paths == ("~/.config/opencode/opencode.json", "opencode.json")
-    assert opencode.capability == "runtime-mcp"
+    assert opencode.capability == "native-plugin"
     assert opencode.verification_command[:3] == ("simplicio", "mcp", "register")
     assert opencode.default_scope == "user"
+    assert opencode.mcp_environment == (("SIMPLICIO_RUNTIME_MODE", "full"),)
 
 
 def test_vscode_declares_all_supported_configuration_scopes() -> None:

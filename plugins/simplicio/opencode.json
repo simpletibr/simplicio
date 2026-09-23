@@ -1,0 +1,37 @@
+{
+  "$schema": "https://simpleti.com.br/schemas/simplicio-opencode-host-v1",
+  "schema": "simplicio.opencode-host/v1",
+  "host": "opencode",
+  "surface": "native-plugin",
+  "config": "~/.config/opencode/opencode.json",
+  "mcp": {
+    "type": "local",
+    "command": ["simplicio", "serve", "--mcp", "--stdio", "--no-facade-mode"],
+    "enabled": true,
+    "environment": {
+      "SIMPLICIO_MCP_PROFILE": "core",
+      "SIMPLICIO_RUNTIME_MODE": "full",
+      "SIMPLICIO_MCP_URL": "http://127.0.0.1:8787/mcp"
+    }
+  },
+  "plugin": "opencode-simplicio",
+  "pluginRepository": "https://github.com/Pasblinn/opencode-simplicio",
+  "hooks": {
+    "turn.before": {
+      "unix": ".simplicio/hooks/opencode-turn-before.sh",
+      "windows": ".simplicio/hooks/opencode-turn-before.ps1"
+    },
+    "turn.after": {
+      "unix": ".simplicio/hooks/opencode-turn-after.sh",
+      "windows": ".simplicio/hooks/opencode-turn-after.ps1"
+    }
+  },
+  "canonicalTools": [
+    "simplicio_map",
+    "simplicio_context",
+    "simplicio_memory",
+    "simplicio_edit",
+    "simplicio_run",
+    "simplicio_savings"
+  ]
+}

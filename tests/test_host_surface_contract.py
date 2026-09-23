@@ -50,6 +50,26 @@ def test_host_surface_fixture_matches_claude_and_full_mode_contracts() -> None:
     assert retired.isdisjoint(surface["modes"]["full"]["canonical"])
 
 
+def test_opencode_host_surface_is_native_plugin_with_full_mode() -> None:
+    surface = _fixture()
+    package = json.loads(
+        (ROOT / "plugins" / "simplicio" / "host-surfaces.json").read_text(encoding="utf-8")
+    )
+    entry = next(host for host in package["hosts"] if host["id"] == "opencode")
+    opencode = next(spec for spec in HOSTS if spec.host_id == "opencode")
+    full_hosts = set(surface["modes"]["full"]["hosts"])
+    canonical = set(surface["modes"]["full"]["canonical"])
+
+    assert entry["surface"] == "native-plugin"
+    assert entry["manifest"] == "opencode.json"
+    assert entry["preHooks"] == "runtime-managed"
+    assert "opencode" in full_hosts
+    assert {"simplicio_edit", "simplicio_run", "simplicio_map", "simplicio_context"} <= canonical
+    assert opencode.capability == "native-plugin"
+    assert ("SIMPLICIO_RUNTIME_MODE", "full") in opencode.mcp_environment
+    assert "opencode" not in set(surface["modes"]["mapper-only"]["hosts"])
+
+
 def test_hermes_mapper_only_surface_excludes_execution_tools() -> None:
     surface = _fixture()
     tools = _hermes_mapper_tools()

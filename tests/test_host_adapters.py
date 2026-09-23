@@ -194,7 +194,7 @@ def test_opencode_contract_registers_documented_user_config(tmp_path: Path) -> N
     document = json.loads(config.read_text(encoding="utf-8"))
     assert document["provider"] == "local"
     assert document["mcpServers"]["simplicio"]["args"] == ["serve", "--mcp", "--stdio"]
-    assert "env" not in document["mcpServers"]["simplicio"]
+    assert document["mcpServers"]["simplicio"]["env"] == {"SIMPLICIO_RUNTIME_MODE": "full"}
 
 
 def test_vscode_contract_supports_user_workspace_and_remote_scopes(tmp_path: Path) -> None:
