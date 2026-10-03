@@ -59,6 +59,12 @@ python3 -m pip install --upgrade simplicio-installer
 simplicio install
 ```
 
+### Simplicio Video (hypit)
+To clone the Simplicio Video runtime repository:
+```bash
+git clone https://github.com/hypit-ai/hypit.git simplicio-video
+```
+
 ---
 
 ## 🚀 First 60 Seconds
