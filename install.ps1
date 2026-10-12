@@ -955,6 +955,23 @@ if (Test-McpToolSurface $DestPath) {
   Fail-Install $script:McpFailureReason $script:McpFailureCode
   exit 1
 }
+# ─── Install Simplicio Loop (standalone binary, sem expor código-fonte) ──
+$LoopAsset = "simplicio-loop-windows-x64.exe"
+$LoopDest = Join-Path $InstallDir "simplicio-loop.exe"
+$LoopUrl = "$ReleaseBase/$LoopAsset"
+$LoopStaging = "$LoopDest.download-$([guid]::NewGuid().ToString('N')).exe"
+Write-Host "==> checking Simplicio Loop standalone binary ($LoopAsset)"
+try {
+  Invoke-WebRequest -Uri $LoopUrl -OutFile $LoopStaging -UseBasicParsing -ErrorAction Stop
+  if ((Test-Path $LoopStaging) -and (Get-Item $LoopStaging).Length -gt 0) {
+    Move-Item -Force -Path $LoopStaging -Destination $LoopDest
+    Write-Host "  ✓ Simplicio Loop installed: $LoopDest"
+  }
+} catch {
+  if (Test-Path $LoopStaging) { Remove-Item -Force $LoopStaging -ErrorAction SilentlyContinue }
+  Write-Host "  ! Simplicio Loop standalone binary will be synced in the next release tag"
+}
+
 $script:InstallStage = "hook_registration"
 if (Sync-PublicRouteOverlay) {
   $script:HookInstalled = $true

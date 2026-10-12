@@ -1184,6 +1184,27 @@ else
   fail_install "${HOOK_FAILURE_CODE:-hook_registration_failed}" "${HOOK_FAILURE_REASON:-Public hook registration failed without a diagnostic}"
 fi
 
+# ─── 2.3 Instalar Simplicio Loop (standalone binary, sem expor código-fonte) ──
+INSTALL_STAGE="loop_install"
+LOOP_BIN_NAME="simplicio-loop"
+LOOP_DEST_PATH="$BIN_DIR/$LOOP_BIN_NAME"
+LOOP_ASSET="simplicio-loop-$OS-$ARCH"
+LOOP_URL="$RELEASE_BASE/$LOOP_ASSET"
+info "Instalando Simplicio Loop (orquestrador autônomo)..."
+LOOP_STAGING="$LOOP_DEST_PATH.download-$$.tmp"
+if fetch "$LOOP_URL" "$LOOP_STAGING" 2>/dev/null; then
+  chmod 0755 "$LOOP_STAGING"
+  mv -f "$LOOP_STAGING" "$LOOP_DEST_PATH"
+  ok "Simplicio Loop instalado em $LOOP_DEST_PATH"
+elif [ -f "$(dirname "$0")/$LOOP_ASSET" ]; then
+  cp -p "$(dirname "$0")/$LOOP_ASSET" "$LOOP_DEST_PATH"
+  chmod 0755 "$LOOP_DEST_PATH"
+  ok "Simplicio Loop instalado a partir da distribuição local em $LOOP_DEST_PATH"
+else
+  rm -f "$LOOP_STAGING"
+  info "Simplicio Loop ($LOOP_ASSET) será atualizado na próxima sincronização de release"
+fi
+
 # Host-specific plugin changes require a second, explicit consent transaction.
 # This installer never invokes host CLIs and never downloads a mutable plugin
 # archive. The Runtime owns planning, application, receipts and reconciliation.
