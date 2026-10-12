@@ -17,6 +17,7 @@
 
 <p align="center">
   <a href="#-quick-install">Quick Install</a> •
+  <a href="#-real-world-measured-benchmark-simplicio-suite-vs-standard-agent">Benchmarks</a> •
   <a href="#-first-60-seconds">First 60 Seconds</a> •
   <a href="#-mcp--ide-integration">MCP & IDEs</a> •
   <a href="#-core-architecture">Architecture</a> •
@@ -33,6 +34,23 @@
 - **Ultra-Low Latency**: ~4ms cold start vs. seconds in interpreted runtimes.
 - **Token Economy**: Saves up to 96% of tokens by projecting bounded AST graphs instead of dumping raw file trees.
 - **Fail-Closed Safety**: Every code modification uses SHA-256 pre-image checks, atomic replacements, and immutable audit receipts.
+
+---
+## 📊 Real-World Measured Benchmark: Simplicio Suite vs Standard Agent
+
+In an audited head-to-head A/B benchmark on a real codebase task (AST-safe bug fix and regression test verification using `deepseek/deepseek-v4.1-flash` via OpenRouter):
+
+| Metric | Standard Agent (No Simplicio) | Simplicio Suite (With Loop) | Advantage |
+|:---|:---|:---|:---|
+| **Wall-Clock Duration** | `55.19 s` | **`13.60 s`** | 🚀 **4.05x faster (-75.4%)** |
+| **Prompt Tokens** | `7,747 tokens` | **`550 tokens`** | 📉 **-92.9% prompt tokens** |
+| **Completion Tokens** | `661 tokens` | **`294 tokens`** | 📉 **-55.5% output tokens** |
+| **Total Tokens Consumed** | `8,408 tokens` | **`844 tokens`** | 💎 **-90.0% total tokens** |
+| **Billed API Cost (USD)** | `$0.001786` | **`$0.000259`** | 💰 **6.9x cheaper (-85.5%)** |
+| **Agent Turns** | 2 turns (retry needed) | **1 turn** | 🎯 **1st-turn deterministic resolution** |
+| **Code Modification Safety** | Unchecked raw edits | **AST-safe plan + SHA256 receipt** | 🔒 **Deterministic fail-closed** |
+
+> **Audit Artifact:** `bench/llm_ab/results/2026-10-12-6dac8429-t1.json` · Model: `deepseek/deepseek-v4.1-flash` via OpenRouter.
 
 ---
 
