@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `install.sh` and `install.ps1` install Simplicio Loop, Mapper and Dev CLI from
+  PyPI (`simplicio-loop`) into a dedicated virtual environment. They require
+  Python 3.11 or newer, run `simplicio-loop install --global`, and print a
+  non-fatal `simplicio-loop doctor` report.
+
+### Removed
+
+- The standalone `simplicio-loop-<os>-<arch>` download and its `SHA256SUMS`
+  entry. No standalone Loop binary is published.
+
+### Fixed
+
+- `install.sh` no longer stops with `RELEASE_BASE: unbound variable` in the Loop
+  step when the requested Runtime version is already installed.
+
 ## [3.8.49] - 2026-09-09
 
 ### Added

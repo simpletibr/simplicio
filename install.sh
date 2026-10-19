@@ -2,9 +2,12 @@
 # install.sh — Simplicio Runtime: instalador do binário com readiness fail-closed
 #
 # A política de distribuição exige que uma release aprovada traga Mapper, Dev
-# CLI, Loop, Fast, Prompt e Sprint no binário, login Google habilitado e chave
+# CLI, Fast, Prompt e Sprint no binário, login Google habilitado e chave
 # pública de updates. O instalador recusa releases que não provem esses campos;
 # não reescreve projetos Python como Rust nem baixa repositórios irmãos.
+# O Simplicio Loop não tem binário standalone: o instalador o instala do PyPI
+# (simplicio-loop, com simplicio-mapper e simplicio-dev-cli) em um ambiente
+# virtual dedicado, que exige Python 3.11 ou superior.
 #
 #   curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 #
@@ -57,6 +60,7 @@ PREVIOUS_PATH=""
 PURGE_DIR="${SIMPLICIO_BUNDLE_DIR:-$HOME/.simplicio}"
 AUTH_FILE="$PURGE_DIR/login.json"
 INSTALL_RECEIPT="$PURGE_DIR/install-receipt.json"
+LOOP_VENV="$PURGE_DIR/loop-venv"
 INSTALL_STAGE="preflight"
 INSTALL_EFFECT_STARTED="false"
 RUNTIME_INSTALLED="false"
@@ -864,6 +868,12 @@ run_doctor() {
     *) warn "$BIN_DIR não está no PATH (sessão atual)" ;;
   esac
 
+  if [ -x "$BIN_DIR/simplicio-loop" ]; then
+    ok "Simplicio Loop presente em $BIN_DIR"
+  else
+    warn "Simplicio Loop ausente em $BIN_DIR (rode o instalador novamente)"
+  fi
+
   if [ -x "$DEST_PATH" ]; then
     if "$DEST_PATH" version >/dev/null 2>&1; then
       ok "binário executa corretamente"
@@ -914,6 +924,14 @@ run_uninstall() {
   else
     ok "já estava removido (nada em $DEST_PATH)"
   fi
+  if [ -x "$LOOP_VENV/bin/simplicio-loop" ]; then
+    "$LOOP_VENV/bin/simplicio-loop" install --global --uninstall </dev/null || warn "simplicio-loop não conseguiu remover todos os arquivos instalados em ~/.claude"
+  fi
+  for LOOP_CMD in simplicio-loop simplicio-mapper simplicio-dev-cli; do
+    rm -f "$BIN_DIR/$LOOP_CMD"
+  done
+  rm -rf "$LOOP_VENV"
+  ok "Simplicio Loop removido de $BIN_DIR e de $LOOP_VENV"
 
   if [ "${UNINSTALL_MODE:-keep-data}" = "purge" ]; then
     if [ "${SIMPLICIO_CONFIRM_PURGE:-}" != "1" ]; then
@@ -1184,26 +1202,32 @@ else
   fail_install "${HOOK_FAILURE_CODE:-hook_registration_failed}" "${HOOK_FAILURE_REASON:-Public hook registration failed without a diagnostic}"
 fi
 
-# ─── 2.3 Instalar Simplicio Loop (standalone binary, sem expor código-fonte) ──
+# ─── 2.3 Instalar Simplicio Loop, Mapper e Dev CLI do PyPI (venv dedicado) ──
+# O pacote simplicio-loop do PyPI traz os três comandos. Ele vai para um venv
+# próprio, é exposto em $BIN_DIR como o Runtime e registrado para o Claude
+# com `simplicio-loop install --global` (skills e hooks em ~/.claude).
 INSTALL_STAGE="loop_install"
-LOOP_BIN_NAME="simplicio-loop"
-LOOP_DEST_PATH="$BIN_DIR/$LOOP_BIN_NAME"
-LOOP_ASSET="simplicio-loop-$OS-$ARCH"
-LOOP_URL="$RELEASE_BASE/$LOOP_ASSET"
-info "Instalando Simplicio Loop (orquestrador autônomo)..."
-LOOP_STAGING="$LOOP_DEST_PATH.download-$$.tmp"
-if fetch "$LOOP_URL" "$LOOP_STAGING" 2>/dev/null; then
-  chmod 0755 "$LOOP_STAGING"
-  mv -f "$LOOP_STAGING" "$LOOP_DEST_PATH"
-  ok "Simplicio Loop instalado em $LOOP_DEST_PATH"
-elif [ -f "$(dirname "$0")/$LOOP_ASSET" ]; then
-  cp -p "$(dirname "$0")/$LOOP_ASSET" "$LOOP_DEST_PATH"
-  chmod 0755 "$LOOP_DEST_PATH"
-  ok "Simplicio Loop instalado a partir da distribuição local em $LOOP_DEST_PATH"
-else
-  rm -f "$LOOP_STAGING"
-  info "Simplicio Loop ($LOOP_ASSET) será atualizado na próxima sincronização de release"
+LOOP_PY=""
+for LOOP_PY_CANDIDATE in python3 python3.13 python3.12 python3.11; do
+  if command -v "$LOOP_PY_CANDIDATE" >/dev/null 2>&1 &&
+    "$LOOP_PY_CANDIDATE" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' </dev/null >/dev/null 2>&1; then
+    LOOP_PY="$LOOP_PY_CANDIDATE"
+    break
+  fi
+done
+if [ -z "$LOOP_PY" ]; then
+  fail_install "loop_python_missing" "Simplicio Loop precisa de Python 3.11 ou superior, e nenhum foi encontrado no PATH. Instale em https://www.python.org/downloads/ (ou, com uv instalado, rode 'uv python install 3.12'), abra um novo terminal e execute o instalador novamente."
 fi
+info "Instalando Simplicio Loop, Mapper e Dev CLI do PyPI com $LOOP_PY..."
+rm -rf "$LOOP_VENV" || err "não foi possível limpar o ambiente anterior do Simplicio Loop: $LOOP_VENV"
+"$LOOP_PY" -m venv "$LOOP_VENV" </dev/null || err "não foi possível criar o ambiente virtual do Simplicio Loop em $LOOP_VENV (em Debian/Ubuntu, instale o pacote python3-venv)"
+"$LOOP_VENV/bin/python" -m pip install --disable-pip-version-check --quiet simplicio-loop </dev/null || err "pip não instalou simplicio-loop em $LOOP_VENV (veja o erro acima)"
+for LOOP_CMD in simplicio-loop simplicio-mapper simplicio-dev-cli; do
+  [ -x "$LOOP_VENV/bin/$LOOP_CMD" ] || err "simplicio-loop não instalou o comando $LOOP_CMD em $LOOP_VENV"
+  ln -sf "$LOOP_VENV/bin/$LOOP_CMD" "$BIN_DIR/$LOOP_CMD" || err "não foi possível expor $LOOP_CMD em $BIN_DIR"
+done
+"$BIN_DIR/simplicio-loop" install --global </dev/null || err "simplicio-loop install --global falhou (veja o erro acima)"
+ok "$("$BIN_DIR/simplicio-loop" --version </dev/null) instalado em $LOOP_VENV"
 
 # Host-specific plugin changes require a second, explicit consent transaction.
 # This installer never invokes host CLIs and never downloads a mutable plugin
@@ -1235,6 +1259,13 @@ else
   err "não foi possível persistir o contrato de release; instalação interrompida"
 fi
 
+# ─── 3.1 Diagnóstico do Simplicio Loop (não fatal) ──────────────────────────
+if "$BIN_DIR/simplicio-loop" doctor </dev/null; then
+  ok "diagnóstico do Simplicio Loop concluído (simplicio-loop doctor)"
+else
+  warn "simplicio-loop doctor reportou falhas; detalhes: $BIN_DIR/simplicio-loop doctor"
+fi
+
 INSTALL_STAGE="complete"
 if ! persist_install_receipt "succeeded" 0 "" ""; then
   INSTALL_STAGE="receipt_persistence"
@@ -1249,7 +1280,7 @@ printf '%b\n' "${GREEN}║                                                      
 printf '%b\n' "${GREEN}║   Simplicio Runtime instalado com sucesso!              ║${NC}"
 printf '%b\n' "${GREEN}║                                                          ║${NC}"
 printf '%b\n' "${GREEN}║   ✓ Contrato de release verificado                       ║${NC}"
-printf '%b\n' "${GREEN}║   ✓ Sem pip ou clones durante a instalação               ║${NC}"
+printf '%b\n' "${GREEN}║   ✓ Simplicio Loop instalado via PyPI (venv dedicado)    ║${NC}"
 if verify_active_login; then
   printf '%b\n' "${GREEN}║   ✓ Sessão Google fresh verificada                       ║${NC}"
 else

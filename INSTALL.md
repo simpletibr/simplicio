@@ -45,6 +45,19 @@ installs the platform binary.
 If the Python script directory is not already on `PATH`, add it before running
 `simplicio install`.
 
+The direct installers also install Simplicio Loop from PyPI. The `simplicio-loop`
+package provides the `simplicio-loop`, `simplicio-mapper` and `simplicio-dev-cli`
+commands. The installers create a dedicated virtual environment at
+`~/.simplicio/loop-venv` (or `$SIMPLICIO_BUNDLE_DIR/loop-venv`), expose the three
+commands next to the Runtime binary, and run `simplicio-loop install --global` to
+register its skills and hooks for Claude in `~/.claude`. Loop needs Python 3.11 or
+newer: when none is found the installer stops and points to
+<https://www.python.org/downloads/>, `winget install -e --id Python.Python.3.12`
+(Windows) or `uv python install 3.12`. The closing `simplicio-loop doctor` report
+is informational and never fails the install. There is no standalone Loop binary.
+`--uninstall` removes the three commands, the virtual environment, and the skills
+and hooks that `simplicio-loop install --global` registered.
+
 The direct installers install the verified Runtime, register MCP/hooks and then
 stop before changing any host plugin. They capability-check
 `simplicio host-plugins --help`: the structured receipt records
@@ -260,8 +273,10 @@ Same workflow — Simplicio commands work from any terminal-based AI agent.
 ## Fontes Python no Runtime
 
 A política do produto exige que o binário carregue as árvores de fontes Python
-reais de Mapper, Dev CLI, Loop, Fast, Prompt e Sprint. Esses projetos não devem
-ser reescritos como Rust, instalados via `pip` ou baixados como `simplicio-*`.
+reais de Mapper, Dev CLI, Fast, Prompt e Sprint. O Loop é a exceção: o instalador
+o obtém do PyPI (`simplicio-loop`, que também traz `simplicio-mapper` e
+`simplicio-dev-cli`) em um ambiente virtual próprio. Esses projetos não devem ser
+reescritos como Rust nem baixados como `simplicio-*`.
 O instalador valida o release `latest` antes de concluir. Se o contrato indicar
 `source_code_distributed=false` ou chave pública ausente, ele recusa o binário
 em vez de instalar um snapshot incompleto. Uma sessão Google ativa pode ser

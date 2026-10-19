@@ -3,6 +3,8 @@
 # The installer accepts only a Runtime release whose own readiness contract
 # confirms embedded sources, active Google login support, and signed updates.
 # It never downloads sibling simplicio-* repositories.
+# Simplicio Loop (with simplicio-mapper and simplicio-dev-cli) is installed from
+# PyPI into a dedicated virtual environment; it needs Python 3.11 or newer.
 #
 # Usage:
 #   powershell -c "irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex"
@@ -69,6 +71,9 @@ $PreviousPath = ""
 $PurgeDir = if ($env:SIMPLICIO_BUNDLE_DIR) { $env:SIMPLICIO_BUNDLE_DIR } else { Join-Path $env:USERPROFILE ".simplicio" }
 $AuthFile = Join-Path $PurgeDir "login.json"
 $InstallReceipt = Join-Path $PurgeDir "install-receipt.json"
+$LoopVenv = Join-Path $PurgeDir "loop-venv"
+$LoopBinDir = Join-Path $LoopVenv $(if ($env:OS -eq "Windows_NT") { "Scripts" } else { "bin" })
+$LoopExe = if ($env:OS -eq "Windows_NT") { ".exe" } else { "" }
 $script:InstallStage = "preflight"
 $script:InstallEffectStarted = $false
 $script:RuntimeInstalled = $false
@@ -219,6 +224,31 @@ function Invoke-Rollback {
 
 function Test-InPath([string]$dir) {
   return ($env:Path -split ";") -contains $dir
+}
+
+function Find-LoopPython {
+  # First interpreter that is Python 3.11 or newer. Microsoft Store aliases in
+  # WindowsApps are stubs that open the Store, not interpreters.
+  foreach ($candidate in @(
+    @{ Name = "py"; Args = @('-3.13') },
+    @{ Name = "py"; Args = @('-3.12') },
+    @{ Name = "py"; Args = @('-3.11') },
+    @{ Name = "python"; Args = @() },
+    @{ Name = "python3"; Args = @() }
+  )) {
+    $command = Get-Command $candidate.Name -ErrorAction SilentlyContinue
+    if (-not $command -or $command.Source -match '\\WindowsApps\\') { continue }
+    try {
+      & $command.Source @($candidate.Args) -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)" 2>$null
+      $usable = ($LASTEXITCODE -eq 0)
+    } catch {
+      $usable = $false
+    }
+    if ($usable) {
+      return [pscustomobject]@{ Exe = $command.Source; Args = @($candidate.Args) }
+    }
+  }
+  return $null
 }
 
 function Get-RuntimeVersionJson([string]$BinaryPath) {
@@ -694,6 +724,12 @@ if ($Doctor) {
     Write-Host "  [WARN] $InstallDir is not on PATH (current session)"
   }
 
+  if (Test-Path (Join-Path $InstallDir "simplicio-loop$LoopExe")) {
+    Write-Host "  [OK] Simplicio Loop present in $InstallDir"
+  } else {
+    Write-Host "  [WARN] Simplicio Loop is missing from $InstallDir (re-run the installer)"
+  }
+
   if (Test-Path $DestPath) {
     try {
       $verOut = & $DestPath version 2>&1 | Out-String
@@ -748,6 +784,16 @@ if ($Uninstall) {
   } else {
     Write-Host "  ✓ already removed (nothing at $DestPath)"
   }
+  $LoopCli = Join-Path $LoopBinDir "simplicio-loop$LoopExe"
+  if (Test-Path $LoopCli) {
+    & $LoopCli install --global --uninstall
+  }
+  foreach ($name in @("simplicio-loop", "simplicio-mapper", "simplicio-dev-cli")) {
+    $entry = Join-Path $InstallDir "$name$LoopExe"
+    if (Test-Path $entry) { Remove-Item -Force $entry }
+  }
+  if (Test-Path $LoopVenv) { Remove-Item -Recurse -Force $LoopVenv }
+  Write-Host "  ✓ Simplicio Loop removed from $InstallDir and $LoopVenv"
   if ($Purge) {
     if (Test-Path $PurgeDir) {
       Get-ChildItem -Force -Path $PurgeDir | Where-Object { $_.Name -ne ".env" } | Remove-Item -Recurse -Force
@@ -955,23 +1001,6 @@ if (Test-McpToolSurface $DestPath) {
   Fail-Install $script:McpFailureReason $script:McpFailureCode
   exit 1
 }
-# ─── Install Simplicio Loop (standalone binary, sem expor código-fonte) ──
-$LoopAsset = "simplicio-loop-windows-x64.exe"
-$LoopDest = Join-Path $InstallDir "simplicio-loop.exe"
-$LoopUrl = "$ReleaseBase/$LoopAsset"
-$LoopStaging = "$LoopDest.download-$([guid]::NewGuid().ToString('N')).exe"
-Write-Host "==> checking Simplicio Loop standalone binary ($LoopAsset)"
-try {
-  Invoke-WebRequest -Uri $LoopUrl -OutFile $LoopStaging -UseBasicParsing -ErrorAction Stop
-  if ((Test-Path $LoopStaging) -and (Get-Item $LoopStaging).Length -gt 0) {
-    Move-Item -Force -Path $LoopStaging -Destination $LoopDest
-    Write-Host "  ✓ Simplicio Loop installed: $LoopDest"
-  }
-} catch {
-  if (Test-Path $LoopStaging) { Remove-Item -Force $LoopStaging -ErrorAction SilentlyContinue }
-  Write-Host "  ! Simplicio Loop standalone binary will be synced in the next release tag"
-}
-
 $script:InstallStage = "hook_registration"
 if (Sync-PublicRouteOverlay) {
   $script:HookInstalled = $true
@@ -980,6 +1009,29 @@ if (Sync-PublicRouteOverlay) {
   Fail-Install $script:HookFailureReason $script:HookFailureCode
   exit 1
 }
+
+# ─── Install Simplicio Loop, Mapper and Dev CLI from PyPI (dedicated venv) ──
+$script:InstallStage = "loop_install"
+$LoopPython = Find-LoopPython
+if (-not $LoopPython) {
+  Fail-Install "Simplicio Loop requires Python 3.11 or newer, and none was found (the Microsoft Store python alias does not count). Install it with 'winget install -e --id Python.Python.3.12' or from https://www.python.org/downloads/, open a new PowerShell window and run this installer again." "loop_python_missing"
+}
+Write-Host "==> installing Simplicio Loop, Mapper and Dev CLI from PyPI into $LoopVenv"
+if (Test-Path $LoopVenv) { Remove-Item -Recurse -Force $LoopVenv }
+& $LoopPython.Exe @($LoopPython.Args) -m venv $LoopVenv
+if ($LASTEXITCODE -ne 0) { Fail-Install "could not create the Simplicio Loop virtual environment at $LoopVenv" "loop_install_failed" }
+& (Join-Path $LoopBinDir "python$LoopExe") -m pip install --disable-pip-version-check --quiet simplicio-loop
+if ($LASTEXITCODE -ne 0) { Fail-Install "pip could not install simplicio-loop into $LoopVenv" "loop_install_failed" }
+$LoopCli = Join-Path $LoopBinDir "simplicio-loop$LoopExe"
+foreach ($name in @("simplicio-loop", "simplicio-mapper", "simplicio-dev-cli")) {
+  $entry = Join-Path $LoopBinDir "$name$LoopExe"
+  if (-not (Test-Path $entry)) { Fail-Install "simplicio-loop did not install $name" "loop_install_failed" }
+  # Expose the launcher next to the Runtime binary, the same place the Runtime is exposed.
+  Copy-Item -Force -Path $entry -Destination (Join-Path $InstallDir "$name$LoopExe")
+}
+& $LoopCli install --global
+if ($LASTEXITCODE -ne 0) { Fail-Install "simplicio-loop install --global failed (see the output above)" "loop_install_failed" }
+Write-Host "  ✓ $(& $LoopCli --version) installed in $LoopVenv"
 
 # Host-specific plugin changes require a second, explicit consent transaction.
 # This installer never invokes host CLIs and never downloads a mutable plugin
@@ -1004,6 +1056,10 @@ try {
   exit 1
 }
 
+# Non-fatal diagnosis of the Simplicio Loop installation.
+& $LoopCli doctor
+if ($LASTEXITCODE -ne 0) { Write-Warning "simplicio-loop doctor reported problems; details: `"$LoopCli`" doctor" }
+
 $script:InstallStage = "complete"
 try {
   [void](Save-InstallReceipt "succeeded" 0 "" "")
@@ -1025,7 +1081,7 @@ if (-not (Test-InPath $InstallDir)) {
 Write-Host ""
 Write-Host "  ✓ simplicio Runtime $Version (windows-x64) installed successfully"
 Write-Host "  ✓ Runtime release contract is active"
-Write-Host "  ✓ no pip packages or sibling checkouts were installed"
+Write-Host "  ✓ no sibling checkouts were installed; Simplicio Loop comes from PyPI into $LoopVenv"
 if (Test-ActiveLogin) {
   Write-Host "  ✓ fresh Google session verified"
 } else {

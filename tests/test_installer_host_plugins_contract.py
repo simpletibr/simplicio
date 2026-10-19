@@ -5,6 +5,7 @@ import re
 import shutil
 import stat
 import subprocess
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -124,6 +125,48 @@ esac
     )
 
 
+def _fake_loop_wheelhouse(directory: Path) -> Path:
+    """Offline PyPI stand-in: pip installs this simplicio-loop from find-links only."""
+    wheelhouse = directory / "wheelhouse"
+    wheelhouse.mkdir(parents=True, exist_ok=True)
+    dist_info = "simplicio_loop-0.0.0.dist-info"
+    cli = (
+        "import os\n"
+        "import sys\n"
+        "\n"
+        "\n"
+        "def main(argv=None):\n"
+        "    args = list(sys.argv[1:] if argv is None else argv)\n"
+        "    log = os.environ.get('FAKE_LOOP_LOG')\n"
+        "    if log:\n"
+        "        with open(log, 'a', encoding='utf-8') as handle:\n"
+        "            handle.write(' '.join(args) + '\\n')\n"
+        "    if args == ['--version']:\n"
+        "        print('simplicio-loop 0.0.0')\n"
+        "    return 0\n"
+    )
+    entry_points = (
+        "[console_scripts]\n"
+        "simplicio-loop = simplicio_loop.cli:main\n"
+        "simplicio-mapper = simplicio_loop.cli:main\n"
+        "simplicio-dev-cli = simplicio_loop.cli:main\n"
+    )
+    with zipfile.ZipFile(wheelhouse / "simplicio_loop-0.0.0-py3-none-any.whl", "w") as wheel:
+        wheel.writestr("simplicio_loop/__init__.py", "")
+        wheel.writestr("simplicio_loop/cli.py", cli)
+        wheel.writestr(
+            f"{dist_info}/METADATA",
+            "Metadata-Version: 2.1\nName: simplicio-loop\nVersion: 0.0.0\nRequires-Python: >=3.11\n",
+        )
+        wheel.writestr(
+            f"{dist_info}/WHEEL",
+            "Wheel-Version: 1.0\nGenerator: contract-test\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
+        )
+        wheel.writestr(f"{dist_info}/entry_points.txt", entry_points)
+        wheel.writestr(f"{dist_info}/RECORD", f"{dist_info}/RECORD,,\n")
+    return wheelhouse
+
+
 def _shell_fixture(
     tmp_path: Path,
     mcp_exit: int,
@@ -183,19 +226,25 @@ exit "${FAKE_HOOK_DOWNLOAD_EXIT:-22}"
             "FAKE_HOST_PLUGINS_EXIT": str(host_plugins_exit),
             "FAKE_HOST_PLUGINS_HELP_MODE": host_plugins_help_mode,
             "PATH": os.pathsep.join((str(fake_bin), os.environ["PATH"])),
+            "FAKE_LOOP_LOG": str(tmp_path / "loop.log"),
+            "PIP_NO_INDEX": "1",
+            "PIP_FIND_LINKS": str(_fake_loop_wheelhouse(tmp_path / "pypi")),
+            "PIP_DISABLE_PIP_VERSION_CHECK": "1",
         }
     )
     return env, bundle, host_log
 
 
 def _run_shell_installer(env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    # Successful runs create the Loop virtual environment, whose wall time is
+    # dominated by filesystem I/O on a loaded host; 30 seconds was too tight.
     return subprocess.run(
         ["sh", str(ROOT / "install.sh")],
         env=env,
         capture_output=True,
         text=True,
         check=False,
-        timeout=30,
+        timeout=180,
     )
 
 
@@ -468,6 +517,43 @@ def test_shell_hook_failure_preserves_structured_code_and_reason(tmp_path: Path)
     assert receipt["hook"] == {"installed": False}
 
 
+def test_shell_installs_loop_commands_from_pypi_venv(tmp_path: Path) -> None:
+    env, bundle, _ = _shell_fixture(tmp_path, mcp_exit=0)
+
+    result = _run_shell_installer(env)
+
+    assert result.returncode == 0, result.stderr
+    install_bin = Path(env["SIMPLICIO_BIN_DIR"])
+    venv_bin = bundle / "loop-venv" / "bin"
+    for name in ("simplicio-loop", "simplicio-mapper", "simplicio-dev-cli"):
+        assert (install_bin / name).resolve() == (venv_bin / name).resolve(), name
+    calls = Path(env["FAKE_LOOP_LOG"]).read_text(encoding="utf-8").splitlines()
+    assert "install --global" in calls
+    assert "doctor" in calls
+    receipt = json.loads((bundle / "install-receipt.json").read_text(encoding="utf-8"))
+    assert receipt["status"] == "succeeded"
+
+
+def test_shell_uninstall_removes_loop_commands_and_venv(tmp_path: Path) -> None:
+    env, bundle, _ = _shell_fixture(tmp_path, mcp_exit=0)
+    assert _run_shell_installer(env).returncode == 0
+
+    result = subprocess.run(
+        ["sh", str(ROOT / "install.sh"), "--uninstall", "--keep-data"],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=60,
+    )
+
+    assert result.returncode == 0, result.stderr
+    install_bin = Path(env["SIMPLICIO_BIN_DIR"])
+    for name in ("simplicio-loop", "simplicio-mapper", "simplicio-dev-cli"):
+        assert not os.path.lexists(install_bin / name), name
+    assert not (bundle / "loop-venv").exists()
+
+
 def test_installers_delegate_plugins_only_to_runtime_after_consent() -> None:
     installers = [
         (ROOT / "install.sh").read_text(encoding="utf-8"),
@@ -696,6 +782,10 @@ def test_powershell_repeat_is_idempotent_and_gates_host_plugins(
             "FAKE_HOST_PLUGINS_HELP_MODE": host_plugins_help_mode,
             "FAKE_RUNTIME_SHA256": digest,
             "FAKE_HOOK_SOURCE": str(hook_source),
+            "FAKE_LOOP_LOG": str(tmp_path / "loop.log"),
+            "PIP_NO_INDEX": "1",
+            "PIP_FIND_LINKS": str(_fake_loop_wheelhouse(tmp_path / "pypi")),
+            "PIP_DISABLE_PIP_VERSION_CHECK": "1",
             "INSTALLER_PATH": str(ROOT / "install.ps1"),
         }
     )
