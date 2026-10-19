@@ -1,7 +1,7 @@
 # ⚡ Simplicio
 
 > **The High-Performance Native AI Coding Runtime & Agent (100% Rust)**  
-> Save up to 96% of tokens with sub-millisecond local orientation, atomic edits, and governed concurrency.
+> Sub-millisecond local orientation, atomic edits, and governed concurrency. In one measured 2-step CRUD flow, the edit stage used 95.53% fewer tokens ([evidence](docs/evidence/openrouter-deepseek-v4-crud-2026-09-01.json)).
 
 <p align="center">
   <img src="assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="840" />
@@ -32,7 +32,7 @@
 
 - **100% Native Rust**: Single ~46MB standalone binary. No Python, virtualenvs, or heavy background processes.
 - **Ultra-Low Latency**: ~4ms cold start vs. seconds in interpreted runtimes.
-- **Token Economy**: Saves up to 96% of tokens by projecting bounded AST graphs instead of dumping raw file trees.
+- **Token Economy**: Sends bounded AST graphs instead of raw file trees. Measured once on a 2-step CRUD flow: 95.53% fewer tokens in the edit stage; results vary by task and model.
 - **Fail-Closed Safety**: Every code modification uses SHA-256 pre-image checks, atomic replacements, and immutable audit receipts.
 
 ---
