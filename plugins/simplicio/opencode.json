@@ -4,6 +4,13 @@
   "host": "opencode",
   "surface": "native-plugin",
   "config": "~/.config/opencode/opencode.json",
+  "configKey": "plugins",
+  "plugin": "~/.simplicio/hooks/opencode-simplicio",
+  "pluginKind": "directory",
+  "pluginEntry": "index.js",
+  "pluginApi": "opencode-v2",
+  "pluginSource": "opencode/",
+  "pluginManagedBy": "simplicio",
   "mcp": {
     "type": "local",
     "command": ["simplicio", "serve", "--mcp", "--stdio", "--no-facade-mode"],
@@ -14,9 +21,11 @@
       "SIMPLICIO_MCP_URL": "http://127.0.0.1:8787/mcp"
     }
   },
-  "plugin": "~/.simplicio/hooks/opencode-simplicio.js",
-  "pluginManagedBy": "simplicio-runtime",
   "hooks": {
+    "execute.before": {
+      "registeredBy": "plugin",
+      "enforces": "native-tool-block"
+    },
     "turn.before": {
       "unix": "~/.simplicio/hooks/opencode-turn-before.sh",
       "windows": "~/.simplicio/hooks/opencode-turn-before.ps1"
@@ -25,6 +34,23 @@
       "unix": "~/.simplicio/hooks/opencode-turn-after.sh",
       "windows": "~/.simplicio/hooks/opencode-turn-after.ps1"
     }
+  },
+  "nativeToolRoutes": {
+    "read": "simplicio_file",
+    "read_file": "simplicio_file",
+    "grep": "simplicio_file",
+    "glob": "simplicio_file",
+    "list": "simplicio_file",
+    "write": "simplicio_edit",
+    "write_file": "simplicio_edit",
+    "edit": "simplicio_edit",
+    "edit_file": "simplicio_edit",
+    "multiedit": "simplicio_edit",
+    "patch": "simplicio_edit",
+    "apply_patch": "simplicio_edit",
+    "shell": "simplicio_exec",
+    "bash": "simplicio_exec",
+    "exec": "simplicio_exec"
   },
   "canonicalTools": [
     "simplicio_map",
