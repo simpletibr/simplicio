@@ -30,6 +30,9 @@ continue with an unmapped provider call.
 
 ## Host rules
 
+- An unset or unrecognized `SIMPLICIO_MCP_PROFILE` resolves to `mapper-only`.
+  Native host file tools pass through unless the host was registered with an
+  explicit `core` or `full` profile.
 - Claude Code uses the native `plugins/simplicio` hook package. Its supported
   lifecycle hooks are `SessionStart`, `UserPromptSubmit`, `PreToolUse`,
   `PostToolUse`, and `SubagentStart`; each one verifies or reuses the map.

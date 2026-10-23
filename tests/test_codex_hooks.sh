@@ -62,17 +62,29 @@ run_case() {
 }
 
 session_repo="$(mktemp -d)"
+# Windows Python cannot resolve a Cygwin/MSYS /tmp path, so pass a native path
+# in the hook payload while still cleaning up through the shell path.
+hook_repo="$session_repo"
+if command -v cygpath >/dev/null 2>&1; then
+  hook_repo="$(cygpath -m "$session_repo")"
+fi
 run_case "SessionStart without repository emits bounded bridge context" \
-  "{\"hook_event_name\":\"SessionStart\",\"source\":\"startup\",\"cwd\":\"$session_repo\"}" \
+  "{\"hook_event_name\":\"SessionStart\",\"source\":\"startup\",\"cwd\":\"$hook_repo\"}" \
   0 'Simplicio context bridge'
 rm -rf -- "$session_repo"
 run_case "allow Simplicio tool unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"simplicio__simplicio_read","tool_input":{"path":"x"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-run_case "deny native read on core/full" \
+run_case "allow native read by default (no profile)" \
+  '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
+  0 '__EMPTY__'
+run_case "allow native edit by default (no profile)" \
+  '{"hook_event_name":"PreToolUse","tool_name":"write_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
+  0 '__EMPTY__'
+SIMPLICIO_MCP_PROFILE=full run_case "deny native read on core/full" \
   '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   2 'simplicio_file_read'
-run_case "deny native edit on core/full" \
+SIMPLICIO_MCP_PROFILE=full run_case "deny native edit on core/full" \
   '{"hook_event_name":"PreToolUse","tool_name":"search_replace","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   2 'simplicio_edit'
 SIMPLICIO_MCP_PROFILE=mapper-only run_case "allow native read on mapper-only profile" \
@@ -117,8 +129,22 @@ if command -v pwsh >/dev/null 2>&1; then
   printf '%s\n' 'exit 0' >"$fake_bin"
   chmod 0555 "$repo"
   payload="{\"hookEventName\":\"PreToolUse\",\"toolName\":\"read_file\",\"cwd\":\"$repo\"}"
-  ps_out="$(printf '%s' "$payload" |
+
+  default_out="$(printf '%s' "$payload" |
     env SIMPLICIO_BIN="$fake_bin" \
+      pwsh -NoLogo -NoProfile -NonInteractive -File "$WINDOWS_HOOK" 2>/dev/null)"
+  default_exit=$?
+  if [ "$default_exit" -eq 0 ] && [ -z "$default_out" ]; then
+    printf 'PASS Windows native read allowed by default\n'
+    PASS=$((PASS + 1))
+  else
+    printf 'FAIL Windows native read allowed by default exit=%s output=%s\n' \
+      "$default_exit" "$default_out" >&2
+    FAIL=$((FAIL + 1))
+  fi
+
+  ps_out="$(printf '%s' "$payload" |
+    env SIMPLICIO_BIN="$fake_bin" SIMPLICIO_MCP_PROFILE=full \
       pwsh -NoLogo -NoProfile -NonInteractive -File "$WINDOWS_HOOK" 2>/dev/null)"
   ps_exit=$?
   chmod 0755 "$repo"
