@@ -45,10 +45,22 @@ class PublishError(RuntimeError):
     pass
 
 
-def run(command: list[str], *, cwd: Path = ROOT, timeout: int = 1800) -> subprocess.CompletedProcess[str]:
+def run(
+    command: list[str],
+    *,
+    cwd: Path = ROOT,
+    timeout: int = 1800,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     try:
         result = subprocess.run(
-            command, cwd=cwd, capture_output=True, text=True, timeout=timeout, check=False
+            command,
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+            env=env,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise PublishError("command could not complete: " + " ".join(command[:4])) from exc
@@ -530,10 +542,19 @@ def verify_public_codex_hooks(bundle: Path) -> None:
         raise PublishError("public Codex hooks differ from release bundle: " + ", ".join(mismatched))
 
 
-def verify_codex_hook_contract() -> None:
+def verify_codex_hook_contract(bundle: Path) -> None:
     if shutil.which("pwsh") is None:
         raise PublishError("PowerShell is required to validate the Windows Codex hook")
-    run(["bash", str(ROOT / "tests/test_codex_hooks.sh")], timeout=60)
+    runtime = bundle / "simplicio-macos-arm64"
+    if not runtime.is_file():
+        raise PublishError("release bundle has no runtime binary for the hook gate")
+    # The public wrappers forward to `simplicio hooks pre-tool`; the gate must
+    # run against the compiled Runtime being released, not a host install.
+    run(
+        ["bash", str(ROOT / "tests/test_codex_hooks.sh")],
+        timeout=300,
+        env={**os.environ, "SIMPLICIO_TEST_BIN": str(runtime)},
+    )
 
 
 def prepare_package(version: str) -> list[Path]:
@@ -694,7 +715,7 @@ def publish(bundle: Path, tag: str, version: str, source_commit: str) -> dict:
     changed.extend(prepare_plugin_release_policy(version))
     verify_plugin_release_policy(version)
 
-    verify_codex_hook_contract()
+    verify_codex_hook_contract(bundle)
     run([sys.executable, str(ROOT / "scripts/verify_distribution_consistency.py")])
     run([
         sys.executable, "-m", "pytest", "-q",
@@ -757,7 +778,7 @@ def resume_publish(bundle: Path, tag: str, version: str, source_commit: str) -> 
     verify_public_codex_hooks(bundle)
     verify_plugin_release_policy(version)
 
-    verify_codex_hook_contract()
+    verify_codex_hook_contract(bundle)
     run([sys.executable, str(ROOT / "scripts/verify_distribution_consistency.py")])
     run([
         sys.executable, "-m", "pytest", "-q",

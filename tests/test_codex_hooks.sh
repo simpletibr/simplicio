@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# Codex hook gate: the public mcp-route wrappers must forward to the compiled
+# Runtime and preserve its decision contract.
+#
+# The decision itself (Map warming, mapper-only context, native-file-tool
+# enforcement) lives in Rust as `simplicio hooks pre-tool` (#6128); these
+# wrappers are thin, fail-soft forwarders. The gate therefore needs a compiled
+# Runtime: set SIMPLICIO_TEST_BIN, or export SIMPLICIO_BIN, or install one.
 set -u
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -6,6 +13,16 @@ HOOK="$ROOT/codex/mcp-route.sh"
 WINDOWS_HOOK="$ROOT/codex/mcp-route.ps1"
 PASS=0
 FAIL=0
+SKIP=0
+
+TEST_BIN="${SIMPLICIO_TEST_BIN:-${SIMPLICIO_BIN:-}}"
+if [ -z "$TEST_BIN" ] && [ -x "${HOME}/.simplicio/bin/simplicio" ]; then
+  TEST_BIN="${HOME}/.simplicio/bin/simplicio"
+fi
+if [ -z "$TEST_BIN" ] || [ ! -x "$TEST_BIN" ]; then
+  printf 'FAIL hook gate needs a compiled Runtime: set SIMPLICIO_TEST_BIN=/path/to/simplicio\n' >&2
+  exit 1
+fi
 
 valid_output() {
   [ -z "$1" ] && return 0
@@ -29,13 +46,16 @@ elif not specific.get("additionalContext"):
 '
 }
 
+# run_case <name> <payload> <want_exit> <want_token> [binary]
+# want_token __EMPTY__ means the hook must stay silent (allow-unchanged).
 run_case() {
   name="$1"
   payload="$2"
   want_exit="$3"
   want_token="$4"
+  case_bin="${5:-$TEST_BIN}"
   errfile="$(mktemp)"
-  out="$(printf '%s' "$payload" | SIMPLICIO_BIN=/nonexistent bash "$HOOK" 2>"$errfile")"
+  out="$(printf '%s' "$payload" | SIMPLICIO_BIN="$case_bin" bash "$HOOK" 2>"$errfile")"
   got=$?
   err="$(sed -n '1,4p' "$errfile")"
   rm -f "$errfile"
@@ -61,6 +81,31 @@ run_case() {
   fi
 }
 
+# Core/full native-file-tool enforcement: the Runtime denies when a live MCP
+# server is observable, and otherwise prints an explicit UNVERIFIED advisory.
+# Both outcomes are enforcement; a silent allow is the failure.
+run_enforced_case() {
+  name="$1"
+  payload="$2"
+  token="$3"
+  errfile="$(mktemp)"
+  out="$(printf '%s' "$payload" | SIMPLICIO_BIN="$TEST_BIN" SIMPLICIO_MCP_PROFILE=full \
+    bash "$HOOK" 2>"$errfile")"
+  got=$?
+  err="$(cat "$errfile")"
+  rm -f "$errfile"
+  if [ "$got" -eq 2 ] && printf '%s' "$out" | grep -Fq -- "$token"; then
+    printf 'PASS %s (denied)\n' "$name"
+    PASS=$((PASS + 1))
+  elif [ "$got" -eq 0 ] && printf '%s' "$err" | grep -Fq 'mcp_unavailable'; then
+    printf 'PASS %s (advisory: no live MCP server on this host)\n' "$name"
+    PASS=$((PASS + 1))
+  else
+    printf 'FAIL %s: exit=%s output=%s stderr=%s\n' "$name" "$got" "$out" "$err" >&2
+    FAIL=$((FAIL + 1))
+  fi
+}
+
 session_repo="$(mktemp -d)"
 # Windows Python cannot resolve a Cygwin/MSYS /tmp path, so pass a native path
 # in the hook payload while still cleaning up through the shell path.
@@ -81,13 +126,13 @@ run_case "allow native read by default (no profile)" \
 run_case "allow native edit by default (no profile)" \
   '{"hook_event_name":"PreToolUse","tool_name":"write_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-SIMPLICIO_MCP_PROFILE=full run_case "deny native read on core/full" \
+run_enforced_case "enforce native read on core/full" \
   '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
-  2 'simplicio_file_read'
-SIMPLICIO_MCP_PROFILE=full run_case "deny native edit on core/full" \
+  'simplicio_file_read'
+run_enforced_case "enforce native edit on core/full" \
   '{"hook_event_name":"PreToolUse","tool_name":"search_replace","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
-  2 'simplicio_edit'
-SIMPLICIO_MCP_PROFILE=mapper-only run_case "allow native read on mapper-only profile" \
+  'simplicio_edit'
+run_case "allow native read on mapper-only profile" \
   '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
 run_case "allow native shell unchanged" \
@@ -109,25 +154,38 @@ run_case "allow third-party tool unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"mcp__cloudflare__zones_list","tool_input":{}}' \
   0 '__EMPTY__'
 run_case "ignore malformed input" 'not-json' 0 '__EMPTY__'
+run_case "fail soft when the Runtime binary is missing" \
+  '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
+  0 '__EMPTY__' /nonexistent
 
-if ! grep -q 'MapHandle:' "$HOOK" ||
-   ! grep -q 'map_sha256' "$HOOK" ||
-   ! grep -q 'simplicio_context' "$HOOK"; then
-  printf 'FAIL hook context is missing compact Map receipt/context routing\n' >&2
+# Wrapper contract: both hosts forward the hook JSON to `hooks pre-tool` and
+# keep an empty-stdout allow-unchanged path when the Runtime is absent.
+if ! grep -q 'hooks pre-tool' "$HOOK" ||
+   ! grep -q 'SIMPLICIO_BIN' "$HOOK" ||
+   ! grep -q 'command -v' "$HOOK"; then
+  printf 'FAIL shell hook is not the fail-soft forwarder contract\n' >&2
   FAIL=$((FAIL + 1))
+else
+  printf 'PASS shell hook forwards to hooks pre-tool\n'
+  PASS=$((PASS + 1))
 fi
-if ! grep -q 'Allow-Unchanged' "$WINDOWS_HOOK"; then
-  printf 'FAIL Windows hook is missing empty allow-unchanged contract\n' >&2
+if ! grep -q 'hooks pre-tool' "$WINDOWS_HOOK" ||
+   ! grep -q 'IsNullOrEmpty($input_json)' "$WINDOWS_HOOK" ||
+   ! grep -q 'if (-not $resolved)' "$WINDOWS_HOOK"; then
+  printf 'FAIL Windows hook is missing the fail-soft forwarder contract\n' >&2
   FAIL=$((FAIL + 1))
+else
+  printf 'PASS Windows hook forwards to hooks pre-tool\n'
+  PASS=$((PASS + 1))
 fi
 
 if command -v pwsh >/dev/null 2>&1; then
   scratch="$(mktemp -d)"
   repo="$scratch/repo"
-  fake_bin="$scratch/simplicio-fake.ps1"
+  fake_bin="$scratch/simplicio-fake"
   mkdir -p "$repo"
-  printf '%s\n' 'exit 0' >"$fake_bin"
-  chmod 0555 "$repo"
+  printf '#!/usr/bin/env sh\nexit 0\n' >"$fake_bin"
+  chmod 0755 "$fake_bin"
   payload="{\"hookEventName\":\"PreToolUse\",\"toolName\":\"read_file\",\"cwd\":\"$repo\"}"
 
   default_out="$(printf '%s' "$payload" |
@@ -143,23 +201,28 @@ if command -v pwsh >/dev/null 2>&1; then
     FAIL=$((FAIL + 1))
   fi
 
+  ps_err="$scratch/ps.err"
   ps_out="$(printf '%s' "$payload" |
-    env SIMPLICIO_BIN="$fake_bin" SIMPLICIO_MCP_PROFILE=full \
-      pwsh -NoLogo -NoProfile -NonInteractive -File "$WINDOWS_HOOK" 2>/dev/null)"
+    env SIMPLICIO_BIN="$TEST_BIN" SIMPLICIO_MCP_PROFILE=full \
+      pwsh -NoLogo -NoProfile -NonInteractive -File "$WINDOWS_HOOK" 2>"$ps_err")"
   ps_exit=$?
-  chmod 0755 "$repo"
+  ps_stderr="$(cat "$ps_err" 2>/dev/null || true)"
   rm -rf "$scratch"
   if [ "$ps_exit" -eq 2 ] && printf '%s' "$ps_out" | grep -Fq 'simplicio_file_read'; then
-    printf 'PASS Windows native read denied on core/full\n'
+    printf 'PASS Windows native read enforced on core/full (denied)\n'
+    PASS=$((PASS + 1))
+  elif [ "$ps_exit" -eq 0 ] && printf '%s' "$ps_stderr" | grep -Fq 'mcp_unavailable'; then
+    printf 'PASS Windows native read enforced on core/full (advisory)\n'
     PASS=$((PASS + 1))
   else
-    printf 'FAIL Windows native read denied on core/full exit=%s output=%s\n' \
-      "$ps_exit" "$ps_out" >&2
+    printf 'FAIL Windows native read enforced on core/full exit=%s output=%s stderr=%s\n' \
+      "$ps_exit" "$ps_out" "$ps_stderr" >&2
     FAIL=$((FAIL + 1))
   fi
 else
-  printf 'SKIP Windows read-only repository (pwsh unavailable)\n'
+  printf 'SKIP Windows hook behavior (pwsh unavailable)\n'
+  SKIP=$((SKIP + 1))
 fi
 
-printf '%s passed, %s failed\n' "$PASS" "$FAIL"
+printf '%s passed, %s failed, %s skipped\n' "$PASS" "$FAIL" "$SKIP"
 [ "$FAIL" -eq 0 ]
