@@ -10,8 +10,9 @@ documented path available). Existing keys are preserved, writes are atomic,
 and a `.simplicio.bak` copy is kept before a replacement. Re-running the
 installer is a no-op after the entry is already correct.
 
-The installer-scoped MCP entry sets `SIMPLICIO_RUNTIME_MODE=mapper-only`. This
-keeps direct host registration aligned with the native Claude plugin: Mapper
+The installer-scoped MCP entry sets `SIMPLICIO_RUNTIME_MODE=mapper-only` and
+`SIMPLICIO_MCP_PROFILE=mapper-only`. This keeps direct host registration
+aligned with the native Claude plugin: Mapper
 discovery and read-only context are available, while edit, run, loop, and
 execution surfaces are not advertised. Claude still owns its native editing
 and terminal tools; a registration receipt is not a live handshake.
@@ -19,3 +20,7 @@ and terminal tools; a registration receipt is not a live handshake.
 Live MCP registration and handshake evidence remain Runtime-owned. A dry run
 reports the planned path without creating or changing files; set
 `SIMPLICIO_SKIP_CLAUDE_CODE=1` to opt out.
+
+Claude Desktop registers the same Mapper-only surfaces. `simplicio doctor`
+reports any Claude or Hermes MCP/hook registration whose effective profile is
+not `mapper-only` instead of silently accepting it.

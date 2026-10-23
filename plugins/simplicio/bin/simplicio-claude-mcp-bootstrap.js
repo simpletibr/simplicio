@@ -7,6 +7,7 @@ const bootstrap = require("./simplicio-mcp-bootstrap.js");
 // process-local so an ambient full Runtime configuration is not changed for
 // the user's other hosts.
 process.env.SIMPLICIO_RUNTIME_MODE = "mapper-only";
+process.env.SIMPLICIO_MCP_PROFILE = "mapper-only";
 
 bootstrap.main().catch((error) => {
   process.stderr.write(`[simplicio-plugin] ${error.message}. See ~/.simplicio/logs/codex-plugin-bootstrap.log\n`);

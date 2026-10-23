@@ -66,7 +66,10 @@ def test_claude_code_has_runtime_verification_contract() -> None:
     assert claude.capability == "runtime-mcp"
     assert claude.verification_command[-1] == "--json"
     assert "<absolute-path>" in claude.verification_command
-    assert claude.mcp_environment == (("SIMPLICIO_RUNTIME_MODE", "mapper-only"),)
+    assert claude.mcp_environment == (
+        ("SIMPLICIO_RUNTIME_MODE", "mapper-only"),
+        ("SIMPLICIO_MCP_PROFILE", "mapper-only"),
+    )
 
 
 def test_cursor_declares_user_and_workspace_scopes() -> None:
@@ -92,7 +95,10 @@ def test_opencode_is_native_plugin_with_full_mode() -> None:
     assert opencode.capability == "native-plugin"
     assert opencode.verification_command[:3] == ("simplicio", "mcp", "register")
     assert opencode.default_scope == "user"
-    assert opencode.mcp_environment == (("SIMPLICIO_RUNTIME_MODE", "full"),)
+    assert opencode.mcp_environment == (
+        ("SIMPLICIO_RUNTIME_MODE", "full"),
+        ("SIMPLICIO_MCP_PROFILE", "full"),
+    )
 
 
 def test_vscode_declares_all_supported_configuration_scopes() -> None:

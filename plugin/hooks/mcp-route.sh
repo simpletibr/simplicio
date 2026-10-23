@@ -9,4 +9,5 @@ fi
 # Claude's Loop hook is a Mapper-only host adapter. Scope the mode to this
 # child process so the Runtime cannot route the hook through other modules.
 export SIMPLICIO_RUNTIME_MODE="mapper-only"
+export SIMPLICIO_MCP_PROFILE="mapper-only"
 exec bash "$route"

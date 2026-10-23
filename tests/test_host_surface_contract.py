@@ -4,7 +4,7 @@ import ast
 import json
 from pathlib import Path
 
-from simplicio.host_integrations import HOSTS
+from simplicio.host_integrations import HOSTS, INSTALLER_HOSTS
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,7 +43,10 @@ def test_host_surface_fixture_matches_claude_and_full_mode_contracts() -> None:
         "simplicio edit",
         "simplicio run",
     ]
-    assert claude.mcp_environment == (("SIMPLICIO_RUNTIME_MODE", "mapper-only"),)
+    assert claude.mcp_environment == (
+        ("SIMPLICIO_RUNTIME_MODE", "mapper-only"),
+        ("SIMPLICIO_MCP_PROFILE", "mapper-only"),
+    )
     assert cursor.mcp_environment == ()
     assert forbidden.isdisjoint(surface["modes"]["mapper-only"]["tools"])
     assert retired.isdisjoint(surface["modes"]["mapper-only"]["tools"])
@@ -57,6 +60,9 @@ def test_opencode_host_surface_is_native_plugin_with_full_mode() -> None:
     )
     entry = next(host for host in package["hosts"] if host["id"] == "opencode")
     opencode = next(spec for spec in HOSTS if spec.host_id == "opencode")
+    opencode_manifest = json.loads(
+        (ROOT / "plugins" / "simplicio" / "opencode.json").read_text(encoding="utf-8")
+    )
     full_hosts = set(surface["modes"]["full"]["hosts"])
     canonical = set(surface["modes"]["full"]["canonical"])
 
@@ -67,7 +73,32 @@ def test_opencode_host_surface_is_native_plugin_with_full_mode() -> None:
     assert {"simplicio_edit", "simplicio_run", "simplicio_map", "simplicio_context"} <= canonical
     assert opencode.capability == "native-plugin"
     assert ("SIMPLICIO_RUNTIME_MODE", "full") in opencode.mcp_environment
+    assert ("SIMPLICIO_MCP_PROFILE", "full") in opencode.mcp_environment
+    assert opencode_manifest["mcp"]["environment"]["SIMPLICIO_RUNTIME_MODE"] == "full"
+    assert opencode_manifest["mcp"]["environment"]["SIMPLICIO_MCP_PROFILE"] == "full"
     assert "opencode" not in set(surface["modes"]["mapper-only"]["hosts"])
+
+
+def test_claude_and_hermes_registrations_are_explicitly_mapper_only() -> None:
+    claude = next(spec for spec in HOSTS if spec.host_id == "claude-code")
+    hermes = next(spec for spec in INSTALLER_HOSTS if spec.host_id == "hermes-agent")
+
+    for spec in (claude, hermes):
+        environment = dict(spec.mcp_environment)
+        assert environment["SIMPLICIO_RUNTIME_MODE"] == "mapper-only", spec.host_id
+        assert environment["SIMPLICIO_MCP_PROFILE"] == "mapper-only", spec.host_id
+
+    bootstrap = (
+        ROOT / "plugins" / "simplicio" / "bin" / "simplicio-claude-mcp-bootstrap.js"
+    ).read_text(encoding="utf-8")
+    assert 'process.env.SIMPLICIO_RUNTIME_MODE = "mapper-only"' in bootstrap
+    assert 'process.env.SIMPLICIO_MCP_PROFILE = "mapper-only"' in bootstrap
+
+    hermes_plugin = (
+        ROOT / "plugins" / "simplicio-hermes" / "hermes_plugin.py"
+    ).read_text(encoding="utf-8")
+    assert 'environment["SIMPLICIO_RUNTIME_MODE"] = RUNTIME_MODE' in hermes_plugin
+    assert 'environment["SIMPLICIO_MCP_PROFILE"] = RUNTIME_MODE' in hermes_plugin
 
 
 def test_hermes_mapper_only_surface_excludes_execution_tools() -> None:
