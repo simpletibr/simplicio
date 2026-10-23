@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BoundSessionUsageReport } from "../components/BoundSessionUsageReport";
+import { CacheMeterReport } from "../components/CacheMeterReport";
+import type { CacheMeterReceipt } from "../cache_meter";
 import { Glyph } from "../components/Brand";
 import { ContextSavings } from "../components/ContextSavings";
 import { TokenProjects } from "../components/TokenProjects";
@@ -8,7 +10,7 @@ import type { UsageProjects } from "../project_usage";
 import { buildUnifiedUsageQuery, UNIFIED_USAGE_ACCOUNT_LIMITS, UnifiedUsageRequestGuard, unifiedUsageState, type UnifiedUsageProjection, type UsageQuery } from "../unified_usage";
 import type { CostProjection } from "../cost_projection";
 import type { DesktopUsageState } from "../usage_store";
-import { exportDesktopTokenReport, exportDesktopUnifiedUsageReport, loadDesktopTokenReport, loadDesktopUnifiedUsage, loadDesktopCostProjection } from "../bridge";
+import { exportDesktopTokenReport, exportDesktopUnifiedUsageReport, loadDesktopCacheMeter, loadDesktopTokenReport, loadDesktopUnifiedUsage, loadDesktopCostProjection } from "../bridge";
 import { TOKEN_PERIODS, tokenErrorMessage, tokenExportErrorMessage, type TokenPeriod, type TokenQuery, type TokenUsageReport } from "../token_usage";
 
 import type { IdleSessionFinalization, ProviderUsageMetric } from "../session_idle";
@@ -89,6 +91,19 @@ export function TokensScreen({ initialRepoPath = "", projectPaths = [], usage }:
   const [allowAutoSelect, setAllowAutoSelect] = useState(!initialRepoPath);
   const [autoContext, setAutoContext] = useState(Boolean(initialRepoPath));
   const [sessionId, setSessionId] = useState("");
+  const [cacheMeter, setCacheMeter] = useState<CacheMeterReceipt | null>(null);
+  const [cacheMeterError, setCacheMeterError] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    loadDesktopCacheMeter()
+      .then((receipt) => { if (active) setCacheMeter(receipt); })
+      .catch((error: unknown) => {
+        if (!active) return;
+        const code = error instanceof Error ? error.message : String(error);
+        if (code !== "preview_no_runtime") setCacheMeterError(code);
+      });
+    return () => { active = false; };
+  }, []);
   const [provider, setProvider] = useState("");
   const [model, setModel] = useState("");
   const [host, setHost] = useState("");
@@ -382,6 +397,7 @@ export function TokensScreen({ initialRepoPath = "", projectPaths = [], usage }:
           <p>Proveniência: {costProjection.rows.map((row) => row.state).filter((value, index, values) => values.indexOf(value) === index).join(", ") || "indisponível"} · confiança: {costProjection.confidence.actual} · baseline: {costProjection.baseline.values_status} · digest <code>{costProjection.metadata.report_digest}</code></p>
         </div>}
       </section>
+      <CacheMeterReport receipt={cacheMeter} error={cacheMeterError} />
       <IdleFinalizationHistory items={usage?.idleHistory?.length ? usage.idleHistory : usage?.idleFinalization ? [usage.idleFinalization] : []} />
       <ContextSavings repoPath={repoPath} autoLoad={autoContext} />
       </section>

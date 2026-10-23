@@ -833,6 +833,34 @@ async fn desktop_token_report(
 }
 
 #[tauri::command]
+async fn desktop_cache_meter(session_id: Option<String>) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_read_access()?;
+        let mut args = vec!["savings".to_string(), "cache".to_string()];
+        match session_id {
+            Some(id) if !id.trim().is_empty() => {
+                let id = id.trim();
+                if id.len() > 256
+                    || !id
+                        .chars()
+                        .all(|value| value.is_ascii_alphanumeric() || "-_.:".contains(value))
+                {
+                    return Err("cache_meter_session_invalid".to_string());
+                }
+                args.push("--session".to_string());
+                args.push(id.to_string());
+            }
+            _ => args.push("--latest".to_string()),
+        }
+        args.push("--json".to_string());
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        run_runtime_json(&borrowed).map_err(|_| "cache_meter_unavailable".to_string())
+    })
+    .await
+    .map_err(|_| "cache_meter_unavailable".to_string())?
+}
+
+#[tauri::command]
 async fn desktop_consolidated_token_report(request: Value) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
         let executable = std::env::current_exe().map_err(|_| "consolidated_report_unavailable")?;
@@ -1435,6 +1463,7 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_cache_meter,
             desktop_session_close_idle,
             desktop_bind_provider_session,
             desktop_request_start,
