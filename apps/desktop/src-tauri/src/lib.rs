@@ -9,6 +9,7 @@ mod auth_login;
 mod preparation;
 mod consolidated_tokens;
 mod context_report;
+mod desktop_api;
 mod desktop_queries;
 mod desktop_updater;
 mod host_plugins;
@@ -189,7 +190,7 @@ fn successful_output(args: &[&str]) -> Result<Output, String> {
     Ok(output)
 }
 
-fn run_runtime_json(args: &[&str]) -> Result<Value, String> {
+pub(crate) fn run_runtime_json(args: &[&str]) -> Result<Value, String> {
     let output = successful_output(args)?;
     serde_json::from_slice(&output.stdout)
         .map_err(|_| "Simplicio Runtime devolveu JSON inválido".to_string())
@@ -272,7 +273,7 @@ fn host_plugin_reconcile_args(receipt_id: &str) -> Result<Vec<String>, String> {
         .collect())
 }
 
-fn require_read_access() -> Result<(), String> {
+pub(crate) fn require_read_access() -> Result<(), String> {
     // A fresh Runtime authorization query, not a cached snapshot or installation inventory.
     auth_access::require_fresh(run_runtime_json)
 }
@@ -735,7 +736,7 @@ async fn desktop_request_finish(request_id: String) -> Result<Value, String> {
     .map_err(|_| "desktop_request_unavailable".to_string())?
 }
 
-fn default_projection_repo() -> Result<PathBuf, String> {
+pub(crate) fn default_projection_repo() -> Result<PathBuf, String> {
     std::env::var_os("SIMPLICIO_DESKTOP_REPO")
         .or_else(|| std::env::var_os("HOME"))
         .or_else(|| std::env::var_os("USERPROFILE"))
@@ -761,21 +762,25 @@ async fn desktop_unified_usage(query: Value, repo_path: Option<String>) -> Resul
     .map_err(|_| "unified_usage_unavailable".to_string())?
 }
 
+pub(crate) fn execution_report_from(
+    repo_path: Option<&str>,
+    run_id: Option<&str>,
+) -> Result<Value, String> {
+    require_read_access()?;
+    let default_repo = default_projection_repo()?;
+    let args =
+        projection_queries::execution_report_args(repo_path, run_id, &default_repo)?;
+    let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+    run_runtime_json(&borrowed).map_err(|_| "execution_report_unavailable".to_string())
+}
+
 #[tauri::command]
 async fn desktop_execution_report(
     repo_path: Option<String>,
     run_id: Option<String>,
 ) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        require_read_access()?;
-        let default_repo = default_projection_repo()?;
-        let args = projection_queries::execution_report_args(
-            repo_path.as_deref(),
-            run_id.as_deref(),
-            &default_repo,
-        )?;
-        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
-        run_runtime_json(&borrowed).map_err(|_| "execution_report_unavailable".to_string())
+        execution_report_from(repo_path.as_deref(), run_id.as_deref())
     })
     .await
     .map_err(|_| "execution_report_unavailable".to_string())?
@@ -931,12 +936,16 @@ fn review_snapshot(repo: &Path, base: Option<&str>) -> Result<Value, String> {
     }))
 }
 
+pub(crate) fn review_from_repo(repo_path: &str, base: Option<&str>) -> Result<Value, String> {
+    require_read_access()?;
+    let repo = validated_repo_path(repo_path)?;
+    review_snapshot(&repo, base)
+}
+
 #[tauri::command]
 async fn desktop_review(repo_path: String, base: Option<String>) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        require_read_access()?;
-        let repo = validated_repo_path(&repo_path)?;
-        review_snapshot(&repo, base.as_deref())
+        review_from_repo(&repo_path, base.as_deref())
     })
     .await
     .map_err(|_| "review_unavailable".to_string())?
@@ -983,7 +992,7 @@ fn git_output(repo: &Path, args: &[&str]) -> Result<std::process::Output, String
         .map_err(|_| "git_unavailable".to_string())
 }
 
-fn validated_repo_path(repo_path: &str) -> Result<PathBuf, String> {
+pub(crate) fn validated_repo_path(repo_path: &str) -> Result<PathBuf, String> {
     if repo_path.trim().is_empty() {
         return Err("repo_path_invalid".to_string());
     }
@@ -1009,23 +1018,79 @@ fn managed_worktree_path(home: &Path, repo: &Path, issue: u64) -> PathBuf {
         .join(format!("issue-{issue}"))
 }
 
+pub(crate) fn worktrees_from_repo(repo_path: &str) -> Result<Value, String> {
+    require_read_access()?;
+    let repo = validated_repo_path(repo_path)?;
+    let output = git_output(&repo, &["worktree", "list", "--porcelain"])?;
+    if !output.status.success() {
+        return Err("worktree_list_failed".to_string());
+    }
+    Ok(serde_json::json!({
+        "schema": "simplicio.desktop-worktrees/v1",
+        "repo": repo.display().to_string(),
+        "porcelain": String::from_utf8_lossy(&output.stdout),
+    }))
+}
+
 #[tauri::command]
 async fn desktop_worktrees(repo_path: String) -> Result<Value, String> {
-    tauri::async_runtime::spawn_blocking(move || {
-        require_read_access()?;
-        let repo = validated_repo_path(&repo_path)?;
-        let output = git_output(&repo, &["worktree", "list", "--porcelain"])?;
-        if !output.status.success() {
-            return Err("worktree_list_failed".to_string());
-        }
-        Ok(serde_json::json!({
-            "schema": "simplicio.desktop-worktrees/v1",
-            "repo": repo.display().to_string(),
-            "porcelain": String::from_utf8_lossy(&output.stdout),
-        }))
-    })
-    .await
-    .map_err(|_| "worktree_list_failed".to_string())?
+    tauri::async_runtime::spawn_blocking(move || worktrees_from_repo(&repo_path))
+        .await
+        .map_err(|_| "worktree_list_failed".to_string())?
+}
+
+pub(crate) fn create_managed_worktree(
+    repo_path: &str,
+    issue: u64,
+    agent: &str,
+    wip_limit: Option<u32>,
+) -> Result<Value, String> {
+    require_active_access()?;
+    if issue == 0 || issue > 10_000_000 {
+        return Err("issue_invalid".to_string());
+    }
+    if agent.len() > 64 || agent.chars().any(|value| !(value.is_ascii_alphanumeric() || "-_. ".contains(value))) {
+        return Err("agent_invalid".to_string());
+    }
+    let limit = wip_limit.unwrap_or(5).clamp(1, 64);
+    let repo = validated_repo_path(repo_path)?;
+    let list = git_output(&repo, &["worktree", "list", "--porcelain"])?;
+    let active = String::from_utf8_lossy(&list.stdout)
+        .split("\n\n")
+        .filter(|block| !block.trim().is_empty())
+        .skip(1)
+        .count() as u32;
+    if active >= limit {
+        return Err("wip_limit_reached".to_string());
+    }
+    let home = runtime_user_home()?;
+    let path = managed_worktree_path(&home, &repo, issue);
+    if path.exists() {
+        return Err("worktree_exists".to_string());
+    }
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).map_err(|_| "worktree_create_failed".to_string())?;
+    }
+    let branch = format!("issue-{issue}");
+    let output = Command::new("git")
+        .arg("-C")
+        .arg(&repo)
+        .args(["worktree", "add", "-b", &branch])
+        .arg(&path)
+        .output()
+        .map_err(|_| "worktree_create_failed".to_string())?;
+    if !output.status.success() {
+        return Err("worktree_create_failed".to_string());
+    }
+    Ok(serde_json::json!({
+        "schema": "simplicio.desktop-worktree-create/v1",
+        "status": "created",
+        "issue": issue,
+        "branch": branch,
+        "agent": agent,
+        "path": path.display().to_string(),
+        "redacted": true,
+    }))
 }
 
 #[tauri::command]
@@ -1036,52 +1101,7 @@ async fn desktop_worktree_create(
     wip_limit: Option<u32>,
 ) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        require_active_access()?;
-        if issue == 0 || issue > 10_000_000 {
-            return Err("issue_invalid".to_string());
-        }
-        if agent.len() > 64 || agent.chars().any(|value| !(value.is_ascii_alphanumeric() || "-_. ".contains(value))) {
-            return Err("agent_invalid".to_string());
-        }
-        let limit = wip_limit.unwrap_or(5).clamp(1, 64);
-        let repo = validated_repo_path(&repo_path)?;
-        let list = git_output(&repo, &["worktree", "list", "--porcelain"])?;
-        let active = String::from_utf8_lossy(&list.stdout)
-            .split("\n\n")
-            .filter(|block| !block.trim().is_empty())
-            .skip(1)
-            .count() as u32;
-        if active >= limit {
-            return Err("wip_limit_reached".to_string());
-        }
-        let home = runtime_user_home()?;
-        let path = managed_worktree_path(&home, &repo, issue);
-        if path.exists() {
-            return Err("worktree_exists".to_string());
-        }
-        if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent).map_err(|_| "worktree_create_failed".to_string())?;
-        }
-        let branch = format!("issue-{issue}");
-        let output = Command::new("git")
-            .arg("-C")
-            .arg(&repo)
-            .args(["worktree", "add", "-b", &branch])
-            .arg(&path)
-            .output()
-            .map_err(|_| "worktree_create_failed".to_string())?;
-        if !output.status.success() {
-            return Err("worktree_create_failed".to_string());
-        }
-        Ok(serde_json::json!({
-            "schema": "simplicio.desktop-worktree-create/v1",
-            "status": "created",
-            "issue": issue,
-            "branch": branch,
-            "agent": agent,
-            "path": path.display().to_string(),
-            "redacted": true,
-        }))
+        create_managed_worktree(&repo_path, issue, &agent, wip_limit)
     })
     .await
     .map_err(|_| "worktree_create_failed".to_string())?
@@ -1613,7 +1633,7 @@ fn packaged_runtime_authority() -> Result<PathBuf, String> {
     runtime_install::bundled_authority(&current_executable, snapshot_from_binary)
 }
 
-fn snapshot_from_runtime() -> Result<Value, String> {
+pub(crate) fn snapshot_from_runtime() -> Result<Value, String> {
     let current_executable =
         std::env::current_exe().map_err(|_| "runtime_install_package_unavailable".to_string())?;
     let home = runtime_user_home()?;
@@ -1884,6 +1904,11 @@ async fn runtime_status() -> Result<Value, String> {
         .map_err(|_| "Falha interna ao consultar o status".to_string())?
 }
 
+#[tauri::command]
+fn desktop_api_status() -> Value {
+    desktop_api::status()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1900,12 +1925,16 @@ pub fn run() {
                     eprintln!("Simplicio: Desktop update recovery is pending: {error}");
                 }
             }
+            if let Err(error) = desktop_api::start() {
+                eprintln!("Simplicio: Desktop API is unavailable: {error}");
+            }
             #[cfg(desktop)]
             native_menu::install(app)?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             desktop_snapshot,
+            desktop_api_status,
             desktop_preparation_plan,
             desktop_prepare_runtime_environment,
             desktop_preparation_status,
