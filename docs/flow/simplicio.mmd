@@ -1,0 +1,34 @@
+flowchart LR
+  in-installer["Instalador (sh/ps1)"]
+  in-desktop["Desktop / Tauri IPC"]
+  in-host-hook["Hook do host"]
+  in-mcp["MCP / CLI"]
+  step-install["Instala binário gerenciado + registra hosts"]
+  step-bootstrap["Bootstrap do Runtime e preparação"]
+  step-map["Map/context do repositório"]
+  step-edit["Edição governada + validação"]
+  step-session["Sessão: idle, uso e cache"]
+  step-meter["Cache meter medido"]
+  out-manifest["Manifesto e checksums"]
+  out-desktop["Snapshots/recibos do Desktop"]
+  out-flow["Mermaid/SVG/Langflow do fluxo"]
+  out-receipts["Recibos e auditoria"]
+  in-installer --> step-install
+  in-desktop --> step-bootstrap
+  in-desktop --> step-session
+  in-host-hook --> step-map
+  in-mcp --> step-map
+  step-install --> out-manifest
+  step-bootstrap --> step-map
+  step-map --> step-edit
+  step-edit --> out-desktop
+  step-edit --> out-receipts
+  step-session --> step-meter
+  step-meter --> out-receipts
+  step-map --> out-flow
+  classDef input fill:#e8f1ff,stroke:#3b6fb6,stroke-width:1px;
+  class in-installer,in-desktop,in-host-hook,in-mcp input;
+  classDef step fill:#fff7d6,stroke:#b38b00,stroke-width:1px;
+  class step-install,step-bootstrap,step-map,step-edit,step-session,step-meter step;
+  classDef output fill:#e8f7ea,stroke:#2f7d32,stroke-width:1px;
+  class out-manifest,out-desktop,out-flow,out-receipts output;

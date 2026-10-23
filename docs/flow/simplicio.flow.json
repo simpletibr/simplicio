@@ -1,0 +1,37 @@
+{
+  "schema": "simplicio.flow/v1",
+  "id": "simplicio",
+  "title": "Simplicio — entrada → passos → saídas",
+  "version": "3.10.0",
+  "nodes": [
+    { "id": "in-installer", "kind": "input", "label": "Instalador (sh/ps1)", "source": "install.sh" },
+    { "id": "in-desktop", "kind": "input", "label": "Desktop / Tauri IPC", "source": "apps/desktop/src/bridge.ts" },
+    { "id": "in-host-hook", "kind": "input", "label": "Hook do host", "source": "plugins/simplicio/hooks/mapper_context.py" },
+    { "id": "in-mcp", "kind": "input", "label": "MCP / CLI", "source": "plugins/simplicio/.mcp.json" },
+    { "id": "step-install", "kind": "step", "label": "Instala binário gerenciado + registra hosts", "source": "scripts/verify_distribution_consistency.py" },
+    { "id": "step-bootstrap", "kind": "step", "label": "Bootstrap do Runtime e preparação", "source": "apps/desktop/src-tauri/src/runtime_process.rs" },
+    { "id": "step-map", "kind": "step", "label": "Map/context do repositório", "source": "apps/desktop/src/catalog_ui.ts" },
+    { "id": "step-edit", "kind": "step", "label": "Edição governada + validação", "source": "apps/desktop/src/execution_report.ts" },
+    { "id": "step-session", "kind": "step", "label": "Sessão: idle, uso e cache", "source": "apps/desktop/src/session_idle.ts" },
+    { "id": "step-meter", "kind": "step", "label": "Cache meter medido", "source": "apps/desktop/src/cache_meter.ts" },
+    { "id": "out-manifest", "kind": "output", "label": "Manifesto e checksums", "source": "simplicio-update-manifest.json" },
+    { "id": "out-desktop", "kind": "output", "label": "Snapshots/recibos do Desktop", "source": "apps/desktop/src/execution_report.ts" },
+    { "id": "out-flow", "kind": "output", "label": "Mermaid/SVG/Langflow do fluxo", "artifact": "docs/flow/simplicio.mmd" },
+    { "id": "out-receipts", "kind": "output", "label": "Recibos e auditoria", "source": "apps/desktop/src/cache_meter.ts" }
+  ],
+  "edges": [
+    ["in-installer", "step-install"],
+    ["in-desktop", "step-bootstrap"],
+    ["in-desktop", "step-session"],
+    ["in-host-hook", "step-map"],
+    ["in-mcp", "step-map"],
+    ["step-install", "out-manifest"],
+    ["step-bootstrap", "step-map"],
+    ["step-map", "step-edit"],
+    ["step-edit", "out-desktop"],
+    ["step-edit", "out-receipts"],
+    ["step-session", "step-meter"],
+    ["step-meter", "out-receipts"],
+    ["step-map", "out-flow"]
+  ]
+}
