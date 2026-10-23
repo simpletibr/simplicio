@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BoundSessionUsageReport } from "../components/BoundSessionUsageReport";
 import { CacheMeterReport } from "../components/CacheMeterReport";
+import { RoiDigestPanel } from "../components/RoiDigestPanel";
 import type { CacheMeterReceipt } from "../cache_meter";
 import { Glyph } from "../components/Brand";
 import { ContextSavings } from "../components/ContextSavings";
@@ -398,6 +399,7 @@ export function TokensScreen({ initialRepoPath = "", projectPaths = [], usage }:
         </div>}
       </section>
       <CacheMeterReport receipt={cacheMeter} error={cacheMeterError} />
+      <RoiDigestPanel repoPath={repoPath} />
       <IdleFinalizationHistory items={usage?.idleHistory?.length ? usage.idleHistory : usage?.idleFinalization ? [usage.idleFinalization] : []} />
       <ContextSavings repoPath={repoPath} autoLoad={autoContext} />
       </section>
