@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.simpletibr/simplicio",
+  "description": "Governed local-first coding runtime with Mapper context, memory, edits, execution and receipts.",
+  "repository": {
+    "url": "https://github.com/simpletibr/simplicio",
+    "source": "github"
+  },
+  "version": "3.10.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@simpletibr/simplicio",
+      "version": "3.10.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SIMPLICIO_MCP_URL",
+          "description": "Local Runtime MCP URL.",
+          "default": "http://127.0.0.1:8787/mcp",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}
