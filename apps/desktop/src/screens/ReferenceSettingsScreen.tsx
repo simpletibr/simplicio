@@ -10,6 +10,7 @@ import { DESKTOP_UPDATE_EVENT } from "../desktop_updates";
 import { readProviderQuotas } from "../components/ProviderUsage";
 import { PluginManagerPanel } from "../components/PluginManagerPanel";
 import { CommandPalette } from "../components/CommandPalette";
+import { HostsMcpPanel } from "../components/HostsMcpPanel";
 import { useSystemPermissions, permissionLabels } from "../use_system_permissions";
 import { permissionIds, openPermissionSettings, requestMediaPermission, revealPermissionApp, type PermissionId } from "../system_permissions";
 
@@ -237,6 +238,7 @@ function ServiceCards({ services }: { services: typeof reviewServices }) {
 
 function Integrations({ onNavigate }: { onNavigate: Navigate }) {
   return <>
+    <HostsMcpPanel />
     <Notice>Esta é a área de serviços externos. O estado de GitHub, Linear ou Jira não é inferido de um agente conectado ao MCP.</Notice>
     <Section title="Revisão e código-fonte" description="Provedores para acompanhar repositórios e revisões."><ServiceCards services={reviewServices} /></Section>
     <Section title="Provedores de tarefas" description="Contas e permissões precisam ser verificadas pelo serviço."><ServiceCards services={taskServices} /></Section>

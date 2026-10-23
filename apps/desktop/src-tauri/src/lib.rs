@@ -860,6 +860,28 @@ async fn desktop_cache_meter(session_id: Option<String>) -> Result<Value, String
     .map_err(|_| "cache_meter_unavailable".to_string())?
 }
 
+#[tauri::command]
+async fn desktop_hosts_plan() -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        require_read_access()?;
+        run_runtime_json(&["mcp", "register", "--dry-run", "--json"])
+            .map_err(|_| "hosts_plan_unavailable".to_string())
+    })
+    .await
+    .map_err(|_| "hosts_plan_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_hosts_repair() -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        require_active_access()?;
+        run_runtime_json(&["mcp", "register", "--json"])
+            .map_err(|_| "hosts_repair_unavailable".to_string())
+    })
+    .await
+    .map_err(|_| "hosts_repair_unavailable".to_string())?
+}
+
 fn catalog_entry_requires_consent(entry: &Value) -> bool {
     entry
         .get("capabilities_requiring_consent")
@@ -1638,6 +1660,8 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_hosts_plan,
+            desktop_hosts_repair,
             desktop_catalog,
             desktop_catalog_run,
             desktop_plugins,

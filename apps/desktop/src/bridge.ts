@@ -38,6 +38,7 @@ import { parseIdleSessionFinalization, IDLE_SESSION_TIMEOUT_MS, type IdleSession
 import { parseCacheMeter, type CacheMeterReceipt } from "./cache_meter";
 import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from "./plugin_manager";
 import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./catalog_ui";
+import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -389,6 +390,16 @@ export async function loadDesktopCacheMeter(options: { sessionId?: string } = {}
     60_000,
     "cache_meter_timeout",
   ));
+}
+
+export async function loadDesktopHostsPlan(): Promise<HostsPlan> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseHostsPlan(await withTimeout(invoke<unknown>("desktop_hosts_plan"), 60_000, "hosts_plan_timeout"));
+}
+
+export async function repairDesktopHosts(): Promise<unknown> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return invoke<unknown>("desktop_hosts_repair");
 }
 
 export async function loadDesktopCatalog(): Promise<DesktopCatalog> {
