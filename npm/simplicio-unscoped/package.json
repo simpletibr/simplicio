@@ -9,7 +9,7 @@
     "install.js"
   ],
   "scripts": {
-    "postinstall": "node install.js"
+    "postinstall": "node install.js install"
   },
   "keywords": [
     "simplicio",

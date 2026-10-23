@@ -85,3 +85,13 @@ def test_pypi_publication_is_local_manual_and_fail_closed():
     ):
         assert required in publisher
     assert re.search(r"pypi-[A-Za-z0-9_-]{20,}", publisher) is None
+
+
+def test_pypi_installer_uses_the_single_managed_binary():
+    main = (ROOT / "pypi/simplicio/simplicio/__main__.py").read_text(encoding="utf-8")
+    assert (
+        'INSTALL_DIR = os.path.expanduser(os.environ.get("SIMPLICIO_BIN_DIR") or "~/.simplicio/bin")'
+        in main
+    )
+    assert "~/.local/bin" not in main
+
