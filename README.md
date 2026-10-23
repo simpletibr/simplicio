@@ -20,6 +20,9 @@ python3 scripts/generate_flow.py --check   # drift antes do release
 
 Artefatos: `simplicio.mmd`, `simplicio.svg` e `langflow/simplicio.langflow.json`.
 
+Verificação, requisitos de `mmdc` e status do Langflow: [docs/flow/README.md](docs/flow/README.md).
+O import live no Langflow está **blocked** neste ambiente (sem servidor em `localhost:7860`) e é verificado de forma fail-closed por `scripts/verify_flow_langflow.py`.
+
 <p align="center">
   <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=2fe6a0&label=release" alt="Latest Release"></a>
   <a href="https://simpleti.com.br/simplicio/docs"><img src="https://img.shields.io/badge/docs-simpleti.com.br-ffd23f" alt="Documentation"></a>
