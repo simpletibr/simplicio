@@ -14,16 +14,16 @@
       "SIMPLICIO_MCP_URL": "http://127.0.0.1:8787/mcp"
     }
   },
-  "plugin": "opencode-simplicio",
-  "pluginRepository": "https://github.com/Pasblinn/opencode-simplicio",
+  "plugin": "~/.simplicio/hooks/opencode-simplicio.js",
+  "pluginManagedBy": "simplicio-runtime",
   "hooks": {
     "turn.before": {
-      "unix": ".simplicio/hooks/opencode-turn-before.sh",
-      "windows": ".simplicio/hooks/opencode-turn-before.ps1"
+      "unix": "~/.simplicio/hooks/opencode-turn-before.sh",
+      "windows": "~/.simplicio/hooks/opencode-turn-before.ps1"
     },
     "turn.after": {
-      "unix": ".simplicio/hooks/opencode-turn-after.sh",
-      "windows": ".simplicio/hooks/opencode-turn-after.ps1"
+      "unix": "~/.simplicio/hooks/opencode-turn-after.sh",
+      "windows": "~/.simplicio/hooks/opencode-turn-after.ps1"
     }
   },
   "canonicalTools": [

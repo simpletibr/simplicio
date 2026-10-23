@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use tauri::Manager;
 
+mod activity_events;
 mod auth_access;
 mod auth_login;
 mod preparation;
@@ -21,6 +22,7 @@ mod project_usage;
 mod projection_exports;
 mod projection_queries;
 mod remote_fleet;
+mod review_submit;
 mod runtime_install;
 mod runtime_lifecycle;
 mod runtime_process;
@@ -332,6 +334,25 @@ async fn desktop_usage_changefeed(
     })
     .await
     .map_err(|_| "usage_changefeed_unavailable".to_string())?
+}
+
+/// One bounded page of the Runtime daemon event stream (#432). The Runtime is
+/// authoritative: no event is synthesized when the daemon is unavailable.
+#[tauri::command]
+async fn desktop_activity_events(
+    after_cursor: Option<u64>,
+    wait_ms: Option<u64>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_read_access()?;
+        let args = activity_events::query_args(after_cursor.unwrap_or(0), wait_ms.unwrap_or(900))?;
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        activity_events::validate_page(
+            run_runtime_json(&borrowed).map_err(|_| "activity_events_unavailable".to_string())?,
+        )
+    })
+    .await
+    .map_err(|_| "activity_events_unavailable".to_string())?
 }
 
 const SESSION_IDLE_FINALIZATION_SCHEMA: &str = "simplicio.session-idle-finalization/v1";
@@ -869,47 +890,88 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .collect()
 }
 
+fn review_snapshot(repo: &Path, base: Option<&str>) -> Result<Value, String> {
+    let status = git_output(repo, &["status", "--porcelain"])?;
+    let status_text = String::from_utf8_lossy(&status.stdout).to_string();
+    let base = base.filter(|value| !value.trim().is_empty());
+    if let Some(base) = base {
+        if !review_submit::valid_base_revision(base) {
+            return Err("review_base_invalid".to_string());
+        }
+    }
+    let mut args = vec!["diff", "--no-ext-diff", "--unified=3"];
+    if let Some(base) = base {
+        args.push(base);
+    } else {
+        args.push("HEAD");
+    }
+    let mut diff = git_output(repo, &args)?;
+    if !diff.status.success() && base.is_none() {
+        diff = git_output(repo, &["diff", "--no-ext-diff", "--unified=3"])?;
+    }
+    if !diff.status.success() {
+        return Err("review_unavailable".to_string());
+    }
+    let full = String::from_utf8_lossy(&diff.stdout).to_string();
+    let truncated = full.len() > 200_000;
+    let diff_text = if truncated { full[..200_000].to_string() } else { full };
+    let digest = format!(
+        "sha256:{}",
+        sha256_hex(format!("{status_text}\n{diff_text}").as_bytes())
+    );
+    Ok(serde_json::json!({
+        "schema": review_submit::REVIEW_SCHEMA,
+        "repo": repo.display().to_string(),
+        "base": base,
+        "status": status_text,
+        "diff": diff_text,
+        "digest": digest,
+        "truncated": truncated,
+        "redacted": true,
+    }))
+}
+
 #[tauri::command]
 async fn desktop_review(repo_path: String, base: Option<String>) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
         require_read_access()?;
         let repo = validated_repo_path(&repo_path)?;
-        let status = git_output(&repo, &["status", "--porcelain"])?;
-        let status_text = String::from_utf8_lossy(&status.stdout).to_string();
-        let base = base.filter(|value| !value.trim().is_empty());
-        let mut args = vec!["diff", "--no-ext-diff", "--unified=3"];
-        if let Some(base) = base.as_deref() {
-            args.push(base);
-        } else {
-            args.push("HEAD");
-        }
-        let mut diff = git_output(&repo, &args)?;
-        if !diff.status.success() && base.is_none() {
-            diff = git_output(&repo, &["diff", "--no-ext-diff", "--unified=3"])?;
-        }
-        if !diff.status.success() {
-            return Err("review_unavailable".to_string());
-        }
-        let full = String::from_utf8_lossy(&diff.stdout).to_string();
-        let truncated = full.len() > 200_000;
-        let diff_text = if truncated { full[..200_000].to_string() } else { full };
-        let digest = format!(
-            "sha256:{}",
-            sha256_hex(format!("{status_text}\n{diff_text}").as_bytes())
-        );
-        Ok(serde_json::json!({
-            "schema": "simplicio.desktop-review/v1",
-            "repo": repo.display().to_string(),
-            "base": base,
-            "status": status_text,
-            "diff": diff_text,
-            "digest": digest,
-            "truncated": truncated,
-            "redacted": true,
-        }))
+        review_snapshot(&repo, base.as_deref())
     })
     .await
     .map_err(|_| "review_unavailable".to_string())?
+}
+
+/// Writes the review comments into the repository inbox. The receipt proves the
+/// queue entry exists; it never claims that a live agent session was notified.
+#[tauri::command]
+async fn desktop_review_submit(
+    repo: String,
+    digest: String,
+    comments: String,
+    plan_digest: Option<String>,
+    base: Option<String>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        let repo = validated_repo_path(&repo)?;
+        let review = review_snapshot(&repo, base.as_deref())?;
+        review_submit::validate_digest(&review, &digest)?;
+        let plan_digest = review_submit::resolve_plan_digest(&repo, plan_digest.as_deref());
+        let now_epoch_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_millis() as u64)
+            .unwrap_or(0);
+        review_submit::submit(
+            &repo,
+            &review,
+            &comments,
+            plan_digest.as_deref(),
+            now_epoch_ms,
+        )
+    })
+    .await
+    .map_err(|_| "review_submit_unavailable".to_string())?
 }
 
 fn git_output(repo: &Path, args: &[&str]) -> Result<std::process::Output, String> {
@@ -1867,7 +1929,9 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_activity_events,
             desktop_review,
+            desktop_review_submit,
             desktop_worktrees,
             desktop_remote_fleet,
             desktop_worktree_create,
