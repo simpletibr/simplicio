@@ -175,7 +175,13 @@ def verify_release_payload(
         if sidecar.decode("utf-8").strip() != signature:
             errors.append(f"{artifact}: signature sidecar differs from manifest")
         try:
-            valid_signature = verify_signature_for_digest(signing_pubkey, signature, digest)
+            valid_signature = verify_signature_for_digest(
+                signing_pubkey,
+                signature,
+                digest,
+                version=version,
+                target=str(record.get("target") or ""),
+            )
         except (ValueError, TypeError, binascii.Error) as exc:
             valid_signature = False
             errors.append(f"{artifact}: invalid Ed25519 input: {exc}")

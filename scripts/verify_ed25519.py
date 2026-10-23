@@ -5,7 +5,10 @@ The Runtime signs a domain-separated UTF-8 payload, not the raw 32-byte
 SHA-256 digest.  Keeping this contract here prevents the Windows and
 macOS/Linux bootstrap installers from drifting from the compiled Runtime:
 
-    simplicio-release-v1:<lowercase sha256>
+    simplicio-release-v2:<version>:<target>:<lowercase sha256>
+
+Legacy ``simplicio-release-v1:<lowercase sha256>`` signatures (published
+before v2) still verify when no version/target is supplied.
 
 The sidecar and manifest carry the resulting ``ed25519:<base64>`` signature.
 """
@@ -22,6 +25,8 @@ D = (-121665 * pow(121666, Q - 2, Q)) % Q
 I = pow(2, (Q - 1) // 4, Q)
 B_Y = 4 * pow(5, Q - 2, Q) % Q
 SIGNATURE_DOMAIN = "simplicio-release-v1:"
+SIGNATURE_DOMAIN_V2 = "simplicio-release-v2:"
+SIGNATURE_TARGETS = ("any", "linux-arm64", "linux-x64", "macos-arm64", "macos-x64", "windows-x64")
 
 def inv(x: int) -> int:
     return pow(x, Q - 2, Q)
@@ -102,17 +107,68 @@ def canonical_sha256(value: str) -> str:
     return digest
 
 
-def signature_payload(sha256_hex: str) -> bytes:
+def canonical_version(value: str) -> str:
+    """Return the version text bound into a v2 signature (no leading ``v``)."""
+    version = str(value).strip()
+    version = version[1:] if version.startswith("v") else version
+    core, _, pre = version.partition("-")
+    parts = core.split(".")
+    if len(parts) != 3 or not all(part.isdigit() for part in parts) or not version:
+        raise ValueError("version must look like x.y.z")
+    if pre and any(not (char.isalnum() or char in ".-") for char in pre):
+        raise ValueError("version prerelease is invalid")
+    return version
+
+
+def canonical_target(value: str) -> str:
+    target = str(value).strip()
+    if target not in SIGNATURE_TARGETS:
+        raise ValueError("target must be one of " + ", ".join(SIGNATURE_TARGETS))
+    return target
+
+
+ARTIFACT_TARGETS = {
+    "simplicio-linux-arm64": "linux-arm64",
+    "simplicio-linux-x64": "linux-x64",
+    "simplicio-macos-arm64": "macos-arm64",
+    "simplicio-macos-x64": "macos-x64",
+    "simplicio-windows-x64.exe": "windows-x64",
+}
+
+
+def target_for_artifact(filename: str) -> str | None:
+    """Return the release target a published artifact filename belongs to."""
+    return ARTIFACT_TARGETS.get(str(filename).strip().rsplit("/", 1)[-1])
+
+
+def signature_payload(sha256_hex: str, version: str | None = None, target: str | None = None) -> bytes:
     """Build the exact domain-separated payload signed by Runtime ``update sign``."""
     digest = canonical_sha256(sha256_hex)
-    return f"{SIGNATURE_DOMAIN}{digest}".encode("ascii")
+    if version is None and target is None:
+        return f"{SIGNATURE_DOMAIN}{digest}".encode("ascii")
+    if version is None or target is None:
+        raise ValueError("v2 signatures require both version and target")
+    return (
+        f"{SIGNATURE_DOMAIN_V2}{canonical_version(version)}:{canonical_target(target)}:{digest}"
+    ).encode("ascii")
 
 
-def verify_signature_for_digest(public_key_value: str, signature_value: str, sha256_hex: str) -> bool:
-    """Verify a Runtime release signature for a hexadecimal artifact digest."""
+def verify_signature_for_digest(
+    public_key_value: str,
+    signature_value: str,
+    sha256_hex: str,
+    *,
+    version: str | None = None,
+    target: str | None = None,
+) -> bool:
+    """Verify a Runtime release signature for an artifact digest.
+
+    v2 signatures are bound to the release version and target; omitting both
+    keeps the legacy v1 payload for previously published releases.
+    """
     public_key = base64.b64decode(public_key_value.strip(), validate=True)
     signature = parse_signature(signature_value.strip())
-    return verify(public_key, signature, signature_payload(sha256_hex))
+    return verify(public_key, signature, signature_payload(sha256_hex, version, target))
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()

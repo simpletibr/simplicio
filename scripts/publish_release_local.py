@@ -125,7 +125,13 @@ def verify_bundle(bundle: Path, tag: str, version: str, source_commit: str) -> d
             raise PublishError("manifest identity mismatch: %s" % asset)
         if record.get("signature") != signature:
             raise PublishError("signature sidecar mismatch: %s" % asset)
-        if not verify_signature_for_digest(public_key, signature, digest):
+        if not verify_signature_for_digest(
+            public_key,
+            signature,
+            digest,
+            version=str(manifest.get("version") or ""),
+            target=str(record.get("target") or ""),
+        ):
             raise PublishError("Ed25519 verification failed: %s" % asset)
         for suffix in (".spdx.json", ".provenance.json"):
             json.loads((bundle / (asset + suffix)).read_text(encoding="utf-8"))

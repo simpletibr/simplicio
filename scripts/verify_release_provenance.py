@@ -19,9 +19,9 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 try:
-    from scripts.verify_ed25519 import verify_signature_for_digest
+    from scripts.verify_ed25519 import target_for_artifact, verify_signature_for_digest
 except ModuleNotFoundError:  # direct execution: python scripts/verify_release_provenance.py
-    from verify_ed25519 import verify_signature_for_digest
+    from verify_ed25519 import target_for_artifact, verify_signature_for_digest
 
 PROVENANCE_FIELDS = ("artifact", "url", "sha256", "signature")
 
@@ -243,7 +243,7 @@ def exact_directory_errors(directory: Path, expected_names: set[str], label: str
 
 
 def verify_staged_files(working: dict, staging_dir: Path) -> list[str]:
-    _, artifacts = provenance_snapshot(working)
+    version, artifacts = provenance_snapshot(working)
     expected_names = {record[0] for record in artifacts}
     errors = exact_directory_errors(staging_dir, expected_names, "staging")
     if errors:
@@ -266,7 +266,13 @@ def verify_staged_files(working: dict, staging_dir: Path) -> list[str]:
         return ["manifest requires Ed25519 but signing_pubkey is missing"]
     for name, _, expected_sha256, signature in artifacts:
         try:
-            valid = verify_signature_for_digest(public_key, signature, expected_sha256)
+            valid = verify_signature_for_digest(
+                public_key,
+                signature,
+                expected_sha256,
+                version=version,
+                target=target_for_artifact(name),
+            )
         except (ValueError, TypeError, binascii.Error) as exc:
             valid = False
             reason = str(exc)
