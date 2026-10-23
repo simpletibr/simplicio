@@ -37,7 +37,7 @@ REPO="simpletibr/simplicio"
 GITHUB="https://github.com/$REPO"
 ED25519_PUBLIC_KEY="t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U="
 ED25519_HELPER_URL="https://raw.githubusercontent.com/$REPO/master/scripts/verify_ed25519.py"
-ED25519_HELPER_SHA256="f03a0719dd557ddea27dc4cf1456d6f06a47b9056505e4d4b8453090697600d0"
+ED25519_HELPER_SHA256="837b5355a72837e33a130629409e9d284b37880129b309edc8fa81f6777e60eb"
 PUBLIC_ROUTE_REF="68b4c7f7ac27d07624ffa4ddf0673a43e180c3e5"
 PUBLIC_ROUTE_URL="https://raw.githubusercontent.com/$REPO/$PUBLIC_ROUTE_REF/codex/mcp-route.sh"
 PUBLIC_ROUTE_SHA256="d91200cae4816c79fe0c903fc6eedc01835a557827e8d3d0480304f3bdce5118"
@@ -436,6 +436,8 @@ verify_ed25519_signature() {
   public_key="$3"
   expected_sha256="$4"
   helper_path="$5"
+  release_version="$6"
+  release_target="$7"
 
   if [ -z "$signature" ] || [ -z "$public_key" ] || [ -z "$expected_sha256" ]; then
     return 1
@@ -462,7 +464,9 @@ verify_ed25519_signature() {
   python3 "$helper_path" \
     --public-key "$public_key" \
     --signature "$signature" \
-    --sha256 "$expected_sha256" >/dev/null 2>&1
+    --sha256 "$expected_sha256" \
+    --version "$release_version" \
+    --target "$release_target" >/dev/null 2>&1
 }
 
 verify_runtime_contract() {
@@ -1015,6 +1019,7 @@ if [ "$SKIP_EXISTING" != "true" ]; then
   SIGNATURE=""
   SIGNING_PUBKEY=""
   SIGNATURE_REQUIRED="false"
+  MANIFEST_VERSION=""
   MANIFEST_TMP="$(mktemp)" || err "não foi possível criar o arquivo temporário do manifest de release"
   trap 'rm -f "$MANIFEST_TMP"' EXIT
   if fetch "$MANIFEST_URL" "$MANIFEST_TMP" 2>/dev/null; then
@@ -1059,6 +1064,14 @@ import json
 try:
     m = json.load(open('$MANIFEST_TMP'))
     print(str(m.get('signing_pubkey') or '').strip())
+except Exception:
+    pass
+" 2>/dev/null)"
+    MANIFEST_VERSION="$(python3 -c "
+import json
+try:
+    m = json.load(open('$MANIFEST_TMP'))
+    print(str(m.get('version') or '').strip())
 except Exception:
     pass
 " 2>/dev/null)"
@@ -1116,7 +1129,7 @@ except Exception:
 
   if [ "$SIGNED" = "true" ]; then
     SIGNATURE_HELPER_TMP="$(mktemp)" || err "não foi possível criar o arquivo temporário do verificador Ed25519"
-    if [ "$SIGNING_PUBKEY" != "$ED25519_PUBLIC_KEY" ] || ! verify_ed25519_signature "$STAGING_PATH" "$SIGNATURE" "$ED25519_PUBLIC_KEY" "$EXPECTED_SHA256" "$SIGNATURE_HELPER_TMP"; then
+    if [ "$SIGNING_PUBKEY" != "$ED25519_PUBLIC_KEY" ] || ! verify_ed25519_signature "$STAGING_PATH" "$SIGNATURE" "$ED25519_PUBLIC_KEY" "$EXPECTED_SHA256" "$SIGNATURE_HELPER_TMP" "$MANIFEST_VERSION" "$TARGET_ID"; then
       rm -f "$STAGING_PATH" "$SIGNATURE_HELPER_TMP"
       err "assinatura Ed25519 inválida ou não verificável; instalação recusada"
     fi

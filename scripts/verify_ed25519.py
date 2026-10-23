@@ -177,12 +177,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--sha256",
         required=True,
-        help="lowercase hex SHA-256 digest; Runtime signs simplicio-release-v1:<digest>",
+        help="lowercase hex SHA-256 digest of the artifact",
     )
+    parser.add_argument("--version", help="release version bound into a v2 signature")
+    parser.add_argument("--target", help="release target bound into a v2 signature")
     args = parser.parse_args(argv)
     try:
         digest = canonical_sha256(args.sha256)
-        verified = verify_signature_for_digest(args.public_key, args.signature, digest)
+        verified = verify_signature_for_digest(
+            args.public_key,
+            args.signature,
+            digest,
+            version=args.version,
+            target=args.target,
+        )
     except (ValueError, base64.binascii.Error) as exc:
         print(f"invalid Ed25519 verification input: {exc}", file=sys.stderr)
         return 2

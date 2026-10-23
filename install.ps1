@@ -43,7 +43,7 @@ $Target = "windows-x64"
 $Asset = "simplicio-windows-x64.exe"
 $Ed25519PublicKey = "t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U="
 $Ed25519HelperUrl = "https://raw.githubusercontent.com/simpletibr/simplicio/master/scripts/verify_ed25519.py"
-$Ed25519HelperSha256 = "f03a0719dd557ddea27dc4cf1456d6f06a47b9056505e4d4b8453090697600d0"
+$Ed25519HelperSha256 = "9beb253526ae1c99d17885c62304787f8e912c849bb214a11e3e888486b211fa"
 $PublicRouteRef = "68b4c7f7ac27d07624ffa4ddf0673a43e180c3e5"
 $PublicRouteUrl = "https://raw.githubusercontent.com/$Repo/$PublicRouteRef/codex/mcp-route.ps1"
 $PublicRouteSha256 = "5a0392cd525b57d390bbdfb68dfe19de716861d07a97b90e6961be5b89455843"
@@ -232,7 +232,7 @@ function Get-RuntimeVersionJson([string]$BinaryPath) {
 }
 
 
-function Test-Ed25519Signature([string]$BinaryPath, [string]$Signature, [string]$PublicKey, [string]$Digest) {
+function Test-Ed25519Signature([string]$BinaryPath, [string]$Signature, [string]$PublicKey, [string]$Digest, [string]$Version, [string]$Target) {
   $helperPath = Join-Path ([IO.Path]::GetTempPath()) ("simplicio-verify-$([guid]::NewGuid().ToString('N')).py")
   try {
     $python = $null
@@ -268,7 +268,7 @@ function Test-Ed25519Signature([string]$BinaryPath, [string]$Signature, [string]
     $normalizedSignature = ([string]$Signature).Trim()
     $normalizedPublicKey = ([string]$PublicKey).Trim()
     $normalizedDigest = ([string]$Digest).Trim().ToLowerInvariant()
-    $verifyOutput = & $python @pythonArgs $helperPath --public-key $normalizedPublicKey --signature $normalizedSignature --sha256 $normalizedDigest 2>&1 | Out-String
+    $verifyOutput = & $python @pythonArgs $helperPath --public-key $normalizedPublicKey --signature $normalizedSignature --sha256 $normalizedDigest --version $Version --target $Target 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0) {
       $detail = $verifyOutput.Trim()
       if ([string]::IsNullOrWhiteSpace($detail)) {
@@ -811,6 +811,7 @@ $ExpectedSha256 = $null
 $ExpectedSigned = $false
 $ExpectedSignature = $null
 $ExpectedPublicKey = ""
+$ManifestVersion = ""
 $SignatureRequired = $false
 if ($Manifest) {
   $artifact = $Manifest.artifacts | Where-Object { $_.target -eq $Target } | Select-Object -First 1
@@ -820,6 +821,7 @@ if ($Manifest) {
     $ExpectedSignature = [string]$artifact.signature
   }
   $ExpectedPublicKey = ([string]$Manifest.signing_pubkey).Trim()
+  $ManifestVersion = ([string]$Manifest.version).Trim()
   $SignatureRequired = [bool]$Manifest.security.signature_required
 }
 
@@ -880,7 +882,7 @@ if ($ExpectedSha256) {
 }
 
 if ($ExpectedSigned) {
-  if (-not (Test-Ed25519Signature $StagingPath $ExpectedSignature $PinnedPublicKey $ExpectedSha256)) {
+  if (-not (Test-Ed25519Signature $StagingPath $ExpectedSignature $PinnedPublicKey $ExpectedSha256 $ManifestVersion $Target)) {
     Remove-Item -Force $StagingPath -ErrorAction SilentlyContinue
     if ([string]::IsNullOrWhiteSpace($script:Ed25519VerifyError)) {
       Fail-Install "Ed25519 signature verification failed; refusing to install."
