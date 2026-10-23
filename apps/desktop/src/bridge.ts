@@ -40,7 +40,7 @@ import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from ".
 import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./catalog_ui";
 import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
 import { parseWorktrees, type Worktree } from "./fleet";
-import type { ReviewDigest } from "./review";
+import { parseReviewReceipt, type ReviewDigest, type ReviewSubmissionReceipt } from "./review";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -401,6 +401,29 @@ export async function loadDesktopReview(repoPath: string, base?: string): Promis
     throw new Error("review_unavailable");
   }
   return value;
+}
+
+/**
+ * Writes the comments into the repository review inbox. The receipt is a local
+ * file receipt, not proof that a live agent session read the comments.
+ */
+export async function submitDesktopReview(
+  repoPath: string,
+  digest: string,
+  comments: string,
+  planDigest?: string,
+  base?: string,
+): Promise<ReviewSubmissionReceipt> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseReviewReceipt(
+    await invoke<unknown>("desktop_review_submit", {
+      repo: repoPath,
+      digest,
+      comments,
+      planDigest: planDigest?.trim() || null,
+      base: base?.trim() || null,
+    }),
+  );
 }
 
 export async function loadDesktopWorktrees(repoPath: string): Promise<Worktree[]> {
