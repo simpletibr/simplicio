@@ -103,4 +103,31 @@ describe("FleetCockpitList", () => {
     expect(html).toContain("Wave 1");
     expect(html).toContain("Adicionar à fila");
   });
+
+  it("shows the reason instead of a duration when the orientation was not measured", () => {
+    const html = renderToStaticMarkup(
+      <FleetCockpitList
+        worktrees={worktrees}
+        repoPath="C:/repo"
+        issue="3"
+        agent="claude"
+        wipLimit={2}
+        busy={false}
+        queue={queue}
+        orientationNotice="Baseline ausente para este repositório; rode `simplicio map --repo <repo> --json` no default branch. A orientação não foi medida."
+        onRepo={noop}
+        onIssue={noop}
+        onAgent={noop}
+        onWipLimit={noop}
+        onCreate={noop}
+        onRemove={noop}
+        onQueueTask={noop}
+        onQueueStatus={noop}
+      />,
+    );
+    expect(html).toContain('data-testid="fleet-orientation-notice"');
+    expect(html).toContain("Baseline ausente");
+    expect(html).toContain("1200 ms");
+    expect(html).toContain("orientação não medida");
+  });
 });

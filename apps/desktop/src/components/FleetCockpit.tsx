@@ -3,6 +3,7 @@ import {
   createDesktopWorktree,
   loadDesktopFleetQueue,
   loadDesktopWorktrees,
+  orientDesktopWorktree,
   removeDesktopWorktree,
   upsertDesktopFleetTask,
 } from "../bridge";
@@ -27,6 +28,11 @@ import {
   type FleetTask,
   type FleetTaskNode,
 } from "../fleet_queue";
+import {
+  orientationFields,
+  orientationNotice as orientationMessage,
+  type OrientationMeasurement,
+} from "../worktree_orientation";
 
 const AGENTS = ["claude", "codex", "gemini", "cursor", "opencode", "hermes"];
 const TRACK_SUGGESTIONS = ["desktop", "runtime", "docs", "infra"];
@@ -238,6 +244,7 @@ export function FleetCockpitList({
   error,
   queue,
   queueError,
+  orientationNotice,
   onCreate,
   onRemove,
   onRepo,
@@ -256,6 +263,7 @@ export function FleetCockpitList({
   error?: string | null;
   queue?: FleetQueue | null;
   queueError?: string | null;
+  orientationNotice?: string | null;
   onRepo: (value: string) => void;
   onIssue: (value: string) => void;
   onAgent: (value: string) => void;
@@ -306,9 +314,12 @@ export function FleetCockpitList({
         </ul>
       )}
       {onQueueTask && <FleetQueueControls busy={busy} defaultIssue={issue} defaultAgent={agent} onAdd={onQueueTask} />}
+      {orientationNotice && (
+        <p role="status" data-testid="fleet-orientation-notice">{orientationNotice}</p>
+      )}
       {queue && <FleetQueueBoard queue={queue} busy={busy} onStatus={onQueueStatus} />}
       {queueError && <p role="status" data-testid="fleet-queue-error">{fleetQueueErrorMessage(queueError)}</p>}
-      <p className="cache-meter-source">Criação git real em <code>~/.simplicio/worktrees/&lt;repo&gt;/issue-&lt;n&gt;</code>; remoção limitada a esse diretório. O WIP limit é aplicado antes de qualquer escrita. A orientação só aparece quando medida; &lt;2 s continua não verificado neste ambiente headless.</p>
+      <p className="cache-meter-source">Criação git real em <code>~/.simplicio/worktrees/&lt;repo&gt;/issue-&lt;n&gt;</code>; remoção limitada a esse diretório. O WIP limit é aplicado antes de qualquer escrita. A orientação é medida no Runtime a partir do baseline compartilhado do default branch; sem baseline o tempo não é inventado e o motivo aparece acima.</p>
     </section>
   );
 }
@@ -323,6 +334,8 @@ export function FleetCockpit() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [queueError, setQueueError] = useState<string | null>(null);
+  const [orientation, setOrientation] = useState<{ issue: number; measurement: OrientationMeasurement } | null>(null);
+  const [orientationNotice, setOrientationNotice] = useState<string | null>(null);
 
   async function refresh(path = repoPath) {
     if (!path.trim()) return;
@@ -373,24 +386,40 @@ export function FleetCockpit() {
   }
 
   function addQueueTask(draft: FleetQueueDraft) {
-    const current = queue ?? emptyFleetQueue();
-    const matched = worktrees?.find((item) => item.issue === draft.issue);
-    const task: FleetTask = {
-      id: draft.issue + "-" + draft.track,
-      issue: draft.issue,
-      worktree: matched?.path ?? "",
-      agent: draft.agent,
-      track: draft.track,
-      lane: draft.status,
-      wave: draft.wave,
-      status: draft.status,
-      parent: draft.parent,
-      updated_at: new Date().toISOString(),
-    };
-    const limits = { ...current.wip_per_track, [draft.track]: draft.trackWip };
-    const admission = admitFleetTask(current, task, limits);
-    if (!admission.ok) { setQueueError(admission.error); return; }
-    void saveQueue(task, { [draft.track]: draft.trackWip });
+    void (async () => {
+      const current = queue ?? emptyFleetQueue();
+      const matched = worktrees?.find((item) => item.issue === draft.issue);
+      // Opening a task measures its orientation once, from the shared
+      // baseline; a task without a real measurement is stored unmeasured.
+      let measured = orientation && orientation.issue === draft.issue ? orientation.measurement : undefined;
+      if (measured === undefined && matched) {
+        try {
+          const opened = await orientDesktopWorktree(repoPath.trim(), matched.path);
+          setOrientation(opened.status === "measured" ? { issue: draft.issue, measurement: opened } : null);
+          setOrientationNotice(orientationMessage(opened));
+          measured = opened;
+        } catch (failure) {
+          setOrientationNotice("Falha ao medir a orientação: " + codeOf(failure));
+        }
+      }
+      const task: FleetTask = {
+        id: draft.issue + "-" + draft.track,
+        issue: draft.issue,
+        worktree: matched?.path ?? "",
+        agent: draft.agent,
+        track: draft.track,
+        lane: draft.status,
+        wave: draft.wave,
+        status: draft.status,
+        parent: draft.parent,
+        updated_at: new Date().toISOString(),
+        ...orientationFields(measured),
+      };
+      const limits = { ...current.wip_per_track, [draft.track]: draft.trackWip };
+      const admission = admitFleetTask(current, task, limits);
+      if (!admission.ok) { setQueueError(admission.error); return; }
+      void saveQueue(task, { [draft.track]: draft.trackWip });
+    })();
   }
 
   function updateQueueStatus(id: string, status: FleetStatus) {
@@ -414,6 +443,7 @@ export function FleetCockpit() {
       error={error}
       queue={queue}
       queueError={queueError}
+      orientationNotice={orientationNotice}
       onRepo={(value) => { setRepoPath(value); void refresh(value); void refreshQueue(value); }}
       onIssue={setIssue}
       onAgent={setAgent}
@@ -421,7 +451,15 @@ export function FleetCockpit() {
       onCreate={() => {
         const number = Number(issue);
         if (!Number.isSafeInteger(number) || number < 1) { setError("issue_invalid"); return; }
-        void mutate(() => createDesktopWorktree(repoPath.trim(), number, agent, wipLimit));
+        void mutate(async () => {
+          const receipt = await createDesktopWorktree(repoPath.trim(), number, agent, wipLimit);
+          setOrientation(
+            receipt.orientation.status === "measured"
+              ? { issue: receipt.issue, measurement: receipt.orientation }
+              : null,
+          );
+          setOrientationNotice(orientationMessage(receipt.orientation));
+        });
       }}
       onRemove={(worktree) => void mutate(() => removeDesktopWorktree(repoPath.trim(), worktree.path))}
       onQueueTask={addQueueTask}
