@@ -559,6 +559,20 @@ function Test-McpToolSurface([string]$BinaryPath) {
       @("mcp", "register", "--binary", $BinaryPath, "--json") `
       @{ SIMPLICIO_MCP_URL = $SimplicioMcpUrl }
     if ($result.ExitCode -eq 0) { return $true }
+    try {
+      $payload = ($result.Stdout | Out-String) | ConvertFrom-Json
+      if ($payload.status -eq 'failed') {
+        $failedHosts = @($payload.PSObject.Properties |
+          Where-Object { $_.Value -is [pscustomobject] -and $_.Value.status -eq 'failed' } |
+          ForEach-Object { $_.Name })
+        if ($failedHosts.Count -eq 1 -and $failedHosts[0] -eq 'hermes') {
+          Write-Host "  ! optional host integration failed (hermes); install continues"
+          return $true
+        }
+      }
+    } catch {
+      # Fall through to the structured failure below.
+    }
     $failure = Resolve-RuntimeFailure `
       $result.Stdout `
       $result.Stderr `

@@ -721,6 +721,19 @@ if not reason:
 if not reason:
     reason = f"Runtime MCP registration failed with exit code {sys.argv[5]}"
 
+# An optional host integration (for example the isolated Hermes runtime) must
+# not abort an otherwise successful install.
+optional_failed = []
+if isinstance(payload, dict) and text_value(payload.get("status")) == "failed":
+    optional_failed = [
+        key
+        for key, value in payload.items()
+        if isinstance(value, dict) and text_value(value.get("status")) == "failed"
+    ]
+if optional_failed and optional_failed == ["hermes"]:
+    code = "optional_host_failed"
+    reason = "optional host integration failed: " + ", ".join(optional_failed)
+
 reason_bytes = reason.encode("utf-8")
 if len(reason_bytes) > LIMIT:
     reason = reason_bytes[:LIMIT].decode("utf-8", errors="ignore") + TRUNCATED
@@ -736,6 +749,15 @@ PY
     MCP_FAILURE_CODE="${MCP_FAILURE_CODE%"$capture_sentinel"}"
     MCP_FAILURE_REASON="$(cat "$reason_path"; printf '%s' "$capture_sentinel")"
     MCP_FAILURE_REASON="${MCP_FAILURE_REASON%"$capture_sentinel"}"
+    if [ "$MCP_FAILURE_CODE" = "optional_host_failed" ]; then
+      warn "integração opcional de host não concluída ($MCP_FAILURE_REASON); instalação continua"
+      rm -f "$stdout_path" "$stderr_path" "$stdout_path.truncated" "$stderr_path.truncated" "$code_path" "$reason_path"
+      rmdir "$capture_dir" 2>/dev/null || true
+      "$binary_path" memory steward migrate --json >/dev/null 2>&1 || true
+      "$binary_path" memory steward seed --json >/dev/null 2>&1 || true
+      "$binary_path" memory init --json >/dev/null 2>&1 || true
+      return 0
+    fi
   else
     MCP_FAILURE_CODE="mcp_registration_failed"
     capture_sentinel="__SIMPLICIO_CAPTURE_EOF__"
