@@ -43,6 +43,12 @@ import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
 import { parseWorktrees, type Worktree } from "./fleet";
 import { parseRemoteFleet, type RemoteFleet } from "./remote_fleet";
 import { parseFleetQueue, type FleetQueue, type FleetTask } from "./fleet_queue";
+import {
+  parseOrientation,
+  parseWorktreeCreateReceipt,
+  type OrientationMeasurement,
+  type WorktreeCreateReceipt,
+} from "./worktree_orientation";
 import { parseReviewReceipt, type ReviewDigest, type ReviewSubmissionReceipt } from "./review";
 import {
   canonicalAuthoritativeHostProvider,
@@ -478,9 +484,17 @@ export async function loadDesktopRemoteFleet(): Promise<RemoteFleet> {
   );
 }
 
-export async function createDesktopWorktree(repoPath: string, issue: number, agent: string, wipLimit: number): Promise<unknown> {
+export async function createDesktopWorktree(repoPath: string, issue: number, agent: string, wipLimit: number): Promise<WorktreeCreateReceipt> {
   if (!isTauri()) throw new Error("preview_no_runtime");
-  return invoke<unknown>("desktop_worktree_create", { repoPath, issue, agent, wipLimit });
+  return parseWorktreeCreateReceipt(
+    await invoke<unknown>("desktop_worktree_create", { repoPath, issue, agent, wipLimit }),
+  );
+}
+
+/** Opens an existing task: measures its orientation from the shared baseline. */
+export async function orientDesktopWorktree(repoPath: string, path: string): Promise<OrientationMeasurement> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseOrientation(await invoke<unknown>("desktop_worktree_orient", { repoPath, path }));
 }
 
 export async function removeDesktopWorktree(repoPath: string, path: string): Promise<unknown> {

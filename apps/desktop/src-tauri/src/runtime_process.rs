@@ -33,6 +33,15 @@ impl CaptureLimits {
         stdout_bytes: 64 * 1024,
         stderr_bytes: 16 * 1024,
     };
+    /// One worktree orientation: a baseline hit answers in well under a
+    /// second, and a checkout without a baseline must never hang the create
+    /// flow while the Runtime builds one. The map receipt lists every mapped
+    /// file, so the stdout budget is larger than a plain query.
+    pub const ORIENTATION: Self = Self {
+        deadline: Duration::from_secs(10),
+        stdout_bytes: 4 * 1024 * 1024,
+        stderr_bytes: 16 * 1024,
+    };
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

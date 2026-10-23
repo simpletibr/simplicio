@@ -36,6 +36,7 @@ mod grok_quotas;
 mod token_exports;
 mod unified_usage_bridge;
 mod usage_changefeed;
+mod worktree_orientation;
 
 static INSTALL_PROCESS_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
@@ -218,6 +219,64 @@ fn runtime_user_home() -> Result<PathBuf, String> {
 
 fn run_runtime_action(args: &[&str]) -> Result<(), String> {
     successful_output(args).map(|_| ())
+}
+
+/// Asks the Runtime for the checkout's map. The Runtime owns the shared
+/// default-branch baseline (#6594); this call never maps a repository itself,
+/// it reads the receipt that says whether the baseline was reused (`hit`) or
+/// had to be built (`written`).
+fn runtime_orientation_map(repo: &Path) -> Result<Value, String> {
+    let binary = packaged_runtime_authority()
+        .map_err(|_| "orientation_runtime_unavailable".to_string())?;
+    let repo = repo
+        .to_str()
+        .ok_or_else(|| "repo_path_invalid".to_string())?;
+    let mut command = Command::new(binary);
+    command
+        .args(["map", "--repo", repo, "--json"])
+        .env("SIMPLICIO_DESKTOP_BRIDGE", "1");
+    let output = runtime_process::capture(&mut command, runtime_process::CaptureLimits::ORIENTATION)
+        .map_err(|failure| {
+            use runtime_process::FailureKind;
+            let code = match failure.kind {
+                FailureKind::Spawn => "orientation_runtime_unavailable",
+                FailureKind::Deadline => "orientation_timeout",
+                _ => "orientation_unavailable",
+            };
+            code.to_string()
+        })?;
+    if !output.status.success() {
+        return Err("orientation_map_failed".to_string());
+    }
+    worktree_orientation::parse_runtime_json(&output.stdout)
+}
+
+/// Read-only probe of `<git-common-dir>/simplicio/map` before invoking the
+/// Runtime, so a checkout with no baseline is reported as missing instead of
+/// silently triggering a full map.
+fn shared_baseline_ready(repo: &Path) -> bool {
+    let Ok(output) = git_output(repo, &["rev-parse", "--git-common-dir"]) else {
+        return false;
+    };
+    if !output.status.success() {
+        return false;
+    }
+    let raw = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if raw.is_empty() {
+        return false;
+    }
+    let dir = PathBuf::from(raw);
+    let common = if dir.is_absolute() { dir } else { repo.join(dir) };
+    worktree_orientation::baseline_store_ready(&common)
+}
+
+/// Measured orientation of one worktree. Always returns a receipt; failures
+/// are explicit and carry no number.
+pub(crate) fn orient_worktree(path: &Path) -> Value {
+    match worktree_orientation::orient(path, shared_baseline_ready(path), runtime_orientation_map) {
+        Ok(found) => found.to_json(),
+        Err(code) => worktree_orientation::failure(&code),
+    }
 }
 
 fn run_host_plugin_json(args: &[&str]) -> Result<Value, String> {
@@ -1162,6 +1221,10 @@ pub(crate) fn create_managed_worktree(
     if !output.status.success() {
         return Err("worktree_create_failed".to_string());
     }
+    // First orientation of the new worktree: the Runtime serves the stored
+    // default-branch baseline and this records the measured duration. A
+    // missing baseline stays explicit (no number) and never fails creation.
+    let orientation = orient_worktree(&path);
     Ok(serde_json::json!({
         "schema": "simplicio.desktop-worktree-create/v1",
         "status": "created",
@@ -1170,7 +1233,52 @@ pub(crate) fn create_managed_worktree(
         "agent": agent,
         "path": path.display().to_string(),
         "redacted": true,
+        "orientation": orientation,
     }))
+}
+
+/// Managed worktree path under `~/.simplicio/worktrees`, canonicalized.
+fn managed_worktree_target(path: &str) -> Result<PathBuf, String> {
+    let home = runtime_user_home()?;
+    let managed = home.join(".simplicio").join("worktrees");
+    let target = PathBuf::from(path)
+        .canonicalize()
+        .map_err(|_| "worktree_path_invalid".to_string())?;
+    let root = managed.canonicalize().unwrap_or(managed);
+    if !target.starts_with(&root) {
+        return Err("worktree_path_invalid".to_string());
+    }
+    Ok(target)
+}
+
+/// The requested worktree must be one `git worktree list` reports for the
+/// selected repository, so orientation cannot be measured for a foreign path.
+fn worktree_belongs_to_repo(repo: &Path, target: &Path) -> bool {
+    let Ok(output) = git_output(repo, &["worktree", "list", "--porcelain"]) else {
+        return false;
+    };
+    output.status.success()
+        && String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .filter_map(|line| line.strip_prefix("worktree "))
+            .map(|path| PathBuf::from(path).canonicalize().unwrap_or_else(|_| PathBuf::from(path)))
+            .any(|path| path == target)
+}
+
+/// Opens an existing task: measures its orientation from the shared baseline.
+#[tauri::command]
+async fn desktop_worktree_orient(repo_path: String, path: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        let repo = validated_repo_path(&repo_path)?;
+        let target = managed_worktree_target(&path)?;
+        if !worktree_belongs_to_repo(&repo, &target) {
+            return Err("worktree_path_invalid".to_string());
+        }
+        Ok(orient_worktree(&target))
+    })
+    .await
+    .map_err(|_| "orientation_unavailable".to_string())?
 }
 
 #[tauri::command]
@@ -2071,6 +2179,7 @@ pub fn run() {
             desktop_remote_fleet,
             desktop_worktree_create,
             desktop_worktree_remove,
+            desktop_worktree_orient,
             desktop_fleet_queue,
             desktop_fleet_queue_upsert,
             desktop_hosts_plan,
