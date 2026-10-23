@@ -8,6 +8,7 @@ import { isNavigationVisible, searchMatches, type View } from "../workbench";
 import "../reference_settings.css";
 import { DESKTOP_UPDATE_EVENT } from "../desktop_updates";
 import { readProviderQuotas } from "../components/ProviderUsage";
+import { PluginManagerPanel } from "../components/PluginManagerPanel";
 import { useSystemPermissions, permissionLabels } from "../use_system_permissions";
 import { permissionIds, openPermissionSettings, requestMediaPermission, revealPermissionApp, type PermissionId } from "../system_permissions";
 
@@ -492,6 +493,7 @@ function Plugins({ evidence, onNavigate }: { evidence: Evidence; onNavigate: Nav
   const packages = pluginPackages.filter((plugin) => searchMatches(plugin.name + " " + plugin.description + " " + plugin.category, query));
   const skills = evidence.skills.filter((skill) => searchMatches(skill, query));
   return <>
+    <PluginManagerPanel />
     <Notice title="Pacote instalado e MCP registrado são estados diferentes">O reparo de integrações configura MCP e hooks. Ele não comprova a instalação, atualização ou ativação de cada pacote nativo no seu agente ou IDE.</Notice>
     <Section title="Pacotes e inventário" description="O catálogo público não é uma lista de pacotes instalados nesta máquina.">
       <div className="ref-plugin-toolbar"><div className="segmented-control" role="group" aria-label="Origem do inventário de plugins"><button type="button" aria-pressed={tab === "catalog"} className={tab === "catalog" ? "active" : ""} onClick={() => setTab("catalog")}>Catálogo público</button><button type="button" aria-pressed={tab === "reported"} className={tab === "reported" ? "active" : ""} onClick={() => setTab("reported")}>Skills informadas</button></div><label className="ref-search"><Glyph name="search" size={17} /><input aria-label="Buscar plugins e skills" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar pacote ou categoria" maxLength={120} /></label></div>

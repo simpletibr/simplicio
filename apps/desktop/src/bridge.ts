@@ -36,6 +36,7 @@ import {
 import { parseRuntimeLifecycleReceipt, type RuntimeLifecycleAction, type RuntimeLifecycleReceipt } from "./runtime_lifecycle";
 import { parseIdleSessionFinalization, IDLE_SESSION_TIMEOUT_MS, type IdleSessionFinalization } from "./session_idle";
 import { parseCacheMeter, type CacheMeterReceipt } from "./cache_meter";
+import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from "./plugin_manager";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -387,6 +388,27 @@ export async function loadDesktopCacheMeter(options: { sessionId?: string } = {}
     60_000,
     "cache_meter_timeout",
   ));
+}
+
+export async function loadDesktopPlugins(): Promise<PluginCatalog> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parsePluginCatalog(await withTimeout(invoke<unknown>("desktop_plugins"), 60_000, "plugin_catalog_timeout"));
+}
+
+export async function installDesktopPlugin(name: string, consent = false): Promise<unknown> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  if (requiresPluginConsent(name) && !consent) throw new Error("plugin_consent_required");
+  return invoke<unknown>("desktop_plugin_install", { name, consent });
+}
+
+export async function removeDesktopPlugin(name: string): Promise<unknown> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return invoke<unknown>("desktop_plugin_remove", { name });
+}
+
+export async function updateDesktopPlugin(name: string): Promise<unknown> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return invoke<unknown>("desktop_plugin_update", { name });
 }
 
 export async function loadDesktopTokenReport(request: TokenQuery): Promise<TokenUsageReport> {
