@@ -943,6 +943,30 @@ pub(crate) fn review_from_repo(repo_path: &str, base: Option<&str>) -> Result<Va
     review_snapshot(&repo, base)
 }
 
+pub(crate) const DIFF_SCHEMA: &str = "simplicio.desktop-diff/v1";
+
+/// The bounded, redacted diff document shared by `diff open` and `/v1/diff`.
+/// It reuses the review snapshot so both surfaces quote byte-identical text.
+pub(crate) fn diff_snapshot(repo: &Path, base: Option<&str>) -> Result<Value, String> {
+    let review = review_snapshot(repo, base)?;
+    Ok(serde_json::json!({
+        "schema": DIFF_SCHEMA,
+        "path": repo.display().to_string(),
+        "base": review.get("base").cloned().unwrap_or(Value::Null),
+        "status": review.get("status").cloned().unwrap_or(Value::Null),
+        "diff": review.get("diff").cloned().unwrap_or(Value::Null),
+        "digest": review.get("digest").cloned().unwrap_or(Value::Null),
+        "truncated": review.get("truncated").cloned().unwrap_or(Value::Null),
+        "redacted": true,
+    }))
+}
+
+pub(crate) fn diff_from_path(path: &str, base: Option<&str>) -> Result<Value, String> {
+    require_read_access()?;
+    let repo = validated_repo_path(path)?;
+    diff_snapshot(&repo, base)
+}
+
 #[tauri::command]
 async fn desktop_review(repo_path: String, base: Option<String>) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
@@ -1038,6 +1062,48 @@ async fn desktop_worktrees(repo_path: String) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || worktrees_from_repo(&repo_path))
         .await
         .map_err(|_| "worktree_list_failed".to_string())?
+}
+
+/// Resolves one worktree of `repo_path` by branch name (`issue-<n>` or an id)
+/// or by directory name. This is the only selector resolver: the API and the
+/// native commands answer from the same `git worktree list --porcelain`.
+pub(crate) fn worktree_path_for(repo_path: &str, key: &str) -> Result<String, String> {
+    if key.is_empty()
+        || key.len() > 512
+        || key
+            .chars()
+            .any(|value| value.is_control() || matches!(value, '/' | '\\'))
+    {
+        return Err("worktree_not_found".to_string());
+    }
+    let repo = validated_repo_path(repo_path)?;
+    let output = git_output(&repo, &["worktree", "list", "--porcelain"])?;
+    if !output.status.success() {
+        return Err("worktree_list_failed".to_string());
+    }
+    let listing = String::from_utf8_lossy(&output.stdout).to_string();
+    for block in listing.split("\n\n") {
+        let mut path: Option<&str> = None;
+        let mut branch_matches = false;
+        let mut path_matches = false;
+        for line in block.lines() {
+            if let Some(value) = line.strip_prefix("worktree ") {
+                path = Some(value);
+                path_matches = value
+                    .rsplit(['/', '\\'])
+                    .next()
+                    .is_some_and(|name| name == key);
+            } else if let Some(value) = line.strip_prefix("branch ") {
+                branch_matches = value.rsplit('/').next().is_some_and(|name| name == key);
+            }
+        }
+        if branch_matches || path_matches {
+            if let Some(path) = path {
+                return Ok(path.to_string());
+            }
+        }
+    }
+    Err("worktree_not_found".to_string())
 }
 
 /// Default and clamp for the worktree WIP limit; 5 matches the fleet queue default.

@@ -80,7 +80,15 @@ pub(crate) fn start() -> Result<(), String> {
     let server_info = info.clone();
     if let Err(error) = std::thread::Builder::new()
         .name("simplicio-desktop-api".to_string())
-        .spawn(move || serve(listener, token, server_info, server_shutdown))
+        .spawn(move || {
+            serve(
+                listener,
+                token,
+                server_info,
+                server_shutdown,
+                Arc::new(NativeActions),
+            )
+        })
     {
         let _ = std::fs::remove_file(token_file_path(&home));
         return Err(format!("desktop_api_start_failed: {error}"));
@@ -249,7 +257,13 @@ fn authorize(headers: &BTreeMap<String, String>, expected: &str) -> Result<(), A
     }
 }
 
-fn serve(listener: TcpListener, token: String, info: ApiInfo, shutdown: Arc<AtomicBool>) {
+fn serve(
+    listener: TcpListener,
+    token: String,
+    info: ApiInfo,
+    shutdown: Arc<AtomicBool>,
+    actions: Arc<dyn ScriptedActions>,
+) {
     let _ = listener.set_nonblocking(true);
     let (sender, receiver) = mpsc::sync_channel::<TcpStream>(WORKERS * 8);
     let receiver = Arc::new(Mutex::new(receiver));
@@ -259,6 +273,7 @@ fn serve(listener: TcpListener, token: String, info: ApiInfo, shutdown: Arc<Atom
         let receiver = Arc::clone(&receiver);
         let token = token.clone();
         let info = info.clone();
+        let actions = Arc::clone(&actions);
         workers.push(std::thread::spawn(move || loop {
             let next = {
                 let guard = match receiver.lock() {
@@ -268,7 +283,7 @@ fn serve(listener: TcpListener, token: String, info: ApiInfo, shutdown: Arc<Atom
                 guard.recv()
             };
             match next {
-                Ok(mut stream) => handle_connection(&mut stream, &token, &info),
+                Ok(mut stream) => handle_connection(&mut stream, &token, &info, actions.as_ref()),
                 Err(_) => break,
             }
         }));
@@ -294,11 +309,20 @@ fn serve(listener: TcpListener, token: String, info: ApiInfo, shutdown: Arc<Atom
     }
 }
 
-fn handle_connection(stream: &mut TcpStream, token: &str, info: &ApiInfo) {
+fn handle_connection(
+    stream: &mut TcpStream,
+    token: &str,
+    info: &ApiInfo,
+    actions: &dyn ScriptedActions,
+) {
+    // BSD/macOS accepts inherit the listener's non-blocking flag; the request
+    // reader expects a blocking socket or a slow client answers 408 instead of
+    // waiting for its bytes.
+    let _ = stream.set_nonblocking(false);
     let _ = stream.set_read_timeout(Some(REQUEST_TIMEOUT));
     let _ = stream.set_write_timeout(Some(REQUEST_TIMEOUT));
     let (status, body) = match read_request(stream) {
-        Ok(request) => dispatch(request, token, info),
+        Ok(request) => dispatch(request, token, info, actions),
         Err(failure) => (failure.status(), failure.body()),
     };
     write_response(stream, status, &body);
@@ -485,7 +509,424 @@ fn content_length(headers: &BTreeMap<String, String>) -> Result<usize, RequestFa
     value.parse::<usize>().map_err(|_| RequestFailure::TooLarge)
 }
 
-fn dispatch(request: Request, token: &str, info: &ApiInfo) -> (u16, Value) {
+/// Groups the scripted twin (`simplicio desktop <group> ...` and the
+/// `simplicio_desktop` MCP tool) advertises. Every Runtime call behind them is a
+/// trait method so the routes can be tested without an installed Runtime.
+pub(crate) trait ScriptedActions: Send + Sync {
+    /// `simplicio goal report [--repo <p>] [--id <goal>] --json`.
+    fn run(&self, repo: Option<&str>, goal_id: Option<&str>) -> Result<Value, String>;
+    /// `simplicio evidence receipt get --run-id <id> --json`.
+    fn receipt(&self, run_id: &str) -> Result<Value, String>;
+    /// The existing execution-report projection, reused by `report open`.
+    fn report(&self, repo: Option<&str>, run_id: Option<&str>) -> Result<Value, String>;
+    /// `git diff` for one worktree, bounded and redacted.
+    fn diff(&self, path: &str, base: Option<&str>) -> Result<Value, String>;
+}
+
+struct NativeActions;
+
+impl ScriptedActions for NativeActions {
+    fn run(&self, repo: Option<&str>, goal_id: Option<&str>) -> Result<Value, String> {
+        crate::require_read_access()?;
+        let mut args = vec!["goal".to_string(), "report".to_string()];
+        if let Some(repo) = repo {
+            args.push("--repo".to_string());
+            args.push(repo.to_string());
+        }
+        if let Some(goal_id) = goal_id {
+            args.push("--id".to_string());
+            args.push(goal_id.to_string());
+        }
+        args.push("--json".to_string());
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        crate::run_runtime_json(&borrowed).map_err(|_| "run_unavailable".to_string())
+    }
+
+    fn receipt(&self, run_id: &str) -> Result<Value, String> {
+        crate::require_read_access()?;
+        let args = ["evidence", "receipt", "get", "--run-id", run_id, "--json"];
+        crate::run_runtime_json(&args).map_err(|_| "receipt_unavailable".to_string())
+    }
+
+    fn report(&self, repo: Option<&str>, run_id: Option<&str>) -> Result<Value, String> {
+        crate::execution_report_from(repo, run_id)
+    }
+
+    fn diff(&self, path: &str, base: Option<&str>) -> Result<Value, String> {
+        crate::diff_from_path(path, base)
+    }
+}
+
+/// `simplicio.desktop-run/v1`, `receipt/v1` and the diff schema; one document per
+/// group, matching the twin's group names.
+pub(crate) const RUN_SCHEMA: &str = "simplicio.desktop-run/v1";
+pub(crate) const RECEIPT_SCHEMA: &str = "simplicio.desktop-receipt/v1";
+/// Statuses that mean the run is no longer active (`run wait --for idle`).
+const TERMINAL_RUN_STATUSES: &[&str] = &[
+    "complete",
+    "completed",
+    "done",
+    "failed",
+    "cancelled",
+    "canceled",
+    "idle",
+];
+const MAX_SELECTOR_BYTES: usize = 4096;
+
+/// `id:<x>`, `path:<p>` or `issue:<n>`, parsed exactly like the Runtime twin:
+/// an unprefixed value is rejected, never guessed.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum Selector {
+    Id(String),
+    Path(String),
+    Issue(u64),
+}
+
+impl Selector {
+    fn parse(raw: &str) -> Result<Self, String> {
+        let bad = || "invalid_selector".to_string();
+        if raw.is_empty()
+            || raw.len() > MAX_SELECTOR_BYTES
+            || raw.chars().any(|value| matches!(value, '\0' | '\r' | '\n'))
+        {
+            return Err(bad());
+        }
+        let (kind, value) = raw.split_once(':').ok_or_else(bad)?;
+        if value.is_empty() {
+            return Err(bad());
+        }
+        match kind {
+            "id" => {
+                if value.chars().any(char::is_whitespace) {
+                    return Err(bad());
+                }
+                Ok(Self::Id(value.to_string()))
+            }
+            "path" => Ok(Self::Path(value.to_string())),
+            "issue" => value.parse().map(Self::Issue).map_err(|_| bad()),
+            _ => Err(bad()),
+        }
+    }
+
+    fn kind(&self) -> &'static str {
+        match self {
+            Self::Id(_) => "id",
+            Self::Path(_) => "path",
+            Self::Issue(_) => "issue",
+        }
+    }
+
+    fn value(&self) -> String {
+        match self {
+            Self::Id(value) | Self::Path(value) => value.clone(),
+            Self::Issue(issue) => issue.to_string(),
+        }
+    }
+
+    fn document(&self) -> Value {
+        json!({
+            "raw": format!("{}:{}", self.kind(), self.value()),
+            "kind": self.kind(),
+            "value": self.value(),
+        })
+    }
+}
+
+fn required_selector(query: &BTreeMap<String, String>) -> Result<Selector, String> {
+    let raw = query
+        .get("selector")
+        .ok_or_else(|| "selector_required".to_string())?;
+    Selector::parse(raw)
+}
+
+/// Base repository for `issue:<n>`/`id:<x>` lookups: the `repo` parameter, or
+/// the same default the other routes use.
+fn selector_base_repo(query: &BTreeMap<String, String>) -> Result<String, String> {
+    match query.get("repo") {
+        Some(repo) => Ok(repo.clone()),
+        None => default_repo_string(),
+    }
+}
+
+fn issue_worktree(query: &BTreeMap<String, String>, issue: u64) -> Result<String, String> {
+    if issue == 0 {
+        return Err("issue_invalid".to_string());
+    }
+    crate::worktree_path_for(&selector_base_repo(query)?, &format!("issue-{issue}"))
+}
+
+fn run_is_idle(document: &Value) -> bool {
+    ["/goal/status", "/status", "/loop/status"]
+        .iter()
+        .filter_map(|pointer| document.pointer(pointer).and_then(Value::as_str))
+        .any(|status| TERMINAL_RUN_STATUSES.contains(&status.to_ascii_lowercase().as_str()))
+}
+
+struct WaitPolicy {
+    attempts: u32,
+    gap: Duration,
+}
+
+#[cfg(test)]
+fn wait_policy() -> WaitPolicy {
+    WaitPolicy {
+        attempts: 3,
+        gap: Duration::from_millis(1),
+    }
+}
+
+#[cfg(not(test))]
+fn wait_policy() -> WaitPolicy {
+    WaitPolicy {
+        attempts: 5,
+        gap: Duration::from_millis(200),
+    }
+}
+
+/// `path:` names the working tree, so a separate `repo` would be ambiguous.
+/// `issue:`/`id:` still use `repo` as the base repository for the lookup.
+fn reject_redundant_repo(
+    selector: &Selector,
+    query: &BTreeMap<String, String>,
+) -> Result<(), String> {
+    if matches!(selector, Selector::Path(_)) && query.contains_key("repo") {
+        return Err("invalid_query".to_string());
+    }
+    Ok(())
+}
+
+fn run_data(
+    query: &BTreeMap<String, String>,
+    actions: &dyn ScriptedActions,
+) -> Result<Value, String> {
+    let selector = required_selector(query)?;
+    reject_redundant_repo(&selector, query)?;
+    let wait = query.get("wait").map(String::as_str);
+    if let Some(wait) = wait {
+        if wait != "idle" {
+            return Err("invalid_query".to_string());
+        }
+    }
+    let repo = match &selector {
+        Selector::Id(_) => query.get("repo").cloned(),
+        Selector::Path(path) => Some(crate::validated_repo_path(path)?.display().to_string()),
+        Selector::Issue(issue) => Some(issue_worktree(query, *issue)?),
+    };
+    let goal_id = match &selector {
+        Selector::Id(value) => Some(value.clone()),
+        _ => None,
+    };
+    let mut document = actions.run(repo.as_deref(), goal_id.as_deref())?;
+    let waited = match wait {
+        None => Value::Null,
+        Some(_) => {
+            let policy = wait_policy();
+            let started = Instant::now();
+            let mut attempts = 1u32;
+            while !run_is_idle(&document) && attempts < policy.attempts {
+                std::thread::sleep(policy.gap);
+                document = actions.run(repo.as_deref(), goal_id.as_deref())?;
+                attempts += 1;
+            }
+            let idle = run_is_idle(&document);
+            json!({
+                "for": "idle",
+                "outcome": if idle { "idle" } else { "timeout" },
+                "attempts": attempts,
+                "elapsed_ms": started.elapsed().as_millis() as u64,
+            })
+        }
+    };
+    Ok(json!({
+        "schema": RUN_SCHEMA,
+        "group": "run",
+        "action": if wait.is_some() { "wait" } else { "open" },
+        "selector": selector.document(),
+        "repo": repo,
+        "goal_id": goal_id,
+        "wait": waited,
+        "run": document,
+    }))
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RunRequest {
+    selector: String,
+    #[serde(default)]
+    wait: Option<String>,
+    #[serde(default)]
+    repo: Option<String>,
+}
+
+fn post_run_data(
+    body: &[u8],
+    query: &BTreeMap<String, String>,
+    actions: &dyn ScriptedActions,
+) -> Result<Value, String> {
+    if query
+        .keys()
+        .any(|key| matches!(key.as_str(), "selector" | "wait" | "repo"))
+    {
+        return Err("invalid_query".to_string());
+    }
+    let request: RunRequest =
+        serde_json::from_slice(body).map_err(|_| "invalid_json".to_string())?;
+    let mut merged = BTreeMap::new();
+    merged.insert("selector".to_string(), request.selector);
+    if let Some(wait) = request.wait {
+        merged.insert("wait".to_string(), wait);
+    }
+    if let Some(repo) = request.repo {
+        merged.insert("repo".to_string(), repo);
+    }
+    run_data(&merged, actions)
+}
+
+fn diff_data(
+    query: &BTreeMap<String, String>,
+    actions: &dyn ScriptedActions,
+) -> Result<Value, String> {
+    let selector = required_selector(query)?;
+    reject_redundant_repo(&selector, query)?;
+    let base = query
+        .get("base")
+        .map(String::as_str)
+        .filter(|value| !value.trim().is_empty());
+    if let Some(base) = base {
+        if !crate::review_submit::valid_base_revision(base) {
+            return Err("review_base_invalid".to_string());
+        }
+    }
+    let target = match &selector {
+        Selector::Id(id) => crate::worktree_path_for(&selector_base_repo(query)?, id)?,
+        Selector::Path(path) => crate::validated_repo_path(path)?.display().to_string(),
+        Selector::Issue(issue) => issue_worktree(query, *issue)?,
+    };
+    let snapshot = actions.diff(&target, base)?;
+    Ok(json!({
+        "schema": crate::DIFF_SCHEMA,
+        "group": "diff",
+        "action": "open",
+        "selector": selector.document(),
+        "path": target,
+        "base": base,
+        "snapshot": snapshot,
+    }))
+}
+
+fn receipt_data(
+    query: &BTreeMap<String, String>,
+    actions: &dyn ScriptedActions,
+) -> Result<Value, String> {
+    let selector = required_selector(query)?;
+    // A receipt is addressed by run id; `path:`/`issue:` name a worktree and
+    // cannot identify one, so they are refused instead of guessed.
+    let run_id = match &selector {
+        Selector::Id(value) => value.clone(),
+        _ => return Err("selector_kind_unsupported".to_string()),
+    };
+    let receipt = actions.receipt(&run_id)?;
+    Ok(json!({
+        "schema": RECEIPT_SCHEMA,
+        "group": "receipt",
+        "action": "open",
+        "selector": selector.document(),
+        "run_id": run_id,
+        "receipt": receipt,
+    }))
+}
+
+fn report_data(
+    query: &BTreeMap<String, String>,
+    actions: &dyn ScriptedActions,
+) -> Result<Value, String> {
+    let Some(raw) = query.get("selector") else {
+        return actions.report(query.get("repo").map(String::as_str), None);
+    };
+    let selector = Selector::parse(raw)?;
+    match &selector {
+        // `repo` keeps its meaning as the repository filter for a run id.
+        Selector::Id(run_id) => actions.report(query.get("repo").map(String::as_str), Some(run_id)),
+        other => {
+            reject_redundant_repo(&selector, query)?;
+            let repo = match other {
+                Selector::Path(path) => crate::validated_repo_path(path)?.display().to_string(),
+                Selector::Issue(issue) => issue_worktree(query, *issue)?,
+                Selector::Id(_) => unreachable!("handled above"),
+            };
+            actions.report(Some(&repo), None)
+        }
+    }
+}
+
+/// One authoritative table for the routes: path, methods and accepted query
+/// keys. Dispatch, `405` and `invalid_query` all read it, so a route cannot be
+/// half-registered.
+struct Route {
+    path: &'static str,
+    methods: &'static [&'static str],
+    query: &'static [&'static str],
+}
+
+const ROUTES: &[Route] = &[
+    Route {
+        path: "/v1/health",
+        methods: &["GET"],
+        query: &[],
+    },
+    Route {
+        path: "/v1/snapshot",
+        methods: &["GET"],
+        query: &[],
+    },
+    Route {
+        path: "/v1/report",
+        methods: &["GET"],
+        query: &["repo", "selector"],
+    },
+    Route {
+        path: "/v1/review",
+        methods: &["GET"],
+        query: &["repo", "base"],
+    },
+    Route {
+        path: "/v1/worktrees",
+        methods: &["GET"],
+        query: &["repo"],
+    },
+    Route {
+        path: "/v1/worktree",
+        methods: &["POST"],
+        query: &["repo"],
+    },
+    Route {
+        path: "/v1/run",
+        methods: &["GET", "POST"],
+        query: &["selector", "repo", "wait"],
+    },
+    Route {
+        path: "/v1/diff",
+        methods: &["GET"],
+        query: &["selector", "repo", "base"],
+    },
+    Route {
+        path: "/v1/receipt",
+        methods: &["GET"],
+        query: &["selector"],
+    },
+];
+
+fn route(path: &str) -> Option<&'static Route> {
+    ROUTES.iter().find(|route| route.path == path)
+}
+
+fn dispatch(
+    request: Request,
+    token: &str,
+    info: &ApiInfo,
+    actions: &dyn ScriptedActions,
+) -> (u16, Value) {
     if let Err(failure) = authorize(&request.headers, token) {
         return failure.response();
     }
@@ -495,28 +936,24 @@ fn dispatch(request: Request, token: &str, info: &ApiInfo) -> (u16, Value) {
         Err(failure) => return (failure.status(), failure.body()),
     };
 
-    let allowed = match target.path.as_str() {
-        "/v1/report" => &["repo"][..],
-        "/v1/review" => &["repo", "base"][..],
-        "/v1/worktrees" | "/v1/worktree" => &["repo"][..],
-        _ => &[][..],
+    let Some(route) = route(&target.path) else {
+        return (404, error_body("not_found"));
     };
+    if !route.methods.contains(&request.method.as_str()) {
+        return (405, error_body("method_not_allowed"));
+    }
     if target
         .query
         .keys()
-        .any(|key| !allowed.contains(&key.as_str()))
+        .any(|key| !route.query.contains(&key.as_str()))
     {
         return (400, error_body("invalid_query"));
     }
 
-    let path = target.path.as_str();
-    match (request.method.as_str(), path) {
+    match (request.method.as_str(), target.path.as_str()) {
         ("GET", "/v1/health") => (200, ok_body(health_data(info))),
         ("GET", "/v1/snapshot") => result_body(crate::snapshot_from_runtime()),
-        ("GET", "/v1/report") => result_body(crate::execution_report_from(
-            target.query.get("repo").map(String::as_str),
-            None,
-        )),
+        ("GET", "/v1/report") => result_body(report_data(&target.query, actions)),
         ("GET", "/v1/review") => result_body(review_data(
             target.query.get("repo").map(String::as_str),
             target.query.get("base").map(String::as_str),
@@ -528,21 +965,12 @@ fn dispatch(request: Request, token: &str, info: &ApiInfo) -> (u16, Value) {
             &request.body,
             target.query.get("repo").map(String::as_str),
         )),
-        _ if known_route(path) => (405, error_body("method_not_allowed")),
+        ("GET", "/v1/run") => result_body(run_data(&target.query, actions)),
+        ("POST", "/v1/run") => result_body(post_run_data(&request.body, &target.query, actions)),
+        ("GET", "/v1/diff") => result_body(diff_data(&target.query, actions)),
+        ("GET", "/v1/receipt") => result_body(receipt_data(&target.query, actions)),
         _ => (404, error_body("not_found")),
     }
-}
-
-fn known_route(path: &str) -> bool {
-    matches!(
-        path,
-        "/v1/health"
-            | "/v1/snapshot"
-            | "/v1/report"
-            | "/v1/review"
-            | "/v1/worktrees"
-            | "/v1/worktree"
-    )
 }
 
 fn health_data(info: &ApiInfo) -> Value {
@@ -728,13 +1156,23 @@ fn safe_error_code(code: &str) -> String {
 
 fn error_status(code: &str) -> u16 {
     match code {
-        "invalid_json" | "invalid_query" | "invalid_repo" | "repo_path_invalid"
-        | "issue_invalid" | "agent_invalid" => 400,
+        "invalid_json"
+        | "invalid_query"
+        | "invalid_repo"
+        | "repo_path_invalid"
+        | "issue_invalid"
+        | "agent_invalid"
+        | "invalid_selector"
+        | "selector_required"
+        | "selector_kind_unsupported"
+        | "review_base_invalid" => 400,
         "desktop_access_not_active" => 403,
+        "worktree_not_found" => 404,
         "wip_limit_reached" | "worktree_exists" | "worktree_path_invalid" => 409,
         _ if code.starts_with("runtime_")
             || code.ends_with("_unavailable")
-            || code.ends_with("_failed") =>
+            || code.ends_with("_failed")
+            || code.ends_with("_unverified") =>
         {
             503
         }
@@ -780,6 +1218,7 @@ fn reason(status: u16) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::process::Command;
     use std::sync::atomic::AtomicU64;
 
     static NEXT_TEMP: AtomicU64 = AtomicU64::new(1);
@@ -792,6 +1231,166 @@ mod tests {
         ));
         std::fs::create_dir_all(&directory).unwrap();
         directory
+    }
+
+    /// A throwaway repository with one committed change, for the local `git diff`.
+    fn temp_repo() -> PathBuf {
+        let directory = temp_home().join("repo");
+        std::fs::create_dir_all(&directory).unwrap();
+        let git = |args: &[&str]| {
+            let output = Command::new("git")
+                .arg("-C")
+                .arg(&directory)
+                .args(args)
+                .output()
+                .unwrap();
+            assert!(output.status.success(), "git {args:?}: {output:?}");
+        };
+        git(&["init", "-q"]);
+        git(&["config", "user.email", "api@example.com"]);
+        git(&["config", "user.name", "Desktop API"]);
+        std::fs::write(directory.join("a.txt"), "one\n").unwrap();
+        git(&["add", "a.txt"]);
+        git(&["commit", "-q", "-m", "initial"]);
+        std::fs::write(directory.join("a.txt"), "one\ntwo\n").unwrap();
+        directory
+    }
+
+    /// Canned group documents, plus the calls the routes made, so the routes can
+    /// be exercised without an installed Runtime.
+    struct FakeActions {
+        run_documents: Mutex<Vec<Value>>,
+        calls: Mutex<Vec<String>>,
+    }
+
+    impl FakeActions {
+        fn returning(run_documents: Vec<Value>) -> Self {
+            Self {
+                run_documents: Mutex::new(run_documents),
+                calls: Mutex::new(Vec::new()),
+            }
+        }
+
+        fn calls(&self) -> Vec<String> {
+            self.calls.lock().unwrap().clone()
+        }
+    }
+
+    impl ScriptedActions for FakeActions {
+        fn run(&self, repo: Option<&str>, goal_id: Option<&str>) -> Result<Value, String> {
+            self.calls.lock().unwrap().push(format!(
+                "run repo={} id={}",
+                repo.unwrap_or("-"),
+                goal_id.unwrap_or("-")
+            ));
+            let mut documents = self.run_documents.lock().unwrap();
+            if documents.is_empty() {
+                return Ok(json!({
+                    "schema": "simplicio.goal-report/v1",
+                    "goal": {"status": "open"},
+                }));
+            }
+            if documents.len() > 1 {
+                Ok(documents.remove(0))
+            } else {
+                Ok(documents[0].clone())
+            }
+        }
+
+        fn receipt(&self, run_id: &str) -> Result<Value, String> {
+            self.calls.lock().unwrap().push(format!("receipt {run_id}"));
+            Ok(json!({"schema": "simplicio.evidence-receipt/v1", "run_id": run_id}))
+        }
+
+        fn report(&self, repo: Option<&str>, run_id: Option<&str>) -> Result<Value, String> {
+            self.calls.lock().unwrap().push(format!(
+                "report repo={} id={}",
+                repo.unwrap_or("-"),
+                run_id.unwrap_or("-")
+            ));
+            Ok(json!({
+                "schema": "simplicio.execution-report/v1",
+                "repo": repo,
+                "run_id": run_id,
+            }))
+        }
+
+        fn diff(&self, path: &str, base: Option<&str>) -> Result<Value, String> {
+            self.calls
+                .lock()
+                .unwrap()
+                .push(format!("diff path={path} base={}", base.unwrap_or("-")));
+            Ok(json!({
+                "schema": crate::DIFF_SCHEMA,
+                "path": path,
+                "base": base,
+                "diff": "+canned",
+                "truncated": false,
+                "redacted": true,
+            }))
+        }
+    }
+
+    struct Server {
+        port: u16,
+        token: String,
+        shutdown: Arc<AtomicBool>,
+        handle: Option<std::thread::JoinHandle<()>>,
+    }
+
+    impl Server {
+        fn start(actions: Arc<dyn ScriptedActions>) -> Self {
+            let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
+            let port = listener.local_addr().unwrap().port();
+            let token = generate_token().unwrap();
+            let info = ApiInfo::new(port);
+            let shutdown = Arc::new(AtomicBool::new(false));
+            let server_shutdown = Arc::clone(&shutdown);
+            let server_token = token.clone();
+            let handle = std::thread::spawn(move || {
+                serve(listener, server_token, info, server_shutdown, actions)
+            });
+            Self {
+                port,
+                token,
+                shutdown,
+                handle: Some(handle),
+            }
+        }
+
+        fn request(&self, method: &str, target: &str, body: Option<&str>) -> String {
+            let mut head = format!(
+                "{method} {target} HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {}\r\nConnection: close\r\n",
+                self.token
+            );
+            if let Some(body) = body {
+                head.push_str(&format!(
+                    "Content-Type: application/json\r\nContent-Length: {}\r\n",
+                    body.len()
+                ));
+            }
+            head.push_str("\r\n");
+            if let Some(body) = body {
+                head.push_str(body);
+            }
+            http_request(self.port, &head)
+        }
+
+        fn anonymous(&self, target: &str) -> String {
+            http_request(
+                self.port,
+                &format!("GET {target} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n"),
+            )
+        }
+    }
+
+    impl Drop for Server {
+        fn drop(&mut self) {
+            self.shutdown.store(true, Ordering::SeqCst);
+            if let Some(handle) = self.handle.take() {
+                let _ = handle.join();
+            }
+        }
     }
 
     fn http_request(port: u16, request: &str) -> String {
@@ -808,6 +1407,41 @@ mod tests {
         stream.read_to_end(&mut response).unwrap();
         String::from_utf8_lossy(&response).into_owned()
     }
+
+    fn status_of(response: &str) -> u16 {
+        response
+            .split(' ')
+            .nth(1)
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(0)
+    }
+
+    fn body_of(response: &str) -> Value {
+        let (_, body) = response.split_once("\r\n\r\n").unwrap_or(("", "{}"));
+        serde_json::from_str(body).unwrap_or_else(|_| json!({}))
+    }
+
+    fn data_of(response: &str) -> Value {
+        body_of(response)["data"].clone()
+    }
+
+    fn code_of(response: &str) -> String {
+        body_of(response)["error"]["code"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string()
+    }
+
+    fn query_value(value: &str) -> String {
+        value.replace('+', "%2B").replace(' ', "%20")
+    }
+
+    const SCRIPTED_TARGETS: [&str; 4] = [
+        "/v1/run?selector=id:run-7",
+        "/v1/diff?selector=path:/tmp",
+        "/v1/receipt?selector=id:rc-1",
+        "/v1/report?selector=id:run-7",
+    ];
 
     #[test]
     fn generated_token_has_32_random_bytes() {
@@ -905,48 +1539,31 @@ mod tests {
 
     #[test]
     fn listener_requires_the_bearer_token_on_health() {
-        let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
-        let port = listener.local_addr().unwrap().port();
-        let token = generate_token().unwrap();
-        let info = ApiInfo::new(port);
-        let shutdown = Arc::new(AtomicBool::new(false));
-        let server_shutdown = Arc::clone(&shutdown);
-        let server_token = token.clone();
-        let server_info = info.clone();
-        let handle =
-            std::thread::spawn(move || serve(listener, server_token, server_info, server_shutdown));
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
 
         let missing = http_request(
-            port,
+            server.port,
             "GET /v1/health HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
         );
-        assert!(missing.starts_with("HTTP/1.1 401"), "{missing}");
+        assert_eq!(status_of(&missing), 401, "{missing}");
         assert!(missing.contains(RESPONSE_SCHEMA));
         assert!(missing.contains("unauthorized"));
 
         let wrong = http_request(
-            port,
+            server.port,
             &format!(
                 "GET /v1/health HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {}\r\nConnection: close\r\n\r\n",
                 "0".repeat(TOKEN_BYTES * 2)
             ),
         );
-        assert!(wrong.starts_with("HTTP/1.1 403"), "{wrong}");
+        assert_eq!(status_of(&wrong), 403, "{wrong}");
         assert!(wrong.contains("forbidden"));
 
-        let accepted = http_request(
-            port,
-            &format!(
-                "GET /v1/health HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {token}\r\nConnection: close\r\n\r\n"
-            ),
-        );
-        assert!(accepted.starts_with("HTTP/1.1 200"), "{accepted}");
+        let accepted = server.request("GET", "/v1/health", None);
+        assert_eq!(status_of(&accepted), 200, "{accepted}");
         assert!(accepted.contains(RESPONSE_SCHEMA));
         assert!(accepted.contains("\"status\":\"ok\""));
-        assert!(!accepted.contains(&token));
-
-        shutdown.store(true, Ordering::SeqCst);
-        handle.join().unwrap();
+        assert!(!accepted.contains(&server.token));
     }
 
     #[test]
@@ -958,5 +1575,415 @@ mod tests {
         assert_eq!(status["host"].as_str(), Some(HOST));
         assert_eq!(status["port"].as_u64(), Some(5555));
         assert!(status.get("token").is_none());
+    }
+
+    #[test]
+    fn selector_grammar_matches_the_runtime_twin() {
+        assert_eq!(
+            Selector::parse("id:run-7"),
+            Ok(Selector::Id("run-7".into()))
+        );
+        assert_eq!(
+            Selector::parse("path:/tmp/wt"),
+            Ok(Selector::Path("/tmp/wt".into()))
+        );
+        assert_eq!(Selector::parse("issue:439"), Ok(Selector::Issue(439)));
+        for bad in [
+            "run-7",
+            "issue:x",
+            "id:",
+            "path:",
+            "branch:main",
+            "",
+            "id:a\nb",
+        ] {
+            assert_eq!(
+                Selector::parse(bad),
+                Err("invalid_selector".to_string()),
+                "accepted {bad:?}"
+            );
+        }
+        let long = format!("id:{}", "a".repeat(MAX_SELECTOR_BYTES));
+        assert!(Selector::parse(&long).is_err());
+        assert_eq!(
+            Selector::Issue(439).document(),
+            json!({"raw": "issue:439", "kind": "issue", "value": "439"})
+        );
+    }
+
+    #[test]
+    fn route_table_is_the_only_source_of_paths_methods_and_query_keys() {
+        let mut paths = std::collections::BTreeSet::new();
+        for entry in ROUTES {
+            assert!(paths.insert(entry.path), "duplicate route {}", entry.path);
+            assert!(!entry.methods.is_empty(), "{}", entry.path);
+            assert!(route(entry.path).is_some(), "{}", entry.path);
+        }
+        // Everything the twin advertises is now a route.
+        for path in ["/v1/run", "/v1/diff", "/v1/receipt"] {
+            assert!(route(path).is_some(), "{path} is not registered");
+        }
+
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+        assert_eq!(status_of(&server.request("GET", "/v1/nope", None)), 404);
+        assert_eq!(
+            code_of(&server.request("GET", "/v1/nope", None)),
+            "not_found"
+        );
+        assert_eq!(status_of(&server.request("GET", "/v1/worktree", None)), 405);
+        assert_eq!(status_of(&server.request("POST", "/v1/diff", None)), 405);
+        assert_eq!(
+            code_of(&server.request("POST", "/v1/diff", None)),
+            "method_not_allowed"
+        );
+        for (target, key) in [
+            ("/v1/run?selector=id:x&base=main", "base"),
+            ("/v1/diff?selector=path:/tmp&wait=idle", "wait"),
+            ("/v1/receipt?selector=id:x&repo=/tmp", "repo"),
+            ("/v1/health?repo=/tmp", "repo"),
+        ] {
+            let response = server.request("GET", target, None);
+            assert_eq!(status_of(&response), 400, "{target}: {response}");
+            assert_eq!(code_of(&response), "invalid_query", "{target} {key}");
+        }
+    }
+
+    #[test]
+    fn every_scripted_route_rejects_an_unauthenticated_call() {
+        let actions = Arc::new(FakeActions::returning(Vec::new()));
+        let server = Server::start(Arc::clone(&actions) as Arc<dyn ScriptedActions>);
+        for target in SCRIPTED_TARGETS {
+            let response = server.anonymous(target);
+            assert_eq!(status_of(&response), 401, "{target}: {response}");
+            assert_eq!(code_of(&response), "unauthorized", "{target}");
+        }
+        // Nothing was executed for an unauthenticated call.
+        assert!(actions.calls().is_empty(), "{:?}", actions.calls());
+    }
+
+    #[test]
+    fn every_scripted_route_answers_with_the_token() {
+        let repository = temp_repo();
+        let repository = repository.canonicalize().unwrap();
+        let actions = Arc::new(FakeActions::returning(vec![json!({
+            "schema": "simplicio.goal-report/v1",
+            "goal": {"status": "open"},
+        })]));
+        let server = Server::start(Arc::clone(&actions) as Arc<dyn ScriptedActions>);
+
+        let run = server.request("GET", "/v1/run?selector=id:run-7", None);
+        assert_eq!(status_of(&run), 200, "{run}");
+        assert_eq!(data_of(&run)["goal_id"], json!("run-7"));
+
+        let diff = server.request(
+            "GET",
+            &format!(
+                "/v1/diff?selector=path:{}",
+                query_value(&repository.to_string_lossy())
+            ),
+            None,
+        );
+        assert_eq!(status_of(&diff), 200, "{diff}");
+        assert_eq!(data_of(&diff)["group"], json!("diff"));
+
+        let receipt = server.request("GET", "/v1/receipt?selector=id:rc-1", None);
+        assert_eq!(status_of(&receipt), 200, "{receipt}");
+        assert_eq!(data_of(&receipt)["run_id"], json!("rc-1"));
+
+        let report = server.request("GET", "/v1/report?selector=id:run-7", None);
+        assert_eq!(status_of(&report), 200, "{report}");
+        assert_eq!(data_of(&report)["run_id"], json!("run-7"));
+
+        assert_eq!(
+            actions.calls(),
+            vec![
+                "run repo=- id=run-7".to_string(),
+                format!("diff path={} base=-", repository.display()),
+                "receipt rc-1".to_string(),
+                "report repo=- id=run-7".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn run_reads_the_goal_report_for_each_selector_kind() {
+        let repository = temp_repo();
+        let repository = repository.canonicalize().unwrap();
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+
+        let by_id = server.request("GET", "/v1/run?selector=id:run-7&repo=/tmp", None);
+        let data = data_of(&by_id);
+        assert_eq!(data["schema"], json!(RUN_SCHEMA));
+        assert_eq!(data["action"], json!("open"));
+        assert_eq!(data["goal_id"], json!("run-7"));
+        assert_eq!(data["repo"], json!("/tmp"));
+        assert!(data["wait"].is_null());
+        assert_eq!(
+            data["selector"],
+            json!({"raw": "id:run-7", "kind": "id", "value": "run-7"})
+        );
+
+        let by_path = server.request(
+            "GET",
+            &format!(
+                "/v1/run?selector=path:{}",
+                query_value(&repository.to_string_lossy())
+            ),
+            None,
+        );
+        assert_eq!(status_of(&by_path), 200, "{by_path}");
+        assert_eq!(data_of(&by_path)["goal_id"], Value::Null);
+        assert_eq!(
+            data_of(&by_path)["repo"],
+            json!(repository.display().to_string())
+        );
+    }
+
+    #[test]
+    fn run_wait_idle_polls_until_the_run_is_idle() {
+        let server = Server::start(Arc::new(FakeActions::returning(vec![
+            json!({"goal": {"status": "open"}}),
+            json!({"goal": {"status": "complete"}}),
+        ])));
+        let response = server.request("GET", "/v1/run?selector=id:run-7&wait=idle", None);
+        assert_eq!(status_of(&response), 200, "{response}");
+        let data = data_of(&response);
+        assert_eq!(data["action"], json!("wait"));
+        assert_eq!(data["wait"]["for"], json!("idle"));
+        assert_eq!(data["wait"]["outcome"], json!("idle"));
+        assert_eq!(data["wait"]["attempts"], json!(2));
+    }
+
+    #[test]
+    fn run_wait_idle_gives_up_with_a_reported_timeout() {
+        let server = Server::start(Arc::new(FakeActions::returning(vec![
+            json!({"goal": {"status": "open"}}),
+        ])));
+        let response = server.request("GET", "/v1/run?selector=id:run-7&wait=idle", None);
+        assert_eq!(status_of(&response), 200, "{response}");
+        let data = data_of(&response);
+        assert_eq!(data["wait"]["outcome"], json!("timeout"));
+        assert_eq!(data["wait"]["attempts"], json!(wait_policy().attempts));
+        assert_eq!(
+            data["run"]["goal"]["status"],
+            json!("open"),
+            "a timeout still returns the last document"
+        );
+    }
+
+    #[test]
+    fn selectors_are_required_and_validated_on_every_scripted_route() {
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+        for path in ["/v1/run", "/v1/diff", "/v1/receipt"] {
+            let response = server.request("GET", path, None);
+            assert_eq!(status_of(&response), 400, "{path}: {response}");
+            assert_eq!(code_of(&response), "selector_required", "{path}");
+        }
+        for bad in ["main", "branch:main", "id:", "issue:x", "id:a%20b"] {
+            for path in ["/v1/run", "/v1/diff", "/v1/receipt", "/v1/report"] {
+                let response = server.request("GET", &format!("{path}?selector={bad}"), None);
+                assert_eq!(status_of(&response), 400, "{path} {bad}: {response}");
+                let code = code_of(&response);
+                assert!(
+                    matches!(code.as_str(), "invalid_selector" | "repo_path_invalid"),
+                    "{path} {bad}: {code}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn issue_and_id_selectors_resolve_worktrees_or_fail_closed() {
+        let repository = temp_repo();
+        let repository = repository.canonicalize().unwrap();
+        let name = repository
+            .file_name()
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+        let repo = query_value(&repository.to_string_lossy());
+
+        let missing = server.request(
+            "GET",
+            &format!("/v1/diff?repo={repo}&selector=issue:439"),
+            None,
+        );
+        assert_eq!(status_of(&missing), 404, "{missing}");
+        assert_eq!(code_of(&missing), "worktree_not_found");
+
+        let zero = server.request(
+            "GET",
+            &format!("/v1/diff?repo={repo}&selector=issue:0"),
+            None,
+        );
+        assert_eq!(status_of(&zero), 400, "{zero}");
+        assert_eq!(code_of(&zero), "issue_invalid");
+
+        // The repository itself is a worktree of its own list, matched by name.
+        let by_id = server.request(
+            "GET",
+            &format!("/v1/diff?repo={repo}&selector=id:{name}"),
+            None,
+        );
+        assert_eq!(status_of(&by_id), 200, "{by_id}");
+        assert_eq!(
+            data_of(&by_id)["path"],
+            json!(repository.display().to_string())
+        );
+    }
+
+    #[test]
+    fn diff_rejects_paths_that_are_not_directories_and_bad_bases() {
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+        let missing = server.request("GET", "/v1/diff?selector=path:/does/not/exist", None);
+        assert_eq!(status_of(&missing), 400, "{missing}");
+        assert_eq!(code_of(&missing), "repo_path_invalid");
+        let base = server.request("GET", "/v1/diff?selector=path:/tmp&base=--evil", None);
+        assert_eq!(status_of(&base), 400, "{base}");
+        assert_eq!(code_of(&base), "review_base_invalid");
+    }
+
+    #[test]
+    fn receipt_requires_an_id_selector() {
+        let repository = temp_repo();
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+        for selector in [
+            format!("path:{}", repository.display()),
+            "issue:439".to_string(),
+        ] {
+            let response = server.request(
+                "GET",
+                &format!("/v1/receipt?selector={}", query_value(&selector)),
+                None,
+            );
+            assert_eq!(status_of(&response), 400, "{selector}: {response}");
+            assert_eq!(code_of(&response), "selector_kind_unsupported");
+        }
+    }
+
+    #[test]
+    fn post_run_accepts_a_json_body_and_rejects_ambiguous_input() {
+        let server = Server::start(Arc::new(FakeActions::returning(vec![json!({
+            "goal": {"status": "complete"},
+        })])));
+        let accepted = server.request(
+            "POST",
+            "/v1/run",
+            Some(r#"{"selector":"id:run-7","wait":"idle"}"#),
+        );
+        assert_eq!(status_of(&accepted), 200, "{accepted}");
+        assert_eq!(data_of(&accepted)["action"], json!("wait"));
+        assert_eq!(data_of(&accepted)["wait"]["outcome"], json!("idle"));
+
+        let ambiguous = server.request(
+            "POST",
+            "/v1/run?selector=id:run-7",
+            Some(r#"{"selector":"id:run-7"}"#),
+        );
+        assert_eq!(status_of(&ambiguous), 400, "{ambiguous}");
+        assert_eq!(code_of(&ambiguous), "invalid_query");
+
+        let unknown = server.request(
+            "POST",
+            "/v1/run",
+            Some(r#"{"selector":"id:run-7","bogus":1}"#),
+        );
+        assert_eq!(status_of(&unknown), 400, "{unknown}");
+        assert_eq!(code_of(&unknown), "invalid_json");
+
+        let empty = server.request("POST", "/v1/run", None);
+        assert_eq!(status_of(&empty), 400, "{empty}");
+
+        let wrong_wait = server.request("GET", "/v1/run?selector=id:x&wait=done", None);
+        assert_eq!(status_of(&wrong_wait), 400, "{wrong_wait}");
+        assert_eq!(code_of(&wrong_wait), "invalid_query");
+    }
+
+    #[test]
+    fn path_selectors_reject_a_redundant_repo_on_every_scripted_route() {
+        let repository = temp_repo();
+        let repository = query_value(&repository.to_string_lossy());
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+        for path in ["/v1/run", "/v1/diff", "/v1/report"] {
+            let response = server.request(
+                "GET",
+                &format!("{path}?selector=path:{repository}&repo={repository}"),
+                None,
+            );
+            assert_eq!(status_of(&response), 400, "{path}: {response}");
+            assert_eq!(code_of(&response), "invalid_query", "{path}");
+        }
+    }
+
+    #[test]
+    fn report_accepts_a_run_id_with_a_repository_filter() {
+        let server = Server::start(Arc::new(FakeActions::returning(Vec::new())));
+        let filtered = server.request("GET", "/v1/report?selector=id:run-7&repo=/tmp", None);
+        assert_eq!(status_of(&filtered), 200, "{filtered}");
+        assert_eq!(data_of(&filtered)["repo"], json!("/tmp"));
+        assert_eq!(data_of(&filtered)["run_id"], json!("run-7"));
+        // The pre-selector contract still answers.
+        let plain = server.request("GET", "/v1/report?repo=/tmp", None);
+        assert_eq!(status_of(&plain), 200, "{plain}");
+        assert_eq!(data_of(&plain)["repo"], json!("/tmp"));
+    }
+
+    #[test]
+    fn diff_snapshot_quotes_the_repository_diff_locally() {
+        let repository = temp_repo();
+        let repository = repository.canonicalize().unwrap();
+        let document = crate::diff_snapshot(&repository, None).unwrap();
+        assert_eq!(document["schema"], json!(crate::DIFF_SCHEMA));
+        assert_eq!(document["path"], json!(repository.display().to_string()));
+        assert_eq!(document["truncated"], json!(false));
+        assert_eq!(document["redacted"], json!(true));
+        let diff = document["diff"].as_str().unwrap();
+        assert!(diff.contains("+two"), "{diff}");
+        assert!(document["digest"].as_str().unwrap().starts_with("sha256:"));
+    }
+
+    #[test]
+    fn worktree_lookup_matches_branch_and_directory_names() {
+        let repository = temp_repo();
+        let repository = repository.canonicalize().unwrap();
+        let name = repository
+            .file_name()
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+        assert_eq!(
+            crate::worktree_path_for(&repository.to_string_lossy(), &name),
+            Ok(repository.display().to_string())
+        );
+        assert_eq!(
+            crate::worktree_path_for(&repository.to_string_lossy(), "missing"),
+            Err("worktree_not_found".to_string())
+        );
+        assert_eq!(
+            crate::worktree_path_for(&repository.to_string_lossy(), "../escape"),
+            Err("worktree_not_found".to_string())
+        );
+    }
+
+    #[test]
+    fn error_codes_map_to_stable_statuses() {
+        for code in [
+            "invalid_selector",
+            "selector_required",
+            "selector_kind_unsupported",
+            "issue_invalid",
+        ] {
+            assert_eq!(error_status(code), 400, "{code}");
+        }
+        assert_eq!(error_status("worktree_not_found"), 404);
+        for code in [
+            "run_unavailable",
+            "receipt_unavailable",
+            "execution_report_unavailable",
+            "desktop_access_unverified",
+        ] {
+            assert_eq!(error_status(code), 503, "{code}");
+        }
     }
 }
