@@ -42,6 +42,7 @@ import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./
 import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
 import { parseWorktrees, type Worktree } from "./fleet";
 import { parseRemoteFleet, type RemoteFleet } from "./remote_fleet";
+import { parseFleetQueue, type FleetQueue, type FleetTask } from "./fleet_queue";
 import { parseReviewReceipt, type ReviewDigest, type ReviewSubmissionReceipt } from "./review";
 import {
   canonicalAuthoritativeHostProvider,
@@ -471,6 +472,26 @@ export async function createDesktopWorktree(repoPath: string, issue: number, age
 export async function removeDesktopWorktree(repoPath: string, path: string): Promise<unknown> {
   if (!isTauri()) throw new Error("preview_no_runtime");
   return invoke<unknown>("desktop_worktree_remove", { repoPath, path });
+}
+
+export async function loadDesktopFleetQueue(repoPath: string): Promise<FleetQueue> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseFleetQueue(await invoke<unknown>("desktop_fleet_queue", { repoPath: repoPath.trim() || null }));
+}
+
+export async function upsertDesktopFleetTask(
+  repoPath: string,
+  task: FleetTask,
+  wipPerTrack?: Record<string, number>,
+): Promise<FleetQueue> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseFleetQueue(
+    await invoke<unknown>("desktop_fleet_queue_upsert", {
+      repoPath: repoPath.trim() || null,
+      task,
+      wipPerTrack: wipPerTrack ?? null,
+    }),
+  );
 }
 
 export async function loadDesktopHostsPlan(): Promise<HostsPlan> {
