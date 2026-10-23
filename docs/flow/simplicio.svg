@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#555"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40" y="40" font-family="sans-serif" font-size="20" font-weight="700">Simplicio — entrada → passos → saídas</text>
+<line x1="360" y1="115" x2="460" y2="115" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="360" y1="245" x2="460" y2="245" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="360" y1="245" x2="460" y2="635" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="360" y1="375" x2="460" y2="375" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="360" y1="505" x2="460" y2="375" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="115" x2="880" y2="115" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="245" x2="460" y2="375" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="375" x2="460" y2="505" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="505" x2="880" y2="245" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="505" x2="880" y2="505" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="635" x2="460" y2="765" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="765" x2="880" y2="505" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="780" y1="375" x2="880" y2="375" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="40" y="80" width="320" height="70" rx="10" fill="#e8f1ff" stroke="#3b6fb6" stroke-width="1.5"/>
+<text x="54" y="108" font-family="sans-serif" font-size="14" font-weight="700">in-installer</text>
+<text x="54" y="130" font-family="sans-serif" font-size="12" fill="#333">Instalador (sh/ps1)</text>
+<rect x="40" y="210" width="320" height="70" rx="10" fill="#e8f1ff" stroke="#3b6fb6" stroke-width="1.5"/>
+<text x="54" y="238" font-family="sans-serif" font-size="14" font-weight="700">in-desktop</text>
+<text x="54" y="260" font-family="sans-serif" font-size="12" fill="#333">Desktop / Tauri IPC</text>
+<rect x="40" y="340" width="320" height="70" rx="10" fill="#e8f1ff" stroke="#3b6fb6" stroke-width="1.5"/>
+<text x="54" y="368" font-family="sans-serif" font-size="14" font-weight="700">in-host-hook</text>
+<text x="54" y="390" font-family="sans-serif" font-size="12" fill="#333">Hook do host</text>
+<rect x="40" y="470" width="320" height="70" rx="10" fill="#e8f1ff" stroke="#3b6fb6" stroke-width="1.5"/>
+<text x="54" y="498" font-family="sans-serif" font-size="14" font-weight="700">in-mcp</text>
+<text x="54" y="520" font-family="sans-serif" font-size="12" fill="#333">MCP / CLI</text>
+<rect x="460" y="80" width="320" height="70" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="474" y="108" font-family="sans-serif" font-size="14" font-weight="700">step-install</text>
+<text x="474" y="130" font-family="sans-serif" font-size="12" fill="#333">Instala binário gerenciado + registra hosts</text>
+<rect x="460" y="210" width="320" height="70" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="474" y="238" font-family="sans-serif" font-size="14" font-weight="700">step-bootstrap</text>
+<text x="474" y="260" font-family="sans-serif" font-size="12" fill="#333">Bootstrap do Runtime e preparação</text>
+<rect x="460" y="340" width="320" height="70" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="474" y="368" font-family="sans-serif" font-size="14" font-weight="700">step-map</text>
+<text x="474" y="390" font-family="sans-serif" font-size="12" fill="#333">Map/context do repositório</text>
+<rect x="460" y="470" width="320" height="70" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="474" y="498" font-family="sans-serif" font-size="14" font-weight="700">step-edit</text>
+<text x="474" y="520" font-family="sans-serif" font-size="12" fill="#333">Edição governada + validação</text>
+<rect x="460" y="600" width="320" height="70" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="474" y="628" font-family="sans-serif" font-size="14" font-weight="700">step-session</text>
+<text x="474" y="650" font-family="sans-serif" font-size="12" fill="#333">Sessão: idle, uso e cache</text>
+<rect x="460" y="730" width="320" height="70" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="474" y="758" font-family="sans-serif" font-size="14" font-weight="700">step-meter</text>
+<text x="474" y="780" font-family="sans-serif" font-size="12" fill="#333">Cache meter medido</text>
+<rect x="880" y="80" width="320" height="70" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="894" y="108" font-family="sans-serif" font-size="14" font-weight="700">out-manifest</text>
+<text x="894" y="130" font-family="sans-serif" font-size="12" fill="#333">Manifesto e checksums</text>
+<rect x="880" y="210" width="320" height="70" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="894" y="238" font-family="sans-serif" font-size="14" font-weight="700">out-desktop</text>
+<text x="894" y="260" font-family="sans-serif" font-size="12" fill="#333">Snapshots/recibos do Desktop</text>
+<rect x="880" y="340" width="320" height="70" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="894" y="368" font-family="sans-serif" font-size="14" font-weight="700">out-flow</text>
+<text x="894" y="390" font-family="sans-serif" font-size="12" fill="#333">Mermaid/SVG/Langflow do fluxo</text>
+<rect x="880" y="470" width="320" height="70" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="894" y="498" font-family="sans-serif" font-size="14" font-weight="700">out-receipts</text>
+<text x="894" y="520" font-family="sans-serif" font-size="12" fill="#333">Recibos e auditoria</text>
+</svg>

@@ -7,6 +7,19 @@
   <img src="assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="840" />
 </p>
 
+## Fluxo visível
+
+![Fluxo do Simplicio: entrada → passos → saídas](docs/flow/simplicio.svg)
+
+O fluxo é gerado de `docs/flow/simplicio.flow.json` (fonte única):
+
+```bash
+python3 scripts/generate_flow.py
+python3 scripts/generate_flow.py --check   # drift antes do release
+```
+
+Artefatos: `simplicio.mmd`, `simplicio.svg` e `langflow/simplicio.langflow.json`.
+
 <p align="center">
   <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=2fe6a0&label=release" alt="Latest Release"></a>
   <a href="https://simpleti.com.br/simplicio/docs"><img src="https://img.shields.io/badge/docs-simpleti.com.br-ffd23f" alt="Documentation"></a>
