@@ -21,6 +21,7 @@ mod project_discovery_process;
 mod project_usage;
 mod projection_exports;
 mod projection_queries;
+mod remote_fleet;
 mod review_submit;
 mod runtime_install;
 mod runtime_lifecycle;
@@ -1117,6 +1118,18 @@ async fn desktop_worktree_remove(repo_path: String, path: String) -> Result<Valu
 }
 
 #[tauri::command]
+async fn desktop_remote_fleet() -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        // The fleet is a read, but it still needs fresh Runtime authorization
+        // and it never receives a credential from the WebView.
+        require_read_access()?;
+        remote_fleet::read()
+    })
+    .await
+    .map_err(|_| "remote_fleet_unavailable".to_string())?
+}
+
+#[tauri::command]
 async fn desktop_hosts_plan() -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(|| {
         require_read_access()?;
@@ -1920,6 +1933,7 @@ pub fn run() {
             desktop_review,
             desktop_review_submit,
             desktop_worktrees,
+            desktop_remote_fleet,
             desktop_worktree_create,
             desktop_worktree_remove,
             desktop_hosts_plan,
