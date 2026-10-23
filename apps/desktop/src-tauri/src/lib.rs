@@ -860,6 +860,57 @@ async fn desktop_cache_meter(session_id: Option<String>) -> Result<Value, String
     .map_err(|_| "cache_meter_unavailable".to_string())?
 }
 
+fn sha256_hex(bytes: &[u8]) -> String {
+    use sha2::Digest;
+    sha2::Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+#[tauri::command]
+async fn desktop_review(repo_path: String, base: Option<String>) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_read_access()?;
+        let repo = validated_repo_path(&repo_path)?;
+        let status = git_output(&repo, &["status", "--porcelain"])?;
+        let status_text = String::from_utf8_lossy(&status.stdout).to_string();
+        let base = base.filter(|value| !value.trim().is_empty());
+        let mut args = vec!["diff", "--no-ext-diff", "--unified=3"];
+        if let Some(base) = base.as_deref() {
+            args.push(base);
+        } else {
+            args.push("HEAD");
+        }
+        let mut diff = git_output(&repo, &args)?;
+        if !diff.status.success() && base.is_none() {
+            diff = git_output(&repo, &["diff", "--no-ext-diff", "--unified=3"])?;
+        }
+        if !diff.status.success() {
+            return Err("review_unavailable".to_string());
+        }
+        let full = String::from_utf8_lossy(&diff.stdout).to_string();
+        let truncated = full.len() > 200_000;
+        let diff_text = if truncated { full[..200_000].to_string() } else { full };
+        let digest = format!(
+            "sha256:{}",
+            sha256_hex(format!("{status_text}\n{diff_text}").as_bytes())
+        );
+        Ok(serde_json::json!({
+            "schema": "simplicio.desktop-review/v1",
+            "repo": repo.display().to_string(),
+            "base": base,
+            "status": status_text,
+            "diff": diff_text,
+            "digest": digest,
+            "truncated": truncated,
+            "redacted": true,
+        }))
+    })
+    .await
+    .map_err(|_| "review_unavailable".to_string())?
+}
+
 fn git_output(repo: &Path, args: &[&str]) -> Result<std::process::Output, String> {
     Command::new("git")
         .arg("-C")
@@ -1803,6 +1854,7 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_review,
             desktop_worktrees,
             desktop_worktree_create,
             desktop_worktree_remove,

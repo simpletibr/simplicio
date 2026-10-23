@@ -40,6 +40,7 @@ import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from ".
 import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./catalog_ui";
 import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
 import { parseWorktrees, type Worktree } from "./fleet";
+import type { ReviewDigest } from "./review";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -391,6 +392,15 @@ export async function loadDesktopCacheMeter(options: { sessionId?: string } = {}
     60_000,
     "cache_meter_timeout",
   ));
+}
+
+export async function loadDesktopReview(repoPath: string, base?: string): Promise<ReviewDigest> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  const value = await invoke<ReviewDigest>("desktop_review", { repoPath, base: base?.trim() || null });
+  if (value?.schema !== "simplicio.desktop-review/v1" || typeof value.diff !== "string" || typeof value.digest !== "string") {
+    throw new Error("review_unavailable");
+  }
+  return value;
 }
 
 export async function loadDesktopWorktrees(repoPath: string): Promise<Worktree[]> {
