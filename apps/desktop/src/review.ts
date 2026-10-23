@@ -60,6 +60,170 @@ export interface ReviewSubmissionReceipt {
   redacted: true;
 }
 
+export type CommitStatus = "committed" | "commit_failed";
+export type CommitPhase = "ready" | "committed" | "pushed" | "failed";
+
+/**
+ * Receipt of one commit created from the review. `sha` is the real commit id
+ * recorded by the native side; on `commit_failed` it stays null and `stderr`
+ * carries what git actually wrote.
+ */
+export interface ReviewCommitReceipt {
+  schema: "simplicio.desktop-review-commit/v1";
+  status: CommitStatus;
+  receipt_id: string | null;
+  path: string | null;
+  digest: string;
+  sha: string | null;
+  branch: string;
+  paths: string[];
+  message_chars: number;
+  message_digest: string;
+  upstream: string | null;
+  pushed: boolean;
+  phase: CommitPhase;
+  code: string | null;
+  stderr: string | null;
+  redacted: true;
+}
+
+export type PushStatus = "pushed" | "push_failed";
+
+export interface ReviewPushReceipt {
+  schema: "simplicio.desktop-review-push/v1";
+  status: PushStatus;
+  sha: string;
+  branch: string;
+  upstream: string | null;
+  idempotent: boolean;
+  code: string | null;
+  stderr: string | null;
+  redacted: true;
+}
+
+/** Why the review cannot be committed. `null` means the commit is offered. */
+export type CommitGuard = "truncated" | "protected_path" | "no_changes";
+
+export function commitGuard(view: ReviewView, truncated = false): CommitGuard | null {
+  if (truncated) return "truncated";
+  if (view.flags.some((flag) => flag.kind === "protected")) return "protected_path";
+  if (view.files.length === 0) return "no_changes";
+  return null;
+}
+
+export function commitGuardLabel(guard: CommitGuard | null): string {
+  if (guard === "no_changes") return "Sem mudanças para commitar.";
+  if (guard === "protected_path") return "Diff com path protegido: commit e push bloqueados.";
+  if (guard === "truncated") return "Diff truncado: commit bloqueado.";
+  return "Commit disponível para os arquivos revisados.";
+}
+
+export const MAX_COMMIT_MESSAGE_CHARS = 4_096;
+
+/** The message is the user's; only trim/empty/length are enforced here too. */
+export function commitMessageError(message: string): "review_message_empty" | "review_message_too_large" | null {
+  const trimmed = message.trim();
+  if (!trimmed) return "review_message_empty";
+  if (trimmed.length > MAX_COMMIT_MESSAGE_CHARS) return "review_message_too_large";
+  return null;
+}
+
+const COMMIT_PHASES: CommitPhase[] = ["ready", "committed", "pushed", "failed"];
+const COMMIT_STATUSES: CommitStatus[] = ["committed", "commit_failed"];
+const PUSH_STATUSES: PushStatus[] = ["pushed", "push_failed"];
+
+function commitSha(value: unknown): value is string {
+  return typeof value === "string" && /^[0-9a-f]{40}([0-9a-f]{0,24})$/.test(value);
+}
+
+function optionalString(value: unknown): value is string | null {
+  return value === null || value === undefined || typeof value === "string";
+}
+
+export function parseReviewCommitReceipt(value: unknown): ReviewCommitReceipt {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("review_commit_receipt_invalid");
+  const raw = value as Record<string, unknown>;
+  const paths = raw.paths;
+  if (
+    raw.schema !== "simplicio.desktop-review-commit/v1" ||
+    !COMMIT_STATUSES.includes(raw.status as CommitStatus) ||
+    typeof raw.digest !== "string" ||
+    typeof raw.branch !== "string" ||
+    !Array.isArray(paths) ||
+    !paths.every((path) => typeof path === "string") ||
+    typeof raw.message_chars !== "number" ||
+    typeof raw.message_digest !== "string" ||
+    typeof raw.pushed !== "boolean" ||
+    !COMMIT_PHASES.includes(raw.phase as CommitPhase) ||
+    !optionalString(raw.receipt_id) ||
+    !optionalString(raw.path) ||
+    !optionalString(raw.upstream) ||
+    !optionalString(raw.code) ||
+    !optionalString(raw.stderr) ||
+    raw.redacted !== true
+  ) {
+    throw new Error("review_commit_receipt_invalid");
+  }
+  const sha = raw.sha;
+  if (sha !== null && !commitSha(sha)) throw new Error("review_commit_receipt_invalid");
+  // A receipt that claims success must carry both the sha and the file it was
+  // written to; a failure never pretends to have one.
+  if (raw.status === "committed" && (sha === null || typeof raw.path !== "string" || raw.path === "")) {
+    throw new Error("review_commit_receipt_invalid");
+  }
+  return {
+    schema: "simplicio.desktop-review-commit/v1",
+    status: raw.status as CommitStatus,
+    receipt_id: (raw.receipt_id as string | null) ?? null,
+    path: (raw.path as string | null) ?? null,
+    digest: raw.digest,
+    sha: (sha as string | null) ?? null,
+    branch: raw.branch,
+    paths: paths as string[],
+    message_chars: raw.message_chars,
+    message_digest: raw.message_digest,
+    upstream: (raw.upstream as string | null) ?? null,
+    pushed: raw.pushed,
+    phase: raw.phase as CommitPhase,
+    code: (raw.code as string | null) ?? null,
+    stderr: (raw.stderr as string | null) ?? null,
+    redacted: true,
+  };
+}
+
+export function parseReviewPushReceipt(value: unknown): ReviewPushReceipt {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("review_push_receipt_invalid");
+  const raw = value as Record<string, unknown>;
+  if (
+    raw.schema !== "simplicio.desktop-review-push/v1" ||
+    !PUSH_STATUSES.includes(raw.status as PushStatus) ||
+    !commitSha(raw.sha) ||
+    typeof raw.branch !== "string" ||
+    typeof raw.idempotent !== "boolean" ||
+    !optionalString(raw.upstream) ||
+    !optionalString(raw.code) ||
+    !optionalString(raw.stderr) ||
+    raw.redacted !== true
+  ) {
+    throw new Error("review_push_receipt_invalid");
+  }
+  if (raw.status === "pushed" && (typeof raw.upstream !== "string" || raw.upstream.trim() === "")) {
+    throw new Error("review_push_receipt_invalid");
+  }
+  return {
+    schema: "simplicio.desktop-review-push/v1",
+    status: raw.status as PushStatus,
+    sha: raw.sha,
+    branch: raw.branch,
+    upstream: (raw.upstream as string | null) ?? null,
+    idempotent: raw.idempotent,
+    code: (raw.code as string | null) ?? null,
+    stderr: (raw.stderr as string | null) ?? null,
+    redacted: true,
+  };
+}
+
+
 const PROTECTED = [
   /(^|\/)Cargo\.toml$/,
   /(^|\/)Cargo\.lock$/,
@@ -203,5 +367,23 @@ export function reviewErrorMessage(code: string): string {
   if (code === "review_comments_too_large") return "Os comentários excedem 20.000 caracteres.";
   if (code === "review_inbox_unavailable") return "Não foi possível gravar o inbox de revisão do repositório.";
   if (code === "review_receipt_invalid") return "O recibo do inbox veio em formato inesperado.";
+  if (code === "review_truncated") return "Diff truncado em 200 KB: o commit é recusado porque a revisão está incompleta.";
+  if (code === "review_protected_path") return "O diff inclui um path protegido; commit e push ficam bloqueados.";
+  if (code === "review_changes_empty") return "Não há mudanças no working tree para commitar.";
+  if (code === "review_path_invalid") return "O diff contém um caminho inválido; recarregue a revisão.";
+  if (code === "review_message_empty") return "Escreva a mensagem do commit.";
+  if (code === "review_message_too_large") return "A mensagem do commit excede 4.096 caracteres.";
+  if (code === "review_branch_protected") return "A worktree está em main/master; crie uma branch explícita antes de commitar.";
+  if (code === "review_branch_detached") return "A worktree está com HEAD destacado; entre numa branch antes de commitar.";
+  if (code === "review_branch_unavailable") return "Não foi possível ler a branch atual da worktree.";
+  if (code === "review_commit_base_unsupported") return "Commit exige a revisão sem base: só o working tree é commitado.";
+  if (code === "review_commit_in_progress") return "Há merge, rebase ou cherry-pick em andamento; termine antes de commitar.";
+  if (code === "review_commit_missing") return "Nenhum commit registrado para esta revisão; commite antes de fazer push.";
+  if (code === "review_commit_not_head") return "O HEAD mudou depois do commit registrado; commite de novo antes do push.";
+  if (code === "review_commit_branch_changed") return "A branch mudou depois do commit registrado; commite de novo.";
+  if (code === "review_commit_sha_invalid") return "O sha informado não é um commit id válido.";
+  if (code === "review_commit_receipt_invalid") return "O recibo do commit veio em formato inesperado.";
+  if (code === "review_push_no_upstream") return "A branch não tem upstream; marque a criação do upstream para fazer push.";
+  if (code === "review_push_upstream_mismatch") return "O upstream aponta para outra branch; o push não é feito sem decisão explícita.";
   return "Falha na revisão: " + code;
 }

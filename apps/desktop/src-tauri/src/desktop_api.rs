@@ -521,6 +521,22 @@ pub(crate) trait ScriptedActions: Send + Sync {
     fn report(&self, repo: Option<&str>, run_id: Option<&str>) -> Result<Value, String>;
     /// `git diff` for one worktree, bounded and redacted.
     fn diff(&self, path: &str, base: Option<&str>) -> Result<Value, String>;
+    /// `review commit` — one commit with the human's message, receipt with sha.
+    fn review_commit(
+        &self,
+        repo: &str,
+        digest: &str,
+        message: &str,
+        base: Option<&str>,
+    ) -> Result<Value, String>;
+    /// `review push` — pushes a recorded commit; there is no force variant.
+    fn review_push(
+        &self,
+        repo: &str,
+        digest: &str,
+        sha: &str,
+        create_upstream: bool,
+    ) -> Result<Value, String>;
 }
 
 struct NativeActions;
@@ -554,6 +570,26 @@ impl ScriptedActions for NativeActions {
 
     fn diff(&self, path: &str, base: Option<&str>) -> Result<Value, String> {
         crate::diff_from_path(path, base)
+    }
+
+    fn review_commit(
+        &self,
+        repo: &str,
+        digest: &str,
+        message: &str,
+        base: Option<&str>,
+    ) -> Result<Value, String> {
+        crate::review_commit_from_repo(repo, digest, message, base)
+    }
+
+    fn review_push(
+        &self,
+        repo: &str,
+        digest: &str,
+        sha: &str,
+        create_upstream: bool,
+    ) -> Result<Value, String> {
+        crate::review_push_from_repo(repo, digest, sha, create_upstream)
     }
 }
 
@@ -891,6 +927,16 @@ const ROUTES: &[Route] = &[
         query: &["repo", "base"],
     },
     Route {
+        path: "/v1/review/commit",
+        methods: &["POST"],
+        query: &[],
+    },
+    Route {
+        path: "/v1/review/push",
+        methods: &["POST"],
+        query: &[],
+    },
+    Route {
         path: "/v1/worktrees",
         methods: &["GET"],
         query: &["repo"],
@@ -958,6 +1004,8 @@ fn dispatch(
             target.query.get("repo").map(String::as_str),
             target.query.get("base").map(String::as_str),
         )),
+        ("POST", "/v1/review/commit") => result_body(review_commit_data(&request.body, actions)),
+        ("POST", "/v1/review/push") => result_body(review_push_data(&request.body, actions)),
         ("GET", "/v1/worktrees") => {
             result_body(worktrees_data(target.query.get("repo").map(String::as_str)))
         }
@@ -1002,6 +1050,55 @@ fn worktrees_data(repo: Option<&str>) -> Result<Value, String> {
         None => default_repo_string()?,
     };
     crate::worktrees_from_repo(&repo)
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ReviewCommitRequest {
+    repo: String,
+    digest: String,
+    message: String,
+    #[serde(default)]
+    base: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ReviewPushRequest {
+    repo: String,
+    digest: String,
+    sha: String,
+    #[serde(default, rename = "createUpstream", alias = "create_upstream")]
+    create_upstream: bool,
+}
+
+/// The commit mutation takes its repository and message from the body: there is
+/// no default repository, because committing to a guessed tree is destructive.
+fn review_commit_data(body: &[u8], actions: &dyn ScriptedActions) -> Result<Value, String> {
+    let request: ReviewCommitRequest =
+        serde_json::from_slice(body).map_err(|_| "invalid_json".to_string())?;
+    let base = request
+        .base
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    if let Some(base) = base {
+        if !crate::review_submit::valid_base_revision(base) {
+            return Err("review_base_invalid".to_string());
+        }
+    }
+    actions.review_commit(&request.repo, &request.digest, &request.message, base)
+}
+
+fn review_push_data(body: &[u8], actions: &dyn ScriptedActions) -> Result<Value, String> {
+    let request: ReviewPushRequest =
+        serde_json::from_slice(body).map_err(|_| "invalid_json".to_string())?;
+    actions.review_push(
+        &request.repo,
+        &request.digest,
+        &request.sha,
+        request.create_upstream,
+    )
 }
 
 #[derive(Deserialize)]
@@ -1165,10 +1262,34 @@ fn error_status(code: &str) -> u16 {
         | "invalid_selector"
         | "selector_required"
         | "selector_kind_unsupported"
-        | "review_base_invalid" => 400,
+        | "review_base_invalid"
+        | "review_digest_invalid"
+        | "review_message_empty"
+        | "review_message_too_large"
+        | "review_message_invalid"
+        | "review_commit_sha_invalid" => 400,
         "desktop_access_not_active" => 403,
         "worktree_not_found" => 404,
-        "wip_limit_reached" | "worktree_exists" | "worktree_path_invalid" => 409,
+        "wip_limit_reached"
+        | "worktree_exists"
+        | "worktree_path_invalid"
+        | "review_digest_mismatch"
+        | "review_truncated"
+        | "review_protected_path"
+        | "review_changes_empty"
+        | "review_path_invalid"
+        | "review_branch_protected"
+        | "review_branch_detached"
+        | "review_commit_base_unsupported"
+        | "review_commit_in_progress"
+        | "review_commit_missing"
+        | "review_commit_not_head"
+        | "review_commit_branch_changed"
+        | "review_commit_receipt_invalid"
+        | "review_push_no_upstream"
+        | "review_push_upstream_mismatch"
+        | "review_push_upstream_invalid"
+        | "review_push_refspec_invalid" => 409,
         _ if code.starts_with("runtime_")
             || code.ends_with("_unavailable")
             || code.ends_with("_failed")
@@ -1326,6 +1447,49 @@ mod tests {
                 "base": base,
                 "diff": "+canned",
                 "truncated": false,
+                "redacted": true,
+            }))
+        }
+
+        fn review_commit(
+            &self,
+            repo: &str,
+            digest: &str,
+            message: &str,
+            base: Option<&str>,
+        ) -> Result<Value, String> {
+            self.calls.lock().unwrap().push(format!(
+                "commit repo={repo} digest={} chars={} base={}",
+                digest,
+                message.chars().count(),
+                base.unwrap_or("-")
+            ));
+            Ok(json!({
+                "schema": crate::review_git::COMMIT_SCHEMA,
+                "status": "committed",
+                "sha": "1".repeat(40),
+                "branch": "work",
+                "pushed": false,
+                "redacted": true,
+            }))
+        }
+
+        fn review_push(
+            &self,
+            repo: &str,
+            digest: &str,
+            sha: &str,
+            create_upstream: bool,
+        ) -> Result<Value, String> {
+            self.calls.lock().unwrap().push(format!(
+                "push repo={repo} digest={digest} sha={sha} create={create_upstream}"
+            ));
+            Ok(json!({
+                "schema": crate::review_git::PUSH_SCHEMA,
+                "status": "pushed",
+                "sha": sha,
+                "upstream": "origin/work",
+                "idempotent": false,
                 "redacted": true,
             }))
         }
@@ -1659,6 +1823,146 @@ mod tests {
         }
         // Nothing was executed for an unauthenticated call.
         assert!(actions.calls().is_empty(), "{:?}", actions.calls());
+    }
+
+    #[test]
+    fn review_commit_and_push_routes_share_the_api_authorization() {
+        let actions = Arc::new(FakeActions::returning(Vec::new()));
+        let server = Server::start(Arc::clone(&actions) as Arc<dyn ScriptedActions>);
+        for path in ["/v1/review/commit", "/v1/review/push"] {
+            // 401: no Authorization header, even with a body.
+            let anonymous = http_request(
+                server.port,
+                &format!(
+                    "POST {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{{}}"
+                ),
+            );
+            assert_eq!(status_of(&anonymous), 401, "{path}: {anonymous}");
+            assert_eq!(code_of(&anonymous), "unauthorized", "{path}");
+        }
+        // 403: a valid shape with the wrong token never reaches the action.
+        for path in ["/v1/review/commit", "/v1/review/push"] {
+            let forbidden = http_request(
+                server.port,
+                &format!(
+                    "POST {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {}\r\nContent-Type: application/json\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{{}}",
+                    "0".repeat(TOKEN_BYTES * 2)
+                ),
+            );
+            assert_eq!(status_of(&forbidden), 403, "{path}: {forbidden}");
+            assert_eq!(code_of(&forbidden), "forbidden", "{path}");
+        }
+        // An authorized call is the first one that reaches the action seam.
+        assert!(actions.calls().is_empty(), "{:?}", actions.calls());
+        assert_eq!(status_of(&server.request("GET", "/v1/review/commit", None)), 405);
+        assert_eq!(
+            code_of(&server.request("GET", "/v1/review/push", None)),
+            "method_not_allowed"
+        );
+    }
+
+    #[test]
+    fn review_commit_route_commits_the_message_from_the_body() {
+        let actions = Arc::new(FakeActions::returning(Vec::new()));
+        let server = Server::start(Arc::clone(&actions) as Arc<dyn ScriptedActions>);
+        let body = json!({
+            "repo": "/tmp/worktree",
+            "digest": format!("sha256:{}", "a".repeat(64)),
+            "message": "feat: reviewed",
+            "base": "   ",
+        })
+        .to_string();
+        let response = server.request("POST", "/v1/review/commit", Some(&body));
+        assert_eq!(status_of(&response), 200, "{response}");
+        let data = data_of(&response);
+        assert_eq!(data["status"], json!("committed"));
+        assert_eq!(
+            data["sha"],
+            json!("1".repeat(40)),
+            "the api returns the sha verbatim"
+        );
+        assert_eq!(
+            actions.calls(),
+            vec![format!(
+                "commit repo=/tmp/worktree digest=sha256:{} chars=14 base=-",
+                "a".repeat(64)
+            )]
+        );
+
+        // A body-only route: any query key is a contract violation.
+        let with_query = server.request(
+            "POST",
+            "/v1/review/commit?repo=/tmp/worktree",
+            Some(&body),
+        );
+        assert_eq!(status_of(&with_query), 400, "{with_query}");
+        assert_eq!(code_of(&with_query), "invalid_query");
+
+        // Unknown fields are refused instead of ignored.
+        let unknown = server.request(
+            "POST",
+            "/v1/review/commit",
+            Some(&json!({"repo": "/tmp", "digest": "x", "message": "y", "force": true}).to_string()),
+        );
+        assert_eq!(status_of(&unknown), 400, "{unknown}");
+        assert_eq!(code_of(&unknown), "invalid_json");
+        let empty = server.request("POST", "/v1/review/commit", Some(""));
+        assert_eq!(status_of(&empty), 400, "{empty}");
+        assert_eq!(code_of(&empty), "invalid_json");
+        // A base is one revision, validated like the review route.
+        let bad_base = server.request(
+            "POST",
+            "/v1/review/commit",
+            Some(&json!({"repo": "/tmp", "digest": "x", "message": "y", "base": "--output=/tmp/x"}).to_string()),
+        );
+        assert_eq!(status_of(&bad_base), 400, "{bad_base}");
+        assert_eq!(code_of(&bad_base), "review_base_invalid");
+    }
+
+    #[test]
+    fn review_push_route_requires_a_sha_and_an_explicit_upstream_choice() {
+        let actions = Arc::new(FakeActions::returning(Vec::new()));
+        let server = Server::start(Arc::clone(&actions) as Arc<dyn ScriptedActions>);
+        let sha = "2".repeat(40);
+        let body = json!({
+            "repo": "/tmp/worktree",
+            "digest": format!("sha256:{}", "b".repeat(64)),
+            "sha": sha,
+            "create_upstream": true,
+        })
+        .to_string();
+        let response = server.request("POST", "/v1/review/push", Some(&body));
+        assert_eq!(status_of(&response), 200, "{response}");
+        assert_eq!(data_of(&response)["status"], json!("pushed"));
+        assert_eq!(
+            actions.calls(),
+            vec![format!(
+                "push repo=/tmp/worktree digest=sha256:{} sha={} create=true",
+                "b".repeat(64),
+                "2".repeat(40)
+            )]
+        );
+
+        // The camelCase alias is the same field.
+        let aliased = json!({
+            "repo": "/tmp/worktree",
+            "digest": format!("sha256:{}", "b".repeat(64)),
+            "sha": "2".repeat(40),
+            "createUpstream": false,
+        })
+        .to_string();
+        let camel = server.request("POST", "/v1/review/push", Some(&aliased));
+        assert_eq!(status_of(&camel), 200, "{camel}");
+        assert!(actions.calls()[1].ends_with("create=false"), "{:?}", actions.calls());
+
+        // Missing sha is a body contract error, never a default.
+        let missing = server.request(
+            "POST",
+            "/v1/review/push",
+            Some(&json!({"repo": "/tmp", "digest": "x"}).to_string()),
+        );
+        assert_eq!(status_of(&missing), 400, "{missing}");
+        assert_eq!(code_of(&missing), "invalid_json");
     }
 
     #[test]

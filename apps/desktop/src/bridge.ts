@@ -49,7 +49,15 @@ import {
   type OrientationMeasurement,
   type WorktreeCreateReceipt,
 } from "./worktree_orientation";
-import { parseReviewReceipt, type ReviewDigest, type ReviewSubmissionReceipt } from "./review";
+import {
+  parseReviewCommitReceipt,
+  parseReviewPushReceipt,
+  parseReviewReceipt,
+  type ReviewCommitReceipt,
+  type ReviewDigest,
+  type ReviewPushReceipt,
+  type ReviewSubmissionReceipt,
+} from "./review";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -464,6 +472,45 @@ export async function submitDesktopReview(
       comments,
       planDigest: planDigest?.trim() || null,
       base: base?.trim() || null,
+    }),
+  );
+}
+
+/**
+ * Commits exactly the reviewed paths with the message the user typed. A git
+ * failure is a document with the real stderr, not a thrown error.
+ */
+export async function commitDesktopReview(
+  repoPath: string,
+  digest: string,
+  message: string,
+  base?: string,
+): Promise<ReviewCommitReceipt> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseReviewCommitReceipt(
+    await invoke<unknown>("desktop_review_commit", {
+      repo: repoPath,
+      digest,
+      message,
+      base: base?.trim() || null,
+    }),
+  );
+}
+
+/** Pushes the recorded commit; `createUpstream` is the explicit creation. */
+export async function pushDesktopReview(
+  repoPath: string,
+  digest: string,
+  sha: string,
+  createUpstream: boolean,
+): Promise<ReviewPushReceipt> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseReviewPushReceipt(
+    await invoke<unknown>("desktop_review_push", {
+      repo: repoPath,
+      digest,
+      sha,
+      createUpstream,
     }),
   );
 }

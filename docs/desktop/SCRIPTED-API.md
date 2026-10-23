@@ -61,6 +61,8 @@ match is `404 worktree_not_found`.
 | `GET /v1/snapshot` | `snapshot` | Runtime snapshot |
 | `GET /v1/report?repo=` \| `?selector=` | `report open <sel>` | Runtime execution report |
 | `GET /v1/review?repo=&base=` | (review screen) | `simplicio.desktop-review/v1` |
+| `POST /v1/review/commit` | (review screen) | `simplicio.desktop-review-commit/v1` |
+| `POST /v1/review/push` | (review screen) | `simplicio.desktop-review-push/v1` |
 | `GET /v1/worktrees?repo=` | `worktree ps` | `simplicio.desktop-worktrees/v1` |
 | `POST /v1/worktree?repo=` | `worktree create --issue <n>` | `simplicio.desktop-worktree-create/v1` |
 | `GET /v1/run?selector=` (or `POST`) | `run open <sel>` | `simplicio.desktop-run/v1` |
@@ -97,6 +99,32 @@ the outcome is data, not an HTTP error:
 `outcome` is `timeout` when the budget is spent; `attempts` and `elapsed_ms`
 make the budget auditable.
 
+### `/v1/review/commit` and `/v1/review/push`
+
+Both are `POST` with a JSON body and no query keys; a query key is
+`400 invalid_query`. `repo` is required in the body: a mutation is never sent to
+a guessed default repository.
+
+```json
+POST /v1/review/commit
+{ "repo": "/tmp/wt-469", "digest": "sha256:<64 hex>", "message": "feat: x", "base": null }
+```
+
+The digest must still match a freshly recomputed `git diff` (otherwise
+`409 review_digest_mismatch`); the guards, the receipt and the state machine are
+documented in `docs/desktop/REVIEW.md`. A failed hook is **not** an HTTP error:
+the route answers `200` with `status: "commit_failed"` and the real `stderr`, so
+the script sees exactly what git wrote.
+
+```json
+POST /v1/review/push
+{ "repo": "/tmp/wt-469", "digest": "sha256:<64 hex>", "sha": "<40 hex>", "createUpstream": false }
+```
+
+`createUpstream` (alias `create_upstream`) is the explicit upstream creation;
+without it a branch with no upstream is `409 review_push_no_upstream`. There is
+no force flag and unknown body fields are `400 invalid_json`.
+
 ### `/v1/diff`
 
 Resolves the selector to one working tree and returns the same bounded, redacted
@@ -124,10 +152,10 @@ working tree.
 
 | Code | Status |
 | --- | --- |
-| `invalid_json`, `invalid_query`, `invalid_repo`, `repo_path_invalid`, `issue_invalid`, `agent_invalid`, `invalid_selector`, `selector_required`, `selector_kind_unsupported`, `review_base_invalid` | 400 |
+| `invalid_json`, `invalid_query`, `invalid_repo`, `repo_path_invalid`, `issue_invalid`, `agent_invalid`, `invalid_selector`, `selector_required`, `selector_kind_unsupported`, `review_base_invalid`, `review_digest_invalid`, `review_message_empty`, `review_message_too_large`, `review_message_invalid`, `review_commit_sha_invalid` | 400 |
 | `desktop_access_not_active` | 403 |
 | `worktree_not_found` | 404 |
-| `wip_limit_reached`, `worktree_exists`, `worktree_path_invalid` | 409 |
+| `wip_limit_reached`, `worktree_exists`, `worktree_path_invalid`, `review_digest_mismatch`, `review_truncated`, `review_protected_path`, `review_changes_empty`, `review_path_invalid`, `review_branch_protected`, `review_branch_detached`, `review_commit_base_unsupported`, `review_commit_in_progress`, `review_commit_missing`, `review_commit_not_head`, `review_commit_branch_changed`, `review_commit_receipt_invalid`, `review_push_no_upstream`, `review_push_upstream_mismatch`, `review_push_upstream_invalid`, `review_push_refspec_invalid` | 409 |
 | `run_unavailable`, `receipt_unavailable`, `execution_report_unavailable`, `desktop_access_unverified`, any `runtime_*` | 503 |
 
 ## Tests
@@ -139,7 +167,8 @@ TAURI_CONFIG='{"bundle":{"externalBin":[]}}' cargo test --lib desktop_api
 
 `TAURI_CONFIG` removes the packaged-sidecar requirement from the build script;
 the suite does not execute a Runtime. `desktop_api::ScriptedActions` is the seam:
-the native implementation is the five Runtime/git calls above, and the tests use
+the native implementation is the seven Runtime/git calls above, and the tests use
 canned documents to exercise authentication, selector resolution, the `wait`
-budget and every error mapping over a real loopback socket. `diff_snapshot` is
-additionally tested against a throwaway git repository, so the diff text is real.
+budget, the review commit/push body contract and every error mapping over a real
+loopback socket. `diff_snapshot` is additionally tested against a throwaway git
+repository, so the diff text is real.

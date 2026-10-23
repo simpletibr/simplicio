@@ -384,31 +384,34 @@ pub fn prepare(
     })
 }
 
-fn reject_symlink(path: &Path) -> Result<(), String> {
+pub(crate) fn reject_symlink(path: &Path, error: &str) -> Result<(), String> {
     match fs::symlink_metadata(path) {
-        Ok(metadata) if metadata.file_type().is_symlink() => {
-            Err("review_inbox_unavailable".to_string())
-        }
+        Ok(metadata) if metadata.file_type().is_symlink() => Err(error.to_string()),
         Ok(_) => Ok(()),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(_) => Err("review_inbox_unavailable".to_string()),
+        Err(failure) if failure.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(_) => Err(error.to_string()),
     }
 }
 
-/// Review state is repository-local. A symlinked `.simplicio` or inbox could
-/// redirect the write outside the repository, so both levels are rejected.
-fn ensure_inbox_directory(repo: &Path) -> Result<(), String> {
+/// Review state is repository-local. A symlinked `.simplicio` or state
+/// directory could redirect the write outside the repository, so both levels
+/// are rejected. Shared by the inbox and the commit receipts.
+pub(crate) fn ensure_state_dir(repo: &Path, relative: &str, error: &str) -> Result<(), String> {
     let state = repo.join(".simplicio");
-    reject_symlink(&state)?;
-    fs::create_dir_all(&state).map_err(|_| "review_inbox_unavailable".to_string())?;
-    let inbox = repo.join(INBOX_RELATIVE);
-    reject_symlink(&inbox)?;
-    fs::create_dir_all(&inbox).map_err(|_| "review_inbox_unavailable".to_string())?;
-    let metadata = fs::metadata(&inbox).map_err(|_| "review_inbox_unavailable".to_string())?;
+    reject_symlink(&state, error)?;
+    fs::create_dir_all(&state).map_err(|_| error.to_string())?;
+    let directory = repo.join(relative);
+    reject_symlink(&directory, error)?;
+    fs::create_dir_all(&directory).map_err(|_| error.to_string())?;
+    let metadata = fs::metadata(&directory).map_err(|_| error.to_string())?;
     if !metadata.is_dir() {
-        return Err("review_inbox_unavailable".to_string());
+        return Err(error.to_string());
     }
     Ok(())
+}
+
+fn ensure_inbox_directory(repo: &Path) -> Result<(), String> {
+    ensure_state_dir(repo, INBOX_RELATIVE, "review_inbox_unavailable")
 }
 
 fn receipt(entry: &Value, relative_path: &str, idempotent: bool) -> Value {
@@ -438,7 +441,7 @@ pub fn submit(
 ) -> Result<Value, String> {
     let prepared = prepare(repo, review, comments, plan_digest, now_epoch_ms)?;
     ensure_inbox_directory(repo)?;
-    reject_symlink(&prepared.path)?;
+    reject_symlink(&prepared.path, "review_inbox_unavailable")?;
 
     if let Ok(bytes) = fs::read(&prepared.path) {
         if let Ok(existing) = serde_json::from_slice::<Value>(&bytes) {
