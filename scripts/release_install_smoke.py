@@ -83,6 +83,15 @@ def isolated_env(home: Path, bundle: Path, bin_dir: Path) -> dict[str, str]:
     env = dict(os.environ)
     for key in ("SIMPLICIO_BIN_DIR", "SIMPLICIO_BUNDLE_DIR", "SIMPLICIO_VERSION"):
         env.pop(key, None)
+    # Optional host CLIs installed on the maintainer machine must not turn a
+    # hermetic install smoke into a host-integration test (the isolated HOME
+    # cannot satisfy their runtimes).
+    path_entries = [
+        entry
+        for entry in env.get("PATH", "").split(os.pathsep)
+        if entry and not (Path(entry) / "hermes").exists()
+    ]
+    env["PATH"] = os.pathsep.join(path_entries)
     env.update(
         {
             "HOME": str(home),
