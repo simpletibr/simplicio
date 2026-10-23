@@ -45,6 +45,8 @@ simplicio-*
 !plugins/simplicio/.claude-plugin/plugin.json
 !plugins/simplicio/gemini-extension.json
 !plugins/simplicio/host-surfaces.json
+!plugins/simplicio/skills/
+!plugins/simplicio/skills/**
 
 # Desktop browser test artifacts
 apps/desktop/test-results/
