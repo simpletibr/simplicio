@@ -48,7 +48,7 @@ export type DesktopEventKind =
   | "update.available"
   | "update.applied";
 
-const EVENT_KINDS: readonly DesktopEventKind[] = [
+export const EVENT_KINDS: readonly DesktopEventKind[] = [
   "run.started",
   "run.progress",
   "run.finished",

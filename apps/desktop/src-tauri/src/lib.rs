@@ -1040,6 +1040,21 @@ async fn desktop_worktrees(repo_path: String) -> Result<Value, String> {
         .map_err(|_| "worktree_list_failed".to_string())?
 }
 
+/// Default and clamp for the worktree WIP limit; 5 matches the fleet queue default.
+fn managed_worktree_limit(requested: Option<u32>) -> u32 {
+    requested.unwrap_or(5).clamp(1, 64)
+}
+
+/// Admission shared by the native create path and its test. One worktree over
+/// the limit is rejected before any directory or branch is created, so a failed
+/// creation never leaves a half-made task behind.
+fn worktree_admission(active: u32, limit: u32) -> Result<(), String> {
+    if active >= limit {
+        return Err("wip_limit_reached".to_string());
+    }
+    Ok(())
+}
+
 pub(crate) fn create_managed_worktree(
     repo_path: &str,
     issue: u64,
@@ -1053,7 +1068,7 @@ pub(crate) fn create_managed_worktree(
     if agent.len() > 64 || agent.chars().any(|value| !(value.is_ascii_alphanumeric() || "-_. ".contains(value))) {
         return Err("agent_invalid".to_string());
     }
-    let limit = wip_limit.unwrap_or(5).clamp(1, 64);
+    let limit = managed_worktree_limit(wip_limit);
     let repo = validated_repo_path(repo_path)?;
     let list = git_output(&repo, &["worktree", "list", "--porcelain"])?;
     let active = String::from_utf8_lossy(&list.stdout)
@@ -1061,9 +1076,7 @@ pub(crate) fn create_managed_worktree(
         .filter(|block| !block.trim().is_empty())
         .skip(1)
         .count() as u32;
-    if active >= limit {
-        return Err("wip_limit_reached".to_string());
-    }
+    worktree_admission(active, limit)?;
     let home = runtime_user_home()?;
     let path = managed_worktree_path(&home, &repo, issue);
     if path.exists() {
@@ -2309,4 +2322,19 @@ mod tests {
         assert_eq!(snapshot["runtime"]["state"], "healthy");
         fs::remove_dir_all(root).unwrap();
     }
+
+    #[test]
+    fn worktree_wip_limit_is_enforced_before_creation() {
+        assert_eq!(managed_worktree_limit(None), 5);
+        assert_eq!(managed_worktree_limit(Some(0)), 1);
+        assert_eq!(managed_worktree_limit(Some(3)), 3);
+        assert_eq!(managed_worktree_limit(Some(999)), 64);
+
+        assert!(worktree_admission(0, 5).is_ok());
+        assert!(worktree_admission(4, 5).is_ok());
+        assert_eq!(worktree_admission(5, 5).unwrap_err(), "wip_limit_reached");
+        assert_eq!(worktree_admission(6, 5).unwrap_err(), "wip_limit_reached");
+        assert!(worktree_admission(1, 1).is_err());
+    }
+
 }

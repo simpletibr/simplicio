@@ -35,14 +35,30 @@ other Runtime read commands. Its hard bounds:
 | Events per page | 500 (the daemon serves at most 256) |
 | Page bytes | 1 MB |
 | Cursor | `0..9_007_199_254_740_991` (safe integer) |
-| Long-poll wait | 900 ms default, 1 s maximum; the UI leaves a 250 ms gap between polls |
+| Long-poll wait | 700 ms default, 1 s maximum; the UI leaves a 250 ms gap between polls |
 
 When the daemon is unavailable, on Windows without a daemon socket, or when the
 page fails validation, the command returns an error code. The UI shows
 `Eventos indisponíveis (…). Nenhum evento é inventado.` and keeps the last
 valid page. Nothing is synthesized from the snapshot or from the receipt list.
-The long-poll returns as soon as an event exists, so a new event reaches the
-screen within the 1 s acceptance budget.
+
+The long-poll returns as soon as an event exists, so an event that arrives
+during a poll is on screen in milliseconds. An event that arrives just after a
+poll returned empty waits for the next one, and that is the worst case the
+acceptance criterion bounds:
+
+| Component | Budget |
+| --- | --- |
+| Long-poll wait | 700 ms |
+| Gap between polls | 250 ms |
+| Runtime spawn | 40 ms |
+| **Worst case** | **990 ms of the 1 s budget** |
+
+`ACTIVITY_POLL_WAIT_MS`, `ACTIVITY_POLL_GAP_MS` and
+`ACTIVITY_POLL_SPAWN_BUDGET_MS` in `apps/desktop/src/bridge.ts` are the single
+source of that arithmetic, and `src/activity_poll_budget.test.ts` fails if the
+sum exceeds `ACTIVITY_POLL_BUDGET_MS` (1 s). The earlier 900 ms default plus the
+250 ms gap allowed 1.19 s and missed the criterion.
 
 ## Replay projection (`simplicio.activity-replay/v1`)
 
@@ -67,7 +83,12 @@ The projection exposes `eventCount`, `rejectedEvents`, `headCursor`,
 ## AI-BOM export (`simplicio.desktop-ai-bom/v1`)
 
 `buildAiBom(replay, { source, generatedAt })` produces the JSON document, and
-`aiBomToJson` / `aiBomToMarkdown` produce the two downloads. Provenance records:
+`aiBomToJson` / `aiBomToMarkdown` produce the two downloads. The document
+contract is published in
+`apps/desktop/src/schemas/desktop-ai-bom-v1.schema.json` (JSON Schema 2020-12)
+and enforced by `validateAiBom` / `validateAiBomJson` in
+`apps/desktop/src/ai_bom_validation.ts`; a document is only exported after it
+validates. Provenance records:
 
 - producer (`simplicio-desktop`), source (`runtime` / `preview`);
 - event schema, stream id, first/last cursor, event count, rejected count;
@@ -100,10 +121,16 @@ pages with `mergeEventPages`.
 
 ```
 cd apps/desktop
-npx vitest run src/activity_replay.test.ts src/activity_screen.test.ts src/screens/ActivityScreen.replay.test.tsx
+npx vitest run src/activity_replay.test.ts src/ai_bom_validation.test.ts \
+  src/activity_poll_budget.test.ts src/activity_screen.test.ts \
+  src/screens/ActivityScreen.replay.test.tsx
 npm run build
-cd src-tauri && cargo check --all-targets
+cd src-tauri && cargo test activity_events
 ```
+
+`src/ai_bom_validation.test.ts` mutates a freshly built export: it deletes every
+key the published schema marks `required` and breaks every `const`, `enum` and
+bound, so the schema and the executable validator cannot drift apart.
 
 The daemon page total is also bounded in Rust (`activity_events::validate_page`),
 so a direct IPC caller cannot bypass the TS limits.

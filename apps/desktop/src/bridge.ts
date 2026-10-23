@@ -308,17 +308,31 @@ export async function pullDesktopUsageChangefeed(
 }
 
 /**
+ * Delivery budget for one activity event (#432: "events appear within 1 s").
+ * A new event can only reach the screen on the next poll, so the worst case is
+ * the long-poll wait plus the gap the screen leaves plus one Runtime spawn.
+ * 700 + 250 + 40 = 990 ms leaves the budget intact instead of the 900 + 250
+ * + 40 = 1190 ms the previous default allowed.
+ */
+export const ACTIVITY_POLL_WAIT_MS = 700;
+export const ACTIVITY_POLL_GAP_MS = 250;
+export const ACTIVITY_POLL_SPAWN_BUDGET_MS = 40;
+export const ACTIVITY_POLL_BUDGET_MS = 1_000;
+
+/**
  * One bounded page of the daemon event stream. Preview builds have no daemon,
  * so the replay section reports the capability error instead of inventing
  * events. The native command owns the 500-event / 1 MB bound.
  */
 export async function loadDesktopActivityEvents(
   afterCursor = 0,
-  waitMs = 900,
+  waitMs = ACTIVITY_POLL_WAIT_MS,
 ): Promise<DesktopEventPage> {
   if (!isTauri()) throw new Error("preview_no_runtime");
   if (!Number.isSafeInteger(afterCursor) || afterCursor < 0) throw new Error("activity_events_cursor_invalid");
-  const effectiveWait = Number.isFinite(waitMs) ? Math.max(0, Math.min(1_000, Math.trunc(waitMs))) : 900;
+  const effectiveWait = Number.isFinite(waitMs)
+    ? Math.max(0, Math.min(1_000, Math.trunc(waitMs)))
+    : ACTIVITY_POLL_WAIT_MS;
   const raw = await withTimeout(invoke<unknown>("desktop_activity_events", {
     afterCursor,
     waitMs: effectiveWait,
