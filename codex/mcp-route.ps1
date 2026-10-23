@@ -609,13 +609,16 @@ function Get-RepoFromHook {
 $repo = Get-RepoFromHook
 
 function Get-McpProfile {
+  # Never default to a deny-capable profile. Claude and Hermes native
+  # Read/Write/Edit must pass; only an explicit core/full/diagnostic value
+  # enables the native-file-tool deny path.
   $explicit = [Environment]::GetEnvironmentVariable('SIMPLICIO_MCP_PROFILE')
   if (-not [string]::IsNullOrWhiteSpace($explicit)) {
     $value = $explicit.Trim().ToLowerInvariant().Replace('_', '-')
     if ($value -eq 'mapperonly') { return 'mapper-only' }
     if (@('core', 'full', 'mapper-only', 'diagnostic') -contains $value) { return $value }
   }
-  return 'full'
+  return 'mapper-only'
 }
 
 function Get-HookToolName {

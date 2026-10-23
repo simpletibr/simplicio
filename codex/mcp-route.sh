@@ -530,6 +530,13 @@ NATIVE_FILE_TOOLS = {
 
 
 def mcp_profile() -> str:
+    """Resolve the MCP profile without ever defaulting to a deny-capable mode.
+
+    Claude and Hermes are Mapper-only surfaces: their native Read/Write/Edit
+    tools must pass through. Only an explicit core/full/diagnostic profile may
+    enable the native-file-tool deny path, so an unset or invalid value falls
+    back to mapper-only instead of full.
+    """
     explicit = os.environ.get("SIMPLICIO_MCP_PROFILE")
     if explicit is not None and explicit.strip():
         value = explicit.strip().lower().replace("_", "-")
@@ -537,7 +544,7 @@ def mcp_profile() -> str:
             return "mapper-only"
         if value in {"core", "full", "mapper-only", "diagnostic"}:
             return value
-    return "full"
+    return "mapper-only"
 
 
 def tool_name_from_hook() -> str:
