@@ -860,6 +860,90 @@ async fn desktop_cache_meter(session_id: Option<String>) -> Result<Value, String
     .map_err(|_| "cache_meter_unavailable".to_string())?
 }
 
+fn valid_plugin_name(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= 128
+        && name
+            .chars()
+            .all(|value| value.is_ascii_alphanumeric() || "-._".contains(value))
+}
+
+fn plugin_requires_consent(name: &str) -> bool {
+    matches!(name, "simplicio-computer-use" | "simplicio-browser-use")
+}
+
+fn run_plugin_operation(args: Vec<String>) -> Result<Value, String> {
+    let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+    run_runtime_json(&borrowed).map_err(|_| "plugin_operation_unavailable".to_string())
+}
+
+#[tauri::command]
+async fn desktop_plugins() -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        require_read_access()?;
+        run_plugin_operation(vec!["plugin".into(), "list".into(), "--json".into()])
+    })
+    .await
+    .map_err(|_| "plugin_catalog_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_plugin_install(name: String, consent: bool) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        if !valid_plugin_name(&name) {
+            return Err("plugin_name_invalid".to_string());
+        }
+        if plugin_requires_consent(&name) && !consent {
+            return Err("plugin_consent_required".to_string());
+        }
+        run_plugin_operation(vec![
+            "plugin".into(),
+            "install".into(),
+            name,
+            "--json".into(),
+        ])
+    })
+    .await
+    .map_err(|_| "plugin_operation_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_plugin_remove(name: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        if !valid_plugin_name(&name) {
+            return Err("plugin_name_invalid".to_string());
+        }
+        run_plugin_operation(vec![
+            "plugin".into(),
+            "remove".into(),
+            name,
+            "--json".into(),
+        ])
+    })
+    .await
+    .map_err(|_| "plugin_operation_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_plugin_update(name: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        if !valid_plugin_name(&name) {
+            return Err("plugin_name_invalid".to_string());
+        }
+        run_plugin_operation(vec![
+            "plugin".into(),
+            "update".into(),
+            name,
+            "--json".into(),
+        ])
+    })
+    .await
+    .map_err(|_| "plugin_operation_unavailable".to_string())?
+}
+
 #[tauri::command]
 async fn desktop_consolidated_token_report(request: Value) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
@@ -1463,6 +1547,10 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_plugins,
+            desktop_plugin_install,
+            desktop_plugin_remove,
+            desktop_plugin_update,
             desktop_cache_meter,
             desktop_session_close_idle,
             desktop_bind_provider_session,
