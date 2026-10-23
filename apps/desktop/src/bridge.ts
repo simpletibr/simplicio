@@ -39,6 +39,7 @@ import { parseCacheMeter, type CacheMeterReceipt } from "./cache_meter";
 import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from "./plugin_manager";
 import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./catalog_ui";
 import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
+import { parseWorktrees, type Worktree } from "./fleet";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -390,6 +391,23 @@ export async function loadDesktopCacheMeter(options: { sessionId?: string } = {}
     60_000,
     "cache_meter_timeout",
   ));
+}
+
+export async function loadDesktopWorktrees(repoPath: string): Promise<Worktree[]> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  const value = await invoke<{ porcelain?: unknown }>("desktop_worktrees", { repoPath });
+  if (typeof value?.porcelain !== "string") throw new Error("worktree_parse_invalid");
+  return parseWorktrees(value.porcelain);
+}
+
+export async function createDesktopWorktree(repoPath: string, issue: number, agent: string, wipLimit: number): Promise<unknown> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return invoke<unknown>("desktop_worktree_create", { repoPath, issue, agent, wipLimit });
+}
+
+export async function removeDesktopWorktree(repoPath: string, path: string): Promise<unknown> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return invoke<unknown>("desktop_worktree_remove", { repoPath, path });
 }
 
 export async function loadDesktopHostsPlan(): Promise<HostsPlan> {
