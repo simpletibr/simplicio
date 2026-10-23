@@ -11,17 +11,21 @@
 
 ![Fluxo do Simplicio: entrada → passos → saídas](docs/flow/simplicio.svg)
 
-O fluxo é gerado de `docs/flow/simplicio.flow.json` (fonte única):
+O fluxo (8 entradas, 24 passos, 7 saídas) é gerado de `docs/flow/simplicio.flow.json` (fonte única) e cobre todos os comandos públicos da CLI e todas as MCP tools documentadas:
 
 ```bash
-python3 scripts/generate_flow.py
-python3 scripts/generate_flow.py --check   # drift antes do release
+python3 scripts/generate_flow.py            # regenera mmd/svg/langflow
+python3 scripts/generate_flow.py --check    # gate de drift antes do release
+python3 -m pytest tests/test_flow_contract.py -q
 ```
 
 Artefatos: `simplicio.mmd`, `simplicio.svg` e `langflow/simplicio.langflow.json`.
 
-Verificação, requisitos de `mmdc` e status do Langflow: [docs/flow/README.md](docs/flow/README.md).
-O import live no Langflow está **blocked** neste ambiente (sem servidor em `localhost:7860`) e é verificado de forma fail-closed por `scripts/verify_flow_langflow.py`.
+Render Mermaid validado com `mmdc` (evidência e hashes em `docs/flow/render/`).
+O import no Langflow 1.12.0 foi **verificado** localmente: recibo em `docs/flow/evidence/langflow-verify.json`
+e `GET /api/v1/flows/{id}` em `docs/flow/evidence/langflow-readback.json`.
+Sem servidor, `scripts/verify_flow_langflow.py` é fail-closed (exit 2, `status=blocked`).
+Requisitos e repro: [docs/flow/README.md](docs/flow/README.md).
 
 <p align="center">
   <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=2fe6a0&label=release" alt="Latest Release"></a>

@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
+import os
+import re
+import subprocess
+import sys
+import textwrap
 import threading
 import xml.etree.ElementTree as ET
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,7 +21,14 @@ MMD = ROOT / "docs/flow/simplicio.mmd"
 SVG = ROOT / "docs/flow/simplicio.svg"
 LANGFLOW = ROOT / "docs/flow/langflow/simplicio.langflow.json"
 FLOW_DOCS = ROOT / "docs/flow/README.md"
+RENDER_STATUS = ROOT / "docs/flow/render/RENDER-STATUS.json"
 VERIFIER = ROOT / "scripts/verify_flow_langflow.py"
+NPM_PACKAGE = ROOT / "npm/simplicio/package.json"
+PYPI_PROJECT = ROOT / "pypi/simplicio/pyproject.toml"
+COMMAND_DOCS = (ROOT / "README.md", ROOT / "MCP-CONNECT.md")
+TOOL_DOC = ROOT / "MCP-CONNECT.md"
+CLI_COMMAND_RE = re.compile(r"\bsimplicio\s+([a-z][a-z0-9-]*)")
+MCP_TOOL_RE = re.compile(r"`(simplicio_[a-z_]+)`")
 
 
 def _generator():
@@ -159,7 +172,8 @@ def test_mermaid_and_svg_artifacts_render_the_flow():
     assert any(data["title"] in text for text in texts)
     for node in data["nodes"]:
         assert node["id"] in texts
-        assert node["label"] in texts
+        # Long labels wrap into consecutive lines; the first line must be present.
+        assert textwrap.wrap(node["label"], 38)[0] in texts
 
 
 def test_readmes_embed_the_generated_flow():
@@ -173,7 +187,8 @@ def test_readmes_embed_the_generated_flow():
     assert "scripts/generate_flow.py --check" in docs
     assert "scripts/verify_flow_langflow.py" in docs
     assert "mmdc" in docs
-    assert "BLOCKED" in docs
+    assert "docs/flow/render/RENDER-STATUS.json" in docs
+    assert "docs/flow/evidence/langflow-verify.json" in docs
 
 
 def test_verifier_blocks_without_a_live_langflow():
@@ -238,3 +253,139 @@ def test_verifier_readback_logic_against_stub_server():
     assert receipt["checks"]["node_ids_match"] is True
     assert receipt["checks"]["edge_pairs_match"] is True
     assert receipt["checks"]["node_labels_match"] is True
+
+
+def _documented_commands() -> set[str]:
+    text = "\n".join(path.read_text(encoding="utf-8") for path in COMMAND_DOCS)
+    return set(CLI_COMMAND_RE.findall(text))
+
+
+def _documented_tools() -> set[str]:
+    return set(MCP_TOOL_RE.findall(TOOL_DOC.read_text(encoding="utf-8")))
+
+
+def test_flow_covers_every_documented_command_and_mcp_tool():
+    """README/MCP-CONNECT are the public surface; the flow may not omit an item."""
+    data = _flow()
+    documented_commands = _documented_commands()
+    documented_tools = _documented_tools()
+    assert documented_commands, "no CLI command found in README/MCP-CONNECT"
+    assert documented_tools, "no MCP tool found in MCP-CONNECT"
+
+    flow_commands = {
+        node["command"].split()[1]
+        for node in data["nodes"]
+        if node.get("command", "").startswith("simplicio ")
+    }
+    flow_tools = {node["tool"] for node in data["nodes"] if node.get("tool")}
+
+    assert flow_commands == documented_commands, (
+        f"flow omits commands {sorted(documented_commands - flow_commands)} "
+        f"and invents {sorted(flow_commands - documented_commands)}"
+    )
+    assert flow_tools == documented_tools, (
+        f"flow omits tools {sorted(documented_tools - flow_tools)} "
+        f"and invents {sorted(flow_tools - documented_tools)}"
+    )
+
+
+def test_flow_commands_resolve_to_existing_entrypoints():
+    data = _flow()
+    npm_bins = json.loads(NPM_PACKAGE.read_text(encoding="utf-8")).get("bin") or {}
+    pypi_project = PYPI_PROJECT.read_text(encoding="utf-8")
+    for node in data["nodes"]:
+        command = node.get("command")
+        if not command:
+            continue
+        parts = command.split()
+        if parts[0] == "simplicio":
+            assert len(parts) >= 2, command
+            assert "simplicio" in npm_bins, "npm package must declare the simplicio bin"
+            assert (NPM_PACKAGE.parent / npm_bins["simplicio"]).is_file()
+            assert re.search(r'^simplicio\s*=\s*"simplicio:main"$', pypi_project, re.MULTILINE), (
+                "PyPI bootstrap must declare the simplicio console script"
+            )
+        elif parts[0] == "python3":
+            assert len(parts) >= 2, command
+            script = parts[1]
+            assert script.startswith("scripts/"), f"command must point at a repository script: {command}"
+            assert (ROOT / script).is_file(), f"missing script for command: {command}"
+        else:
+            raise AssertionError(f"unsupported command prefix: {command}")
+
+
+def test_flow_graph_is_fully_connected():
+    data = _flow()
+    kinds = {node["id"]: node["kind"] for node in data["nodes"]}
+    outgoing: dict[str, set[str]] = {node_id: set() for node_id in kinds}
+    incoming: dict[str, set[str]] = {node_id: set() for node_id in kinds}
+    for source, target in data["edges"]:
+        outgoing[source].add(target)
+        incoming[target].add(source)
+
+    for node_id, kind in kinds.items():
+        if kind != "input":
+            assert incoming[node_id], f"{node_id} is unreachable from an input"
+        if kind != "output":
+            assert outgoing[node_id], f"{node_id} leads nowhere"
+    assert all(outgoing[node_id] for node_id, kind in kinds.items() if kind == "input")
+
+    def walk(starts: set[str], edges: dict[str, set[str]]) -> set[str]:
+        seen = set(starts)
+        queue = list(starts)
+        while queue:
+            current = queue.pop()
+            for neighbour in edges[current]:
+                if neighbour not in seen:
+                    seen.add(neighbour)
+                    queue.append(neighbour)
+        return seen
+
+    starts = {node_id for node_id, kind in kinds.items() if kind == "input"}
+    ends = {node_id for node_id, kind in kinds.items() if kind == "output"}
+    assert walk(starts, outgoing) == set(kinds), "some node is not reachable from an input"
+    assert walk(ends, incoming) == set(kinds), "some node does not reach an output"
+
+
+def test_flow_metadata_matches_the_release_version():
+    data = _flow()
+    assert data["version"] == (ROOT / "version.txt").read_text(encoding="utf-8").strip()
+
+
+def test_generation_is_byte_identical_across_processes_and_directories(tmp_path):
+    """Same source, different CWD/hash seed: identical bytes for every artifact."""
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    for target, seed in ((first, "0"), (second, "424242")):
+        env = dict(os.environ, PYTHONHASHSEED=seed)
+        subprocess.run(
+            [sys.executable, str(ROOT / "scripts/generate_flow.py"), "--out-dir", str(target)],
+            check=True,
+            cwd=tmp_path,
+            env=env,
+            capture_output=True,
+        )
+    for relative in ("simplicio.mmd", "simplicio.svg", "langflow/simplicio.langflow.json"):
+        committed = hashlib.sha256((ROOT / "docs/flow" / relative).read_bytes()).hexdigest()
+        generated = {
+            hashlib.sha256((target / relative).read_bytes()).hexdigest()
+            for target in (first, second)
+        }
+        assert generated == {committed}, f"non-deterministic or stale artifact: {relative}"
+
+
+def test_render_evidence_matches_the_committed_mermaid():
+    status = json.loads(RENDER_STATUS.read_text(encoding="utf-8"))
+    assert status["schema"] == "simplicio.render-status/v1"
+    assert status["status"] in {"verified", "blocked"}
+    assert status["renderer"] == "mmdc"
+    assert "mermaid-cli" in status["command"]
+    if status["status"] == "blocked":
+        assert status["reason"].strip()
+        return
+    digest = hashlib.sha256(MMD.read_bytes()).hexdigest()
+    assert status["mermaid"]["input_sha256"] == digest, "re-render docs/flow/render after changing the .mmd"
+    for output in status["outputs"]:
+        path = ROOT / output["path"]
+        assert path.is_file(), f"missing render evidence: {output['path']}"
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == output["sha256"]
