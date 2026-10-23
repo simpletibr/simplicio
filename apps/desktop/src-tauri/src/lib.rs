@@ -860,6 +860,97 @@ async fn desktop_cache_meter(session_id: Option<String>) -> Result<Value, String
     .map_err(|_| "cache_meter_unavailable".to_string())?
 }
 
+fn catalog_entry_requires_consent(entry: &Value) -> bool {
+    entry
+        .get("capabilities_requiring_consent")
+        .and_then(Value::as_array)
+        .is_some_and(|items| !items.is_empty())
+}
+
+fn catalog_command_args(entry: &Value, values: &Value) -> Result<Vec<String>, String> {
+    let id = entry.get("id").and_then(Value::as_str).ok_or("catalog_entry_invalid")?;
+    if id.is_empty()
+        || id.len() > 64
+        || !id.chars().all(|value| value.is_ascii_alphanumeric() || value == '-')
+    {
+        return Err("catalog_entry_invalid".to_string());
+    }
+    let properties = entry
+        .pointer("/args_schema/properties")
+        .and_then(Value::as_object)
+        .cloned()
+        .unwrap_or_default();
+    let values = values.as_object().cloned().unwrap_or_default();
+    if values.keys().any(|key| !properties.contains_key(key)) {
+        return Err("catalog_arguments_invalid".to_string());
+    }
+    let mut args = vec![id.to_string()];
+    for (name, property) in properties {
+        let Some(value) = values.get(&name) else { continue };
+        if value.is_null() || value.as_str() == Some("") {
+            continue;
+        }
+        match property.get("type").and_then(Value::as_str) {
+            Some("boolean") => {
+                let flag = value.as_bool().ok_or("catalog_arguments_invalid")?;
+                if flag {
+                    args.push(format!("--{name}"));
+                }
+            }
+            Some("number" | "integer") => {
+                let number = value.as_f64().ok_or("catalog_arguments_invalid")?;
+                args.push(format!("--{name}"));
+                args.push(number.to_string());
+            }
+            Some("string") => {
+                let text = value.as_str().ok_or("catalog_arguments_invalid")?;
+                args.push(format!("--{name}"));
+                args.push(text.to_string());
+            }
+            _ => return Err("catalog_arguments_invalid".to_string()),
+        }
+    }
+    args.push("--json".to_string());
+    Ok(args)
+}
+
+#[tauri::command]
+async fn desktop_catalog() -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        require_read_access()?;
+        run_runtime_json(&["catalog", "desktop", "--json"])
+            .map_err(|_| "catalog_unavailable".to_string())
+    })
+    .await
+    .map_err(|_| "catalog_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_catalog_run(entry_id: String, values: Value, consent: bool) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        let catalog = run_runtime_json(&["catalog", "desktop", "--json"])
+            .map_err(|_| "catalog_unavailable".to_string())?;
+        let entry = catalog
+            .get("entries")
+            .and_then(Value::as_array)
+            .and_then(|entries| entries.iter().find(|entry| entry.get("id").and_then(Value::as_str) == Some(entry_id.as_str())))
+            .ok_or("catalog_entry_not_found")?;
+        if catalog_entry_requires_consent(entry) && !consent {
+            return Err("catalog_consent_required".to_string());
+        }
+        let args = catalog_command_args(entry, &values)?;
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        let output = run_runtime_capture(&borrowed)?;
+        if !output.status.success() {
+            return Err("catalog_command_failed".to_string());
+        }
+        serde_json::from_slice(&output.stdout).map_err(|_| "catalog_result_invalid".to_string())
+    })
+    .await
+    .map_err(|_| "catalog_command_failed".to_string())?
+}
+
 fn valid_plugin_name(name: &str) -> bool {
     !name.is_empty()
         && name.len() <= 128
@@ -1547,6 +1638,8 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_catalog,
+            desktop_catalog_run,
             desktop_plugins,
             desktop_plugin_install,
             desktop_plugin_remove,
