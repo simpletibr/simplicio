@@ -11,6 +11,7 @@ mod consolidated_tokens;
 mod context_report;
 mod desktop_queries;
 mod desktop_updater;
+mod fleet_queue;
 mod host_plugins;
 mod install_journal;
 mod local_projects;
@@ -1130,6 +1131,32 @@ async fn desktop_remote_fleet() -> Result<Value, String> {
 }
 
 #[tauri::command]
+async fn desktop_fleet_queue(repo_path: Option<String>) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_read_access()?;
+        let path = fleet_queue::state_path(repo_path.as_deref())?;
+        fleet_queue::read_at(&path)
+    })
+    .await
+    .map_err(|_| "fleet_queue_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_fleet_queue_upsert(
+    repo_path: Option<String>,
+    task: Value,
+    wip_per_track: Option<Value>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        let path = fleet_queue::state_path(repo_path.as_deref())?;
+        fleet_queue::upsert_at(&path, &task, wip_per_track.as_ref())
+    })
+    .await
+    .map_err(|_| "fleet_queue_unavailable".to_string())?
+}
+
+#[tauri::command]
 async fn desktop_hosts_plan() -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(|| {
         require_read_access()?;
@@ -1936,6 +1963,8 @@ pub fn run() {
             desktop_remote_fleet,
             desktop_worktree_create,
             desktop_worktree_remove,
+            desktop_fleet_queue,
+            desktop_fleet_queue_upsert,
             desktop_hosts_plan,
             desktop_hosts_repair,
             desktop_catalog,
