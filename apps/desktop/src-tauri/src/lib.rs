@@ -13,6 +13,7 @@ mod desktop_api;
 mod desktop_queries;
 mod desktop_updater;
 mod fleet_queue;
+mod fleet_steer;
 mod host_plugins;
 mod install_journal;
 mod local_projects;
@@ -1337,6 +1338,23 @@ async fn desktop_remote_fleet() -> Result<Value, String> {
     .map_err(|_| "remote_fleet_unavailable".to_string())?
 }
 
+/// The only remote effect: pause or resume one worker on an allowlisted
+/// machine. Requires active access on this device, and the native module
+/// resolves the remote token in-process, so the WebView never sees it.
+#[tauri::command]
+async fn desktop_fleet_steer(
+    machine_id: String,
+    worker_id: String,
+    action: String,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        fleet_steer::steer_machine(&machine_id, &worker_id, &action)
+    })
+    .await
+    .map_err(|_| "fleet_steer_unavailable".to_string())?
+}
+
 #[tauri::command]
 async fn desktop_fleet_queue(repo_path: Option<String>) -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(move || {
@@ -2177,6 +2195,7 @@ pub fn run() {
             desktop_review_submit,
             desktop_worktrees,
             desktop_remote_fleet,
+            desktop_fleet_steer,
             desktop_worktree_create,
             desktop_worktree_remove,
             desktop_worktree_orient,

@@ -41,7 +41,7 @@ import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from ".
 import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./catalog_ui";
 import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
 import { parseWorktrees, type Worktree } from "./fleet";
-import { parseRemoteFleet, type RemoteFleet } from "./remote_fleet";
+import { parseRemoteFleet, parseSteerReceipt, type RemoteFleet, type RemoteSteerAction, type RemoteSteerReceipt } from "./remote_fleet";
 import { parseFleetQueue, type FleetQueue, type FleetTask } from "./fleet_queue";
 import {
   parseOrientation,
@@ -482,6 +482,26 @@ export async function loadDesktopRemoteFleet(): Promise<RemoteFleet> {
   return parseRemoteFleet(
     await withTimeout(invoke<unknown>("desktop_remote_fleet"), 20_000, "remote_fleet_timeout"),
   );
+}
+
+/**
+ * Sends one authorized pause/resume to a worker on an allowlisted remote. The
+ * token never crosses IPC: the native command resolves it in-process. The
+ * returned receipt is the Runtime's, so the activity timeline shows the same
+ * id a Desktop-originated action would.
+ */
+export async function steerRemoteWorker(
+  machineId: string,
+  workerId: string,
+  action: RemoteSteerAction,
+): Promise<RemoteSteerReceipt> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  const value = await withTimeout(
+    invoke<unknown>("desktop_fleet_steer", { machineId, workerId, action }),
+    10_000,
+    "fleet_steer_timeout",
+  );
+  return parseSteerReceipt(value, { machineId, workerId, action });
 }
 
 export async function createDesktopWorktree(repoPath: string, issue: number, agent: string, wipLimit: number): Promise<WorktreeCreateReceipt> {

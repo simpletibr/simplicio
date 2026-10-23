@@ -1,0 +1,267 @@
+/*
+ * Read-mostly mobile fleet layout (#468).
+ *
+ * Contract: from 320 px to 480 px wide the panel is one column, every grid
+ * track is `minmax(0, 1fr)`, long ids/URLs/receipts wrap instead of pushing the
+ * page sideways, and no element carries a fixed width wider than the viewport.
+ * `src/mobile_fleet.test.ts` pins those rules against this file, and
+ * `src/components/MobileFleetView.test.tsx` renders it at 375 px and 480 px.
+ */
+.mobile-fleet {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  color: #27322b;
+}
+
+.mobile-fleet *,
+.mobile-fleet *::before,
+.mobile-fleet *::after {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.mobile-fleet .mobile-fleet-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.mobile-fleet .mobile-fleet-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.mobile-fleet .mobile-fleet-heading p {
+  margin: 0;
+  color: #63746a;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.mobile-fleet .mobile-fleet-heading .button {
+  justify-self: start;
+  min-height: 44px;
+}
+
+.mobile-fleet .mobile-fleet-message,
+.mobile-fleet .mobile-fleet-empty,
+.mobile-fleet .mobile-fleet-receipt {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #efdfc2;
+  border-radius: 9px;
+  background: #fdf8ee;
+  color: #7a5b22;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.mobile-fleet .mobile-fleet-receipt {
+  display: grid;
+  gap: 4px;
+  border-color: #cfe6d7;
+  background: #eef8f1;
+  color: #276144;
+}
+
+.mobile-fleet .mobile-fleet-machines,
+.mobile-fleet .mobile-fleet-workers {
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.mobile-fleet .mobile-fleet-machine,
+.mobile-fleet .mobile-fleet-worker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #e1e7e1;
+  border-radius: 10px;
+  background: #f9fbf8;
+  max-width: 100%;
+}
+
+.mobile-fleet .mobile-fleet-worker {
+  background: #ffffff;
+  border-color: #e6ece6;
+}
+
+.mobile-fleet .mobile-fleet-machine-head,
+.mobile-fleet .mobile-fleet-worker-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.mobile-fleet .mobile-fleet-machine-head strong,
+.mobile-fleet .mobile-fleet-worker-head strong {
+  font-size: 13px;
+  font-weight: 590;
+  overflow-wrap: anywhere;
+}
+
+.mobile-fleet .mobile-fleet-status,
+.mobile-fleet .mobile-fleet-worker-state {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid #e2e6e2;
+  border-radius: 6px;
+  background: #f6f8f6;
+  color: #647067;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.mobile-fleet .mobile-fleet-status-online { color: #276144; background: #eef8f1; border-color: #cfe6d7; }
+.mobile-fleet .mobile-fleet-status-unauthorized { color: #8a4b18; background: #fdf4ea; border-color: #eed9bf; }
+.mobile-fleet .mobile-fleet-status-offline { color: #8a2b2b; background: #fdeeee; border-color: #eed0d0; }
+
+.mobile-fleet .mobile-fleet-url,
+.mobile-fleet .mobile-fleet-claim code,
+.mobile-fleet .mobile-fleet-worker-receipt code,
+.mobile-fleet .mobile-fleet-receipts code,
+.mobile-fleet .mobile-fleet-receipt code {
+  display: block;
+  max-width: 100%;
+  font: 10px/1.5 var(--mono, monospace);
+  color: #63746a;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  white-space: normal;
+}
+
+.mobile-fleet .mobile-fleet-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px 10px;
+  margin: 0;
+}
+
+.mobile-fleet .mobile-fleet-meta > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: baseline;
+}
+
+.mobile-fleet .mobile-fleet-meta dt {
+  color: #7d8a81;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mobile-fleet .mobile-fleet-meta dd {
+  margin: 0;
+  color: #3f5147;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.mobile-fleet .mobile-fleet-claim,
+.mobile-fleet .mobile-fleet-progress,
+.mobile-fleet .mobile-fleet-worker-receipt,
+.mobile-fleet .mobile-fleet-receipts,
+.mobile-fleet .mobile-fleet-note,
+.mobile-fleet .mobile-fleet-blocker {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #68796e;
+  overflow-wrap: anywhere;
+}
+
+.mobile-fleet .mobile-fleet-claim span,
+.mobile-fleet .mobile-fleet-progress span,
+.mobile-fleet .mobile-fleet-worker-receipt span,
+.mobile-fleet .mobile-fleet-receipts span {
+  color: #7d8a81;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mobile-fleet .mobile-fleet-blocker {
+  color: #8a4b18;
+}
+
+.mobile-fleet .mobile-fleet-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mobile-fleet .mobile-fleet-action {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
+}
+
+.mobile-fleet .mobile-fleet-action .button {
+  width: 100%;
+  min-height: 44px;
+  white-space: normal;
+}
+
+.mobile-fleet .mobile-fleet-action small {
+  color: #8a4b18;
+  font-size: 10px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.mobile-fleet .mobile-fleet-footnote {
+  margin: 14px 0 0;
+  color: #7d8a81;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.mobile-fleet .mobile-fleet-footnote p {
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+
+/* The read-mostly breakpoint. Above 480 px the desktop panel is used instead. */
+@media (max-width: 480px) {
+  .mobile-fleet {
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .mobile-fleet .mobile-fleet-machine,
+  .mobile-fleet .mobile-fleet-worker {
+    padding: 10px;
+  }
+
+  .mobile-fleet .mobile-fleet-heading h2 {
+    font-size: 19px;
+  }
+
+  .mobile-fleet .mobile-fleet-machines,
+  .mobile-fleet .mobile-fleet-workers {
+    gap: 8px;
+  }
+
+  .mobile-fleet .mobile-fleet-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mobile-fleet .mobile-fleet-action .button {
+    min-height: 44px;
+  }
+}

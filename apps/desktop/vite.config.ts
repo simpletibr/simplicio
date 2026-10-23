@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   test: {
     exclude: [...configDefaults.exclude, "e2e/**", "src-tauri/target/**"],
+    // CSS stays a real module so the layout contract (`mobile_fleet.css`) can
+    // be asserted from the responsive test instead of being stubbed to "".
+    css: true,
   },
   clearScreen: false,
   server: {

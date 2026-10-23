@@ -1,14 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { loadDesktopRemoteFleet } from "../bridge";
+import { loadDesktopRemoteFleet, steerRemoteWorker } from "../bridge";
+import { fleetLayoutMode } from "../mobile_fleet";
+import { useViewportWidth } from "../use_viewport_width";
 import {
   REMOTE_STATUS_LABELS,
   canActOnRemote,
+  canSteerWorker,
   remoteActionBlocker,
   remoteFleetErrorMessage,
   summarizeRemoteFleet,
   type RemoteFleet,
   type RemoteMachine,
+  type RemoteSteerAction,
+  type RemoteSteerReceipt,
 } from "../remote_fleet";
+import { MobileFleetView } from "./MobileFleetView";
+import "../mobile_fleet.css";
 
 /**
  * Read-mostly fleet view. Rendering never invokes a remote action: the only
@@ -87,6 +94,7 @@ export function RemoteFleetList({
                   <span>versão {remote.version ?? "não informada"}</span>
                   <span>{remote.latencyMs === null ? "latência não medida" : remote.latencyMs + " ms"}</span>
                   <span>{remote.authenticated ? "token aceito" : "sem token confirmado"}</span>
+                  <span>{(remote.workers ?? []).length} worker(s)</span>
                   {remote.reasonCode && <span>motivo: {remote.reasonCode}</span>}
                 </div>
                 <div className="remote-fleet-actions">
@@ -126,8 +134,13 @@ export function RemoteFleetPanel() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [steerBusy, setSteerBusy] = useState<string | null>(null);
+  const [steerReceipt, setSteerReceipt] = useState<RemoteSteerReceipt | null>(null);
+  const [steerError, setSteerError] = useState<string | null>(null);
+  const width = useViewportWidth();
   const alive = useRef(false);
   const lock = useRef(false);
+  const steerLock = useRef(false);
 
   useEffect(() => {
     alive.current = true;
@@ -161,6 +174,56 @@ export function RemoteFleetPanel() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  const steer = useCallback(
+    async (machineId: string, workerId: string, action: RemoteSteerAction) => {
+      if (steerLock.current) return;
+      const machine = fleet?.remotes.find((remote) => remote.id === machineId) ?? null;
+      const worker = machine?.workers?.find((item) => item.id === workerId) ?? null;
+      // The same gate the buttons use: an action that the projection does not
+      // authorize is never sent, even if it is invoked programmatically.
+      if (machine === null || worker === null || !canSteerWorker(machine, worker, action)) {
+        setSteerError(
+          machine === null || worker === null ? "fleet_steer_machine_unknown" : "fleet_steer_action_invalid",
+        );
+        return;
+      }
+      steerLock.current = true;
+      setSteerBusy(`${machineId}/${workerId}/${action}`);
+      setSteerError(null);
+      try {
+        const receipt = await steerRemoteWorker(machineId, workerId, action);
+        if (alive.current) {
+          setSteerReceipt(receipt);
+          // The receipt must come back from the fleet, not from this client.
+          void refresh();
+        }
+      } catch (failure) {
+        const code = failure instanceof Error ? failure.message : String(failure);
+        if (alive.current) setSteerError(code);
+      } finally {
+        steerLock.current = false;
+        if (alive.current) setSteerBusy(null);
+      }
+    },
+    [fleet, refresh],
+  );
+
+  if (fleetLayoutMode(width) === "mobile") {
+    return (
+      <MobileFleetView
+        fleet={fleet}
+        width={width}
+        busy={busy}
+        error={error}
+        steerBusy={steerBusy}
+        steerReceipt={steerReceipt}
+        steerError={steerError}
+        onRefresh={() => void refresh()}
+        onSteer={(machineId, workerId, action) => void steer(machineId, workerId, action)}
+      />
+    );
+  }
 
   return (
     <RemoteFleetList
