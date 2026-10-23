@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use tauri::Manager;
 
+mod activity_events;
 mod auth_access;
 mod auth_login;
 mod preparation;
@@ -332,6 +333,25 @@ async fn desktop_usage_changefeed(
     })
     .await
     .map_err(|_| "usage_changefeed_unavailable".to_string())?
+}
+
+/// One bounded page of the Runtime daemon event stream (#432). The Runtime is
+/// authoritative: no event is synthesized when the daemon is unavailable.
+#[tauri::command]
+async fn desktop_activity_events(
+    after_cursor: Option<u64>,
+    wait_ms: Option<u64>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_read_access()?;
+        let args = activity_events::query_args(after_cursor.unwrap_or(0), wait_ms.unwrap_or(900))?;
+        let borrowed = args.iter().map(String::as_str).collect::<Vec<_>>();
+        activity_events::validate_page(
+            run_runtime_json(&borrowed).map_err(|_| "activity_events_unavailable".to_string())?,
+        )
+    })
+    .await
+    .map_err(|_| "activity_events_unavailable".to_string())?
 }
 
 const SESSION_IDLE_FINALIZATION_SCHEMA: &str = "simplicio.session-idle-finalization/v1";
@@ -1896,6 +1916,7 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_activity_events,
             desktop_review,
             desktop_review_submit,
             desktop_worktrees,
