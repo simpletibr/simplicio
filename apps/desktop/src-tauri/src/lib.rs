@@ -860,6 +860,149 @@ async fn desktop_cache_meter(session_id: Option<String>) -> Result<Value, String
     .map_err(|_| "cache_meter_unavailable".to_string())?
 }
 
+fn git_output(repo: &Path, args: &[&str]) -> Result<std::process::Output, String> {
+    Command::new("git")
+        .arg("-C")
+        .arg(repo)
+        .args(args)
+        .output()
+        .map_err(|_| "git_unavailable".to_string())
+}
+
+fn validated_repo_path(repo_path: &str) -> Result<PathBuf, String> {
+    if repo_path.trim().is_empty() {
+        return Err("repo_path_invalid".to_string());
+    }
+    let path = PathBuf::from(repo_path);
+    let path = path.canonicalize().map_err(|_| "repo_path_invalid".to_string())?;
+    if !path.is_dir() {
+        return Err("repo_path_invalid".to_string());
+    }
+    Ok(path)
+}
+
+fn managed_worktree_path(home: &Path, repo: &Path, issue: u64) -> PathBuf {
+    let name = repo
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("repo")
+        .chars()
+        .filter(|value| value.is_ascii_alphanumeric() || *value == '-' || *value == '_')
+        .collect::<String>();
+    home.join(".simplicio")
+        .join("worktrees")
+        .join(if name.is_empty() { "repo".to_string() } else { name })
+        .join(format!("issue-{issue}"))
+}
+
+#[tauri::command]
+async fn desktop_worktrees(repo_path: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_read_access()?;
+        let repo = validated_repo_path(&repo_path)?;
+        let output = git_output(&repo, &["worktree", "list", "--porcelain"])?;
+        if !output.status.success() {
+            return Err("worktree_list_failed".to_string());
+        }
+        Ok(serde_json::json!({
+            "schema": "simplicio.desktop-worktrees/v1",
+            "repo": repo.display().to_string(),
+            "porcelain": String::from_utf8_lossy(&output.stdout),
+        }))
+    })
+    .await
+    .map_err(|_| "worktree_list_failed".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_worktree_create(
+    repo_path: String,
+    issue: u64,
+    agent: String,
+    wip_limit: Option<u32>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        if issue == 0 || issue > 10_000_000 {
+            return Err("issue_invalid".to_string());
+        }
+        if agent.len() > 64 || agent.chars().any(|value| !(value.is_ascii_alphanumeric() || "-_. ".contains(value))) {
+            return Err("agent_invalid".to_string());
+        }
+        let limit = wip_limit.unwrap_or(5).clamp(1, 64);
+        let repo = validated_repo_path(&repo_path)?;
+        let list = git_output(&repo, &["worktree", "list", "--porcelain"])?;
+        let active = String::from_utf8_lossy(&list.stdout)
+            .split("\n\n")
+            .filter(|block| !block.trim().is_empty())
+            .skip(1)
+            .count() as u32;
+        if active >= limit {
+            return Err("wip_limit_reached".to_string());
+        }
+        let home = runtime_user_home()?;
+        let path = managed_worktree_path(&home, &repo, issue);
+        if path.exists() {
+            return Err("worktree_exists".to_string());
+        }
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).map_err(|_| "worktree_create_failed".to_string())?;
+        }
+        let branch = format!("issue-{issue}");
+        let output = Command::new("git")
+            .arg("-C")
+            .arg(&repo)
+            .args(["worktree", "add", "-b", &branch])
+            .arg(&path)
+            .output()
+            .map_err(|_| "worktree_create_failed".to_string())?;
+        if !output.status.success() {
+            return Err("worktree_create_failed".to_string());
+        }
+        Ok(serde_json::json!({
+            "schema": "simplicio.desktop-worktree-create/v1",
+            "status": "created",
+            "issue": issue,
+            "branch": branch,
+            "agent": agent,
+            "path": path.display().to_string(),
+            "redacted": true,
+        }))
+    })
+    .await
+    .map_err(|_| "worktree_create_failed".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_worktree_remove(repo_path: String, path: String) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        require_active_access()?;
+        let repo = validated_repo_path(&repo_path)?;
+        let home = runtime_user_home()?;
+        let managed = home.join(".simplicio").join("worktrees");
+        let target = PathBuf::from(&path)
+            .canonicalize()
+            .map_err(|_| "worktree_path_invalid".to_string())?;
+        let root = managed.canonicalize().unwrap_or(managed);
+        if !target.starts_with(&root) {
+            return Err("worktree_path_invalid".to_string());
+        }
+        let output = Command::new("git")
+            .arg("-C")
+            .arg(&repo)
+            .args(["worktree", "remove", "--force"])
+            .arg(&target)
+            .output()
+            .map_err(|_| "worktree_remove_failed".to_string())?;
+        if !output.status.success() {
+            return Err("worktree_remove_failed".to_string());
+        }
+        Ok(serde_json::json!({"status": "removed", "path": target.display().to_string()}))
+    })
+    .await
+    .map_err(|_| "worktree_remove_failed".to_string())?
+}
+
 #[tauri::command]
 async fn desktop_hosts_plan() -> Result<Value, String> {
     tauri::async_runtime::spawn_blocking(|| {
@@ -1660,6 +1803,9 @@ pub fn run() {
             desktop_plan_integrations,
             desktop_usage_projects,
             desktop_usage_changefeed,
+            desktop_worktrees,
+            desktop_worktree_create,
+            desktop_worktree_remove,
             desktop_hosts_plan,
             desktop_hosts_repair,
             desktop_catalog,

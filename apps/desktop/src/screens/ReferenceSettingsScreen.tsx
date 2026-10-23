@@ -12,6 +12,7 @@ import { PluginManagerPanel } from "../components/PluginManagerPanel";
 import { CommandPalette } from "../components/CommandPalette";
 import { HostsMcpPanel } from "../components/HostsMcpPanel";
 import { WhatsNewPanel } from "../components/WhatsNewPanel";
+import { FleetCockpit } from "../components/FleetCockpit";
 import { useSystemPermissions, permissionLabels } from "../use_system_permissions";
 import { permissionIds, openPermissionSettings, requestMediaPermission, revealPermissionApp, type PermissionId } from "../system_permissions";
 
@@ -351,6 +352,7 @@ function Terminal({ onNavigate }: { onNavigate: Navigate }) {
 function QuickCommands() {
   return <>
     <CommandPalette />
+    <FleetCockpit />
     <WhatsNewPanel />
     <Notice title="Copiar não executa">Os comandos abaixo são fixos e documentados. Cole no seu terminal quando quiser executá-los. A saída permanece no terminal; esta tela não a coleta.</Notice>
     <Section title="Consultas do Simplicio">{(Object.keys(REFERENCE_QUICK_COMMANDS) as CommandId[]).map((id) => <CommandCard key={id} id={id} />)}</Section>
