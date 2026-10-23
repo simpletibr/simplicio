@@ -37,6 +37,7 @@ import { parseRuntimeLifecycleReceipt, type RuntimeLifecycleAction, type Runtime
 import { parseIdleSessionFinalization, IDLE_SESSION_TIMEOUT_MS, type IdleSessionFinalization } from "./session_idle";
 import { parseCacheMeter, type CacheMeterReceipt } from "./cache_meter";
 import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from "./plugin_manager";
+import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./catalog_ui";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -388,6 +389,16 @@ export async function loadDesktopCacheMeter(options: { sessionId?: string } = {}
     60_000,
     "cache_meter_timeout",
   ));
+}
+
+export async function loadDesktopCatalog(): Promise<DesktopCatalog> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseDesktopCatalog(await withTimeout(invoke<unknown>("desktop_catalog"), 60_000, "catalog_timeout"));
+}
+
+export async function runDesktopCatalogEntry(entryId: string, values: CatalogValues, consent = false): Promise<unknown> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return invoke<unknown>("desktop_catalog_run", { entryId, values, consent });
 }
 
 export async function loadDesktopPlugins(): Promise<PluginCatalog> {

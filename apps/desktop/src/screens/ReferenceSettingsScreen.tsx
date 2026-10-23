@@ -9,6 +9,7 @@ import "../reference_settings.css";
 import { DESKTOP_UPDATE_EVENT } from "../desktop_updates";
 import { readProviderQuotas } from "../components/ProviderUsage";
 import { PluginManagerPanel } from "../components/PluginManagerPanel";
+import { CommandPalette } from "../components/CommandPalette";
 import { useSystemPermissions, permissionLabels } from "../use_system_permissions";
 import { permissionIds, openPermissionSettings, requestMediaPermission, revealPermissionApp, type PermissionId } from "../system_permissions";
 
@@ -346,6 +347,7 @@ function Terminal({ onNavigate }: { onNavigate: Navigate }) {
 
 function QuickCommands() {
   return <>
+    <CommandPalette />
     <Notice title="Copiar não executa">Os comandos abaixo são fixos e documentados. Cole no seu terminal quando quiser executá-los. A saída permanece no terminal; esta tela não a coleta.</Notice>
     <Section title="Consultas do Simplicio">{(Object.keys(REFERENCE_QUICK_COMMANDS) as CommandId[]).map((id) => <CommandCard key={id} id={id} />)}</Section>
     <Section title="Comandos personalizados"><Row title="Adicionar atalho de execução" description="Comandos arbitrários não são armazenados nem executados pela interface."><Unavailable label="Adicionar comando" reason="Execução personalizada indisponível." /></Row></Section>
