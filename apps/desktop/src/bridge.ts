@@ -40,6 +40,7 @@ import { parsePluginCatalog, requiresPluginConsent, type PluginCatalog } from ".
 import { parseDesktopCatalog, type CatalogValues, type DesktopCatalog } from "./catalog_ui";
 import { parseHostsPlan, type HostsPlan } from "./hosts_plan";
 import { parseWorktrees, type Worktree } from "./fleet";
+import { parseRemoteFleet, type RemoteFleet } from "./remote_fleet";
 import type { ReviewDigest } from "./review";
 import {
   canonicalAuthoritativeHostProvider,
@@ -408,6 +409,15 @@ export async function loadDesktopWorktrees(repoPath: string): Promise<Worktree[]
   const value = await invoke<{ porcelain?: unknown }>("desktop_worktrees", { repoPath });
   if (typeof value?.porcelain !== "string") throw new Error("worktree_parse_invalid");
   return parseWorktrees(value.porcelain);
+}
+
+export async function loadDesktopRemoteFleet(): Promise<RemoteFleet> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  // The native command owns the 3s per-remote timeout; this bound only covers
+  // authorization plus the bounded fan-out.
+  return parseRemoteFleet(
+    await withTimeout(invoke<unknown>("desktop_remote_fleet"), 20_000, "remote_fleet_timeout"),
+  );
 }
 
 export async function createDesktopWorktree(repoPath: string, issue: number, agent: string, wipLimit: number): Promise<unknown> {

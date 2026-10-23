@@ -206,3 +206,38 @@
 @media (prefers-reduced-motion: reduce) {
   .reference-settings-page *, .reference-settings-page *::before, .reference-settings-page *::after { animation: none !important; transition: none !important; }
 }
+
+/* Remote fleet: read-mostly view of runtimes on other machines. */
+.reference-settings-page .remote-fleet .remote-fleet-heading-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.reference-settings-page .remote-fleet .remote-fleet-message {
+  margin: 0 0 13px; padding: 10px 13px; border: 1px solid #efdfc2; border-radius: 9px;
+  background: #fdf8ee; color: #7a5b22; font-size: 12px; line-height: 1.6;
+}
+.reference-settings-page .remote-fleet .remote-fleet-empty {
+  margin: 6px 0 0; padding: 16px; border: 1px dashed #dde6dd; border-radius: 10px;
+  color: #68796e; font-size: 12px; line-height: 1.7;
+}
+.reference-settings-page .remote-fleet .remote-fleet-list { list-style: none; display: grid; gap: 10px; margin: 15px 0 0; padding: 0; }
+.reference-settings-page .remote-fleet .remote-fleet-item {
+  display: grid; gap: 8px; padding: 14px 16px; border: 1px solid #e1e7e1; border-radius: 10px; background: #f9fbf8;
+}
+.reference-settings-page .remote-fleet .remote-fleet-item-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.reference-settings-page .remote-fleet .remote-fleet-identity { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.reference-settings-page .remote-fleet .remote-fleet-identity strong { font-size: 13px; font-weight: 590; color: #27322b; }
+.reference-settings-page .remote-fleet .remote-fleet-identity code { font-size: 10px; color: #63746a; overflow-wrap: anywhere; }
+.reference-settings-page .remote-fleet .remote-fleet-status {
+  flex: 0 0 auto; padding: 4px 8px; border: 1px solid #e2e6e2; border-radius: 6px;
+  background: #f6f8f6; color: #647067; font-size: 10px; line-height: 1.4;
+}
+.reference-settings-page .remote-fleet .remote-fleet-status-online { color: #276144; background: #eef8f1; border-color: #cfe6d7; }
+.reference-settings-page .remote-fleet .remote-fleet-status-unauthorized { color: #8a4b18; background: #fdf4ea; border-color: #eed9bf; }
+.reference-settings-page .remote-fleet .remote-fleet-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: #68796e; font-size: 11px; }
+.reference-settings-page .remote-fleet .remote-fleet-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.reference-settings-page .remote-fleet .remote-fleet-actions small { color: #7d8a81; font-size: 10px; line-height: 1.5; }
+.reference-settings-page .remote-fleet .remote-fleet-actions .button { flex: 0 0 auto; }
+.reference-settings-page .remote-fleet .remote-fleet-selection { margin: 13px 0 0; font-size: 11px; color: #395642; }
+.reference-settings-page .remote-fleet .remote-fleet-footnote { margin: 14px 0 0; font-size: 10px; line-height: 1.7; color: #7d8a81; }
+@media (max-width: 760px) {
+  .reference-settings-page .remote-fleet .remote-fleet-item-heading { flex-direction: column; gap: 6px; }
+  .reference-settings-page .remote-fleet .remote-fleet-actions { align-items: flex-start; flex-direction: column; }
+}
