@@ -9,7 +9,7 @@
     "command": ["simplicio", "serve", "--mcp", "--stdio", "--no-facade-mode"],
     "enabled": true,
     "environment": {
-      "SIMPLICIO_MCP_PROFILE": "core",
+      "SIMPLICIO_MCP_PROFILE": "full",
       "SIMPLICIO_RUNTIME_MODE": "full",
       "SIMPLICIO_MCP_URL": "http://127.0.0.1:8787/mcp"
     }

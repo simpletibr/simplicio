@@ -102,6 +102,7 @@ def test_claude_manifest_wires_only_the_mapper_hook() -> None:
     loop_hooks = "\n".join(path.read_text().lower() for path in (ROOT / "plugin/hooks").glob("*") if path.is_file())
     assert "simplicio-fast" not in loop_hooks
     assert 'export simplicio_runtime_mode="mapper-only"' in (ROOT / "plugin/hooks/mcp-route.sh").read_text().lower()
+    assert 'export simplicio_mcp_profile="mapper-only"' in (ROOT / "plugin/hooks/mcp-route.sh").read_text().lower()
 
 
 def test_mapper_cache_is_reused_and_refreshed_after_project_change(tmp_path: Path) -> None:

@@ -100,7 +100,10 @@ HOSTS: Tuple[HostSpec, ...] = (
         ("claude",),
         ("~/.claude/settings.json", "~/.claude/.mcp.json"),
         "https://docs.anthropic.com/claude/docs/claude-code",
-        mcp_environment=(("SIMPLICIO_RUNTIME_MODE", "mapper-only"),),
+        mcp_environment=(
+            ("SIMPLICIO_RUNTIME_MODE", "mapper-only"),
+            ("SIMPLICIO_MCP_PROFILE", "mapper-only"),
+        ),
     ),
     _runtime_mcp(
         "cursor",
@@ -124,7 +127,10 @@ HOSTS: Tuple[HostSpec, ...] = (
         ("~/.config/opencode/opencode.json", "opencode.json"),
         "https://opencode.ai/docs/cli/",
         capability="native-plugin",
-        mcp_environment=(("SIMPLICIO_RUNTIME_MODE", "full"),),
+        mcp_environment=(
+            ("SIMPLICIO_RUNTIME_MODE", "full"),
+            ("SIMPLICIO_MCP_PROFILE", "full"),
+        ),
     ),
     _runtime_mcp(
         "vscode",
@@ -246,7 +252,17 @@ HOSTS = HOSTS + tuple(
 # generic JSON writer (Goose, Vibe, Pi and OpenCode-family schemas differ).
 INSTALLER_HOSTS = (
     _runtime_mcp("antigravity", "Antigravity", (), ("~/.gemini/config/mcp_config.json",), "https://antigravity.google/docs/"),
-    _runtime_mcp("hermes-agent", "Hermes Agent", ("hermes",), (), "https://github.com/NousResearch/hermes-agent"),
+    _runtime_mcp(
+        "hermes-agent",
+        "Hermes Agent",
+        ("hermes",),
+        (),
+        "https://github.com/NousResearch/hermes-agent",
+        mcp_environment=(
+            ("SIMPLICIO_RUNTIME_MODE", "mapper-only"),
+            ("SIMPLICIO_MCP_PROFILE", "mapper-only"),
+        ),
+    ),
     _runtime_mcp("cline", "Cline", (), ("~/.cline/mcp_settings.json",), "https://docs.cline.bot/mcp/configuring-mcp-servers"),
     _runtime_mcp("github-copilot", "GitHub Copilot in VS Code", (), (), "https://code.visualstudio.com/docs/copilot/chat/mcp-servers"),
     _runtime_mcp("command-code", "Command Code", ("commandcode",), ("~/.commandcode/mcp.json",), "https://commandcode.ai/docs/settings"),

@@ -124,6 +124,7 @@ def _minimal_environment(extra: dict[str, str] | None = None) -> dict[str, str]:
     }
     environment = {key: value for key, value in os.environ.items() if key in allowed}
     environment["SIMPLICIO_RUNTIME_MODE"] = RUNTIME_MODE
+    environment["SIMPLICIO_MCP_PROFILE"] = RUNTIME_MODE
     if extra:
         environment.update(extra)
     return environment
