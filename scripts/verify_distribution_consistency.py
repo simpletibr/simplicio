@@ -44,7 +44,7 @@ CURRENT_VERSION_RE = re.compile(r"## Current Version:\s*v([^\s]+)")
 # Helper implementations have their own executable tests; these ordered entry
 # points prevent skipping their gates, broad uploads, or automatic overwrite.
 LOCAL_CHECKS = '''verify_plugin_release_policy(version)
-verify_codex_hook_contract()
+verify_codex_hook_contract(bundle)
 run([sys.executable, str(ROOT / "scripts/verify_distribution_consistency.py")])
 run([sys.executable, "-m", "pytest", "-q",
      "tests/test_codex_integration_cli.py", "tests/test_release_local_contract.py",
