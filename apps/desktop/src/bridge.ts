@@ -21,6 +21,7 @@ import { createContextReader } from "./context_report";
 import { parseUsageProjects } from "./project_usage";
 import { applyUsageChangefeedEvent, createUsageChangefeedState, type UsageChangefeedState } from "./usage_changefeed";
 import { exportUnifiedUsageProjection, parseUnifiedUsageProjection, type UnifiedUsageProjection, type UsageQuery } from "./unified_usage";
+import { parseEventPage, type DesktopEventPage } from "./activity_replay";
 import { parseCostProjection, type CostProjection, type CostQuery } from "./cost_projection";
 import { createPreviewExecutionReport, parseExecutionReport, type ExecutionReport } from "./execution_report";
 import { createConsolidatedReader, type ConsolidatedQuery, type ConsolidatedReport } from "./consolidated_tokens";
@@ -302,6 +303,25 @@ export async function pullDesktopUsageChangefeed(
     afterRevision: cursor.cursor.revision,
   }), 30_000, "usage_changefeed_timeout");
   return applyUsageChangefeedEvent(cursor, event);
+}
+
+/**
+ * One bounded page of the daemon event stream. Preview builds have no daemon,
+ * so the replay section reports the capability error instead of inventing
+ * events. The native command owns the 500-event / 1 MB bound.
+ */
+export async function loadDesktopActivityEvents(
+  afterCursor = 0,
+  waitMs = 900,
+): Promise<DesktopEventPage> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  if (!Number.isSafeInteger(afterCursor) || afterCursor < 0) throw new Error("activity_events_cursor_invalid");
+  const effectiveWait = Number.isFinite(waitMs) ? Math.max(0, Math.min(1_000, Math.trunc(waitMs))) : 900;
+  const raw = await withTimeout(invoke<unknown>("desktop_activity_events", {
+    afterCursor,
+    waitMs: effectiveWait,
+  }), effectiveWait + 5_000, "activity_events_timeout");
+  return parseEventPage(raw);
 }
 
 export async function installDesktopRuntime(): Promise<RuntimeInstallResult> {

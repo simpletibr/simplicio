@@ -21,6 +21,7 @@ import {
   loadDesktopContextReport,
   pullDesktopUsageSnapshot,
   closeIdleDesktopSessions,
+  loadDesktopActivityEvents,
 } from "./bridge";
 import { Shell, type View } from "./components/Shell";
 import { AccessGate, LoadingScreen, RuntimeInstallScreen, SignInScreen, type RuntimeInstallPhase } from "./screens/AccessScreens";
@@ -610,7 +611,7 @@ export function DesktopApp({ snapshot: initialSnapshot }: { snapshot?: DesktopSn
           onUninstall={openUninstallLocation} />
       )}
       {(view === "general" || view === "shortcuts" || view === "models") && <PreferencesScreen view={view} snapshot={snapshot} preferences={workbench.preferences} onPreferences={(preferences) => saveWorkbench({ ...workbench, preferences })} onProviders={() => setView("agents")} />}
-      {view === "activity" && <ActivityScreen snapshot={snapshot} usage={usage} />}
+      {view === "activity" && <ActivityScreen snapshot={snapshot} usage={usage} loadEvents={loadDesktopActivityEvents} />}
       {isReferenceSettingsView(view) && <ReferenceSettingsScreen key={view} view={view} snapshot={snapshot} onNavigate={setView} onRefresh={refresh} busy={action !== null} />}
       {showProjectDialog && <ProjectDialog onClose={() => setShowProjectDialog(false)} onAdd={addProject} />}
     </Shell>

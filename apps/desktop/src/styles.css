@@ -1525,6 +1525,23 @@ p { margin-top: 0; }
 .activity-pagination > div { display: flex; align-items: center; gap: 10px; }
 .activity-pagination .text-button { padding: 0; color: var(--green-dark); font: 8px/1 var(--mono); }
 .activity-pagination .text-button:disabled { color: #b2ad9f; cursor: default; }
+.activity-replay { margin-top: 16px; padding: 18px; }
+.activity-replay-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.activity-replay-heading h2 { margin: 2px 0 4px; font-size: 15px; }
+.activity-replay-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.activity-replay-toolbar { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-soft); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.activity-replay-meta { color: #969184; font: 8px/1.3 var(--mono); }
+.activity-replay-playback { margin-left: auto; display: flex; align-items: center; gap: 10px; color: #969184; font: 8px/1.3 var(--mono); }
+.activity-replay-playback .text-button { padding: 0; color: var(--green-dark); font: 8px/1 var(--mono); }
+.activity-replay-playback .text-button:disabled { color: #b2ad9f; cursor: default; }
+.activity-replay-steps { margin: 12px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line-soft); }
+.activity-replay-step { min-width: 0; padding: 11px 0; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 10px; align-items: start; }
+.activity-replay-step:last-child { border-bottom: 0; }
+.activity-replay-cursor { color: #969184; font: 8px/1.6 var(--mono); }
+.activity-replay-step strong { font-size: 10px; }
+.activity-replay-step p { margin: 3px 0 0; color: #858276; font-size: 9px; overflow-wrap: anywhere; }
+.activity-replay-step div > span { display: block; margin-top: 3px; color: #969184; font: 8px/1.3 var(--mono); overflow-wrap: anywhere; }
+.activity-replay-step.status-unknown .activity-replay-cursor { color: #b2ad9f; }
 
 @media (max-width: 1080px) {
   .metrics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
