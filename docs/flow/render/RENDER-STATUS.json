@@ -1,0 +1,21 @@
+{
+  "schema": "simplicio.render-status/v1",
+  "status": "verified",
+  "tool": "@mermaid-js/mermaid-cli",
+  "renderer": "mmdc",
+  "tool_version": "12.0.0",
+  "node_version": "v26.8.2",
+  "command": "npx -y @mermaid-js/mermaid-cli -i docs/flow/simplicio.mmd -o docs/flow/render/simplicio.mermaid.png -s 2",
+  "mermaid": {
+    "input": "docs/flow/simplicio.mmd",
+    "input_sha256": "6abdc271987201578700be1c483f043ed02bea9bbab0ffa51e06535b80d769f2"
+  },
+  "outputs": [
+    {
+      "path": "docs/flow/render/simplicio.mermaid.png",
+      "sha256": "22cf4e3d640db6839111a09815af6bb34c20422436930d5e5feefca861009db7",
+      "pixels": "1568x606"
+    }
+  ],
+  "note": "mmdc validation evidence. The README embeds the deterministic docs/flow/simplicio.svg from scripts/generate_flow.py; regenerating the .mmd requires re-running this command and updating the hashes."
+}

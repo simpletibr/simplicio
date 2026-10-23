@@ -1,0 +1,38 @@
+{
+  "checks": {
+    "availability_http_status": 200,
+    "edge_pairs_match": true,
+    "expected_edges": 53,
+    "expected_nodes": 39,
+    "fetch_http_status": 200,
+    "import_http_status": 201,
+    "imported_edges": 53,
+    "imported_nodes": 39,
+    "node_ids_match": true,
+    "node_labels_match": true
+  },
+  "cleaned_up": true,
+  "cleanup": {
+    "http_status": 200,
+    "removed": true
+  },
+  "endpoint": {
+    "host": "127.0.0.1",
+    "port": 7861,
+    "scheme": "http"
+  },
+  "flow": {
+    "edges": 53,
+    "nodes": 39,
+    "path": "docs/flow/langflow/simplicio.langflow.json",
+    "sha256": "897954600e6b88051fc9a5fb9ebb338c823519239e05d16302c2bce818948fb5"
+  },
+  "flow_id": "7c6d9aaf-fc4f-439b-a7db-74f3ee7ec041",
+  "langflow": {
+    "version": "1.12.0"
+  },
+  "reason": "langflow_import_verified",
+  "schema": "simplicio.langflow-receipt/v1",
+  "status": "verified",
+  "tool": "scripts/verify_flow_langflow.py"
+}

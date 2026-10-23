@@ -12,13 +12,18 @@ This tool therefore never falls back to a local-only success:
   ``verified`` and exits 0.
 
 Credentials are read from ``LANGFLOW_API_KEY`` when present and are never
-written to the receipt or to stdout/logs.
+written to the receipt or to stdout/logs. ``--api-key-file`` reads the key from
+a file so it never appears in ``argv``, ``--evidence`` writes the
+credential-free receipt to disk, and ``LANGFLOW_API_KEY_FILE`` points at a key
+file for non-interactive runs.
 """
 
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
+import io
 import json
 import os
 import sys
@@ -33,9 +38,17 @@ DEFAULT_FLOW = ROOT / "docs" / "flow" / "langflow" / "simplicio.langflow.json"
 SCHEMA = "simplicio.langflow-receipt/v1"
 DEFAULT_BASE_URL = "http://localhost:7860"
 API_KEY_ENV = "LANGFLOW_API_KEY"
+API_KEY_FILE_ENV = "LANGFLOW_API_KEY_FILE"
 EXIT_VERIFIED = 0
 EXIT_FAILED = 1
 EXIT_BLOCKED = 2
+
+_ACTIVE_API_KEY: str | None = None
+
+
+def _api_key() -> str | None:
+    """Return the credential for this run without ever echoing it."""
+    return _ACTIVE_API_KEY or os.environ.get(API_KEY_ENV)
 
 
 def _load_generator():
@@ -59,7 +72,7 @@ def _endpoint(base_url: str) -> dict:
 
 
 def _redact(value: object) -> object:
-    key = os.environ.get(API_KEY_ENV)
+    key = _api_key()
     if not key:
         return value
     if isinstance(value, str):
@@ -87,7 +100,7 @@ def _request(
     headers = {"Accept": "application/json"}
     if content_type:
         headers["Content-Type"] = content_type
-    key = os.environ.get(API_KEY_ENV)
+    key = _api_key()
     if key:
         headers["x-api-key"] = key
     request = urllib.request.Request(url, data=body, headers=headers, method=method)
@@ -195,7 +208,9 @@ def _edge_pairs(document: dict) -> set[tuple[str, str]]:
     }
 
 
-def verify(base_url: str, flow_path: Path, timeout: float, cleanup: bool) -> int:
+def verify(base_url: str, flow_path: Path, timeout: float, cleanup: bool, api_key: str | None = None) -> int:
+    global _ACTIVE_API_KEY
+    _ACTIVE_API_KEY = api_key
     endpoint = _endpoint(base_url)
     if not endpoint["host"]:
         return _failed("invalid_base_url", endpoint, {}, "base URL has no host")
@@ -388,8 +403,59 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--flow", type=Path, default=DEFAULT_FLOW, help="generated Langflow flow JSON")
     parser.add_argument("--timeout", type=float, default=10.0, help="per-request timeout in seconds")
     parser.add_argument("--cleanup", action="store_true", help="delete the imported flow after a verified read-back")
+    parser.add_argument(
+        "--api-key-file",
+        type=Path,
+        default=None,
+        help=f"read the API key from this file instead of {API_KEY_ENV} (keeps it out of argv)",
+    )
+    parser.add_argument(
+        "--evidence",
+        type=Path,
+        default=None,
+        help="write the JSON receipt (pretty-printed, credential-free) to this path",
+    )
     args = parser.parse_args(argv)
-    return verify(args.base_url, args.flow, args.timeout, args.cleanup)
+    api_key = None
+    key_file = args.api_key_file
+    if key_file is None and os.environ.get(API_KEY_FILE_ENV):
+        key_file = Path(os.environ[API_KEY_FILE_ENV])
+    if key_file is not None:
+        try:
+            api_key = key_file.read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            print(
+                json.dumps(
+                    _receipt(
+                        "blocked",
+                        "api_key_file_unreadable",
+                        _endpoint(args.base_url),
+                        {},
+                        {},
+                        message=f"could not read --api-key-file: {exc.__class__.__name__}",
+                    ),
+                    ensure_ascii=False,
+                    sort_keys=True,
+                )
+            )
+            return EXIT_BLOCKED
+        if not api_key:
+            return _blocked("api_key_file_empty", _endpoint(args.base_url), {}, "--api-key-file is empty")
+    if args.evidence is None:
+        return verify(args.base_url, args.flow, args.timeout, args.cleanup, api_key)
+    buffer = io.StringIO()
+    with contextlib.redirect_stdout(buffer):
+        code = verify(args.base_url, args.flow, args.timeout, args.cleanup, api_key)
+    payload = buffer.getvalue()
+    try:
+        receipt = json.loads(payload)
+    except json.JSONDecodeError:
+        sys.stdout.write(payload)
+        return code
+    args.evidence.parent.mkdir(parents=True, exist_ok=True)
+    args.evidence.write_text(json.dumps(receipt, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
+    return code
 
 
 if __name__ == "__main__":

@@ -1,34 +1,99 @@
 flowchart LR
-  in-installer["Instalador (sh/ps1)"]
+  in-installer["Instalador assinado (sh/ps1)"]
+  in-pypi["Bootstrap PyPI (simplicio-installer)"]
+  in-npm["Pacote npm @simpletibr/simplicio"]
+  in-cli["CLI simplicio"]
+  in-mcp["Cliente MCP / host"]
   in-desktop["Desktop / Tauri IPC"]
-  in-host-hook["Hook do host"]
-  in-mcp["MCP / CLI"]
-  step-install["Instala binário gerenciado + registra hosts"]
-  step-bootstrap["Bootstrap do Runtime e preparação"]
-  step-map["Map/context do repositório"]
-  step-edit["Edição governada + validação"]
-  step-session["Sessão: idle, uso e cache"]
+  in-host-hook["Hook do host (mapper/context)"]
+  in-repo["Automação de repositório e release"]
+  step-install["Instala binário gerenciado + verifica assinatura"]
+  step-release["Release local assinado"]
+  step-version["Verifica versão e integridade da instalação"]
+  step-onboard["Onboarding e indexação inicial"]
+  step-auth["Login e sessão da conta"]
+  step-register-hosts["Registra hosts, plugins e rotas"]
+  step-serve["Serve MCP governado (stdio)"]
+  step-bootstrap["Bootstrap e preparação do Runtime"]
+  step-gate["Gate de missão e efeito"]
+  step-map["Map estrutural do repositório"]
+  step-symbol["Navegação de símbolos e declarações"]
+  step-search["Busca estrutural e semântica"]
+  step-read["Leitura compacta de arquivos"]
+  step-memory["Memória indexada do projeto"]
+  step-context["Contexto limitado por orçamento de tokens"]
+  step-edit["Edição determinística com pré-imagem SHA-256"]
+  step-validate["Validação orientada a contrato"]
+  step-run["Execução governada de tarefa"]
+  step-exec["Comandos externos supervisionados"]
+  step-loop["Loop e waves DAG com concorrência governada"]
+  step-session["Sessão: idle, uso e limites"]
   step-meter["Cache meter medido"]
-  out-manifest["Manifesto e checksums"]
-  out-desktop["Snapshots/recibos do Desktop"]
-  out-flow["Mermaid/SVG/Langflow do fluxo"]
-  out-receipts["Recibos e auditoria"]
+  step-flowgen["Geração determinística do fluxo"]
+  step-flowverify["Gate de drift e verificação do Langflow"]
+  out-manifest["Manifesto e checksums de atualização"]
+  out-release["Binários assinados e SHA256SUMS"]
+  out-mcp-surface["Superfície MCP anunciada (tools/list)"]
+  out-desktop["Snapshots e projeções do Desktop"]
+  out-receipts["Recibos de execução e auditoria"]
+  out-tokens["Relatório de tokens e economia"]
+  out-flow["Diagramas Mermaid/SVG/Langflow do fluxo"]
   in-installer --> step-install
+  in-pypi --> step-install
+  in-npm --> step-install
+  in-cli --> step-version
+  in-cli --> step-loop
+  in-mcp --> step-serve
   in-desktop --> step-bootstrap
-  in-desktop --> step-session
   in-host-hook --> step-map
-  in-mcp --> step-map
+  in-repo --> step-release
+  in-repo --> step-flowgen
+  step-install --> step-version
   step-install --> out-manifest
-  step-bootstrap --> step-map
-  step-map --> step-edit
+  step-release --> out-release
+  step-release --> out-manifest
+  step-version --> step-onboard
+  step-onboard --> step-auth
+  step-onboard --> step-serve
+  step-auth --> step-register-hosts
+  step-auth --> step-serve
+  step-register-hosts --> step-serve
+  step-bootstrap --> step-serve
+  step-bootstrap --> step-session
+  step-serve --> step-gate
+  step-serve --> step-map
+  step-serve --> step-symbol
+  step-serve --> step-search
+  step-serve --> step-read
+  step-serve --> step-memory
+  step-serve --> step-context
+  step-serve --> out-mcp-surface
+  step-gate --> step-edit
+  step-gate --> step-run
+  step-gate --> step-exec
+  step-map --> step-context
+  step-symbol --> step-context
+  step-search --> step-context
+  step-read --> step-context
+  step-memory --> step-context
+  step-context --> step-edit
+  step-context --> step-run
+  step-edit --> step-validate
   step-edit --> out-desktop
   step-edit --> out-receipts
+  step-run --> step-exec
+  step-exec --> step-validate
+  step-validate --> out-desktop
+  step-validate --> out-receipts
+  step-loop --> step-run
   step-session --> step-meter
-  step-meter --> out-receipts
-  step-map --> out-flow
+  step-meter --> out-tokens
+  step-flowgen --> step-flowverify
+  step-flowgen --> out-flow
+  step-flowverify --> out-flow
   classDef input fill:#e8f1ff,stroke:#3b6fb6,stroke-width:1px;
-  class in-installer,in-desktop,in-host-hook,in-mcp input;
+  class in-installer,in-pypi,in-npm,in-cli,in-mcp,in-desktop,in-host-hook,in-repo input;
   classDef step fill:#fff7d6,stroke:#b38b00,stroke-width:1px;
-  class step-install,step-bootstrap,step-map,step-edit,step-session,step-meter step;
+  class step-install,step-release,step-version,step-onboard,step-auth,step-register-hosts,step-serve,step-bootstrap,step-gate,step-map,step-symbol,step-search,step-read,step-memory,step-context,step-edit,step-validate,step-run,step-exec,step-loop,step-session,step-meter,step-flowgen,step-flowverify step;
   classDef output fill:#e8f7ea,stroke:#2f7d32,stroke-width:1px;
-  class out-manifest,out-desktop,out-flow,out-receipts output;
+  class out-manifest,out-release,out-mcp-surface,out-desktop,out-receipts,out-tokens,out-flow output;

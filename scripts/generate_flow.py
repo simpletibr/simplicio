@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +60,15 @@ def load() -> dict:
         artifact = node.get("artifact")
         if artifact and not (ROOT / artifact).exists():
             raise SystemExit(f"flow: missing artifact {artifact}")
+        command = node.get("command")
+        if command is not None and (not isinstance(command, str) or not command.strip()):
+            raise SystemExit(f"flow: invalid command on node {node['id']}")
+        tool = node.get("tool")
+        if tool is not None and (not isinstance(tool, str) or not tool.startswith("simplicio_")):
+            raise SystemExit(f"flow: invalid tool on node {node['id']}")
+    tools = [node["tool"] for node in nodes if node.get("tool")]
+    if len(tools) != len(set(tools)):
+        raise SystemExit("flow: tool ids must be unique")
     known = set(ids)
     edges = data.get("edges", [])
     pairs = [tuple(edge) for edge in edges]
@@ -126,42 +136,82 @@ def mermaid(data: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def svg(data: dict) -> str:
-    width, height = 1280, 760
-    columns = {kind: [n for n in data["nodes"] if n["kind"] == kind] for kind in KINDS}
+SVG_NODE_WIDTH = 260
+SVG_NODE_HEIGHT = 72
+SVG_COLUMN_GAP = 40
+SVG_ROW_GAP = 48
+SVG_MAX_ROWS = 8
+SVG_TOP = 90
+
+
+def _svg_positions(data: dict) -> tuple[dict[str, tuple[int, int]], int, int]:
+    """Deterministic kind-band grid: kinds left-to-right, nodes wrap by depth.
+
+    Within a kind, nodes are ordered by longest-path depth so the sub-columns
+    read left-to-right, then by source order for a stable tie-break.
+    """
+    depth = _depths(data)
+    order = {node["id"]: index for index, node in enumerate(data["nodes"])}
     positions: dict[str, tuple[int, int]] = {}
-    for column, kind in enumerate(KINDS):
-        for row, node in enumerate(columns[kind]):
-            positions[node["id"]] = (40 + column * 420, 80 + row * 130)
+    x = 40
+    max_rows = 0
+    for kind in KINDS:
+        nodes = [node for node in data["nodes"] if node["kind"] == kind]
+        if not nodes:
+            continue
+        nodes.sort(key=lambda node: (depth[node["id"]], order[node["id"]]))
+        sub_columns = [nodes[start : start + SVG_MAX_ROWS] for start in range(0, len(nodes), SVG_MAX_ROWS)]
+        max_rows = max(max_rows, max(len(column) for column in sub_columns))
+        for sub, column in enumerate(sub_columns):
+            for row, node in enumerate(column):
+                positions[node["id"]] = (
+                    x + sub * (SVG_NODE_WIDTH + SVG_COLUMN_GAP),
+                    SVG_TOP + row * (SVG_NODE_HEIGHT + SVG_ROW_GAP),
+                )
+        x += len(sub_columns) * (SVG_NODE_WIDTH + SVG_COLUMN_GAP) + 20
+    width = x + 20
+    height = SVG_TOP + max_rows * (SVG_NODE_HEIGHT + SVG_ROW_GAP) + 20
+    return positions, width, height
+
+
+def svg(data: dict) -> str:
+    positions, width, height = _svg_positions(data)
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
         '<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">'
         '<path d="M0,0 L0,6 L9,3 z" fill="#555"/></marker></defs>',
         '<rect width="100%" height="100%" fill="#ffffff"/>',
         f'<text x="40" y="40" font-family="sans-serif" font-size="20" font-weight="700">{html.escape(data["title"])}</text>',
+        f'<text x="40" y="66" font-family="sans-serif" font-size="12" fill="#666">'
+        f'{len(data["nodes"])} nós · {len(data["edges"])} arestas · gerado por scripts/generate_flow.py</text>',
     ]
     for source, target in data["edges"]:
         x1, y1 = positions[source]
         x2, y2 = positions[target]
+        start = (x1 + SVG_NODE_WIDTH, y1 + SVG_NODE_HEIGHT // 2)
+        end = (x2, y2 + SVG_NODE_HEIGHT // 2)
+        dx = max(40, abs(end[0] - start[0]) // 2)
         parts.append(
-            f'<line x1="{x1 + 320}" y1="{y1 + 35}" x2="{x2}" y2="{y2 + 35}" '
-            'stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>'
+            f'<path d="M{start[0]},{start[1]} C{start[0] + dx},{start[1]} '
+            f'{end[0] - dx},{end[1]} {end[0]},{end[1]}" fill="none" '
+            'stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>'
         )
     for node in data["nodes"]:
         x, y = positions[node["id"]]
         kind = node["kind"]
         parts.append(
-            f'<rect x="{x}" y="{y}" width="320" height="70" rx="10" fill="{COLORS[kind]}" '
-            f'stroke="{STROKES[kind]}" stroke-width="1.5"/>'
+            f'<rect x="{x}" y="{y}" width="{SVG_NODE_WIDTH}" height="{SVG_NODE_HEIGHT}" rx="10" '
+            f'fill="{COLORS[kind]}" stroke="{STROKES[kind]}" stroke-width="1.5"/>'
         )
         parts.append(
-            f'<text x="{x + 14}" y="{y + 28}" font-family="sans-serif" font-size="14" '
+            f'<text x="{x + 12}" y="{y + 24}" font-family="sans-serif" font-size="12" '
             f'font-weight="700">{html.escape(node["id"])}</text>'
         )
-        parts.append(
-            f'<text x="{x + 14}" y="{y + 50}" font-family="sans-serif" font-size="12" '
-            f'fill="#333">{html.escape(node["label"])}</text>'
-        )
+        for line, label in enumerate(textwrap.wrap(node["label"], 38)[:3]):
+            parts.append(
+                f'<text x="{x + 12}" y="{y + 42 + line * 14}" font-family="sans-serif" '
+                f'font-size="11" fill="#333">{html.escape(label)}</text>'
+            )
     parts.append("</svg>")
     return "\n".join(parts) + "\n"
 
@@ -462,18 +512,25 @@ def _has_volatile_keys(value: object) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="fail if generated files differ")
+    parser.add_argument(
+        "--out-dir",
+        type=Path,
+        default=None,
+        help="write artifacts to this directory instead of docs/flow (used for determinism checks)",
+    )
     args = parser.parse_args()
     data = load()
+    out = args.out_dir if args.out_dir is not None else OUT
     outputs = {
-        OUT / "simplicio.mmd": mermaid(data),
-        OUT / "simplicio.svg": svg(data),
-        OUT / "langflow" / "simplicio.langflow.json": langflow(data),
+        out / "simplicio.mmd": mermaid(data),
+        out / "simplicio.svg": svg(data),
+        out / "langflow" / "simplicio.langflow.json": langflow(data),
     }
     problems = []
     for path, body in outputs.items():
         if args.check:
             if not path.exists() or path.read_text(encoding="utf-8") != body:
-                problems.append(str(path.relative_to(ROOT)))
+                problems.append(str(path))
         else:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(body, encoding="utf-8", newline="\n")
