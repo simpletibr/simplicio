@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { exportDesktopSnapshot } from "../bridge";
+import { ACTIVITY_POLL_GAP_MS, exportDesktopSnapshot } from "../bridge";
 import type { ActivityItem, DesktopSnapshot } from "../contracts";
 import { Glyph } from "../components/Brand";
 import { createActivityProjection } from "../activity_projection";
+import { validateAiBom } from "../ai_bom_validation";
 import {
   aiBomToJson,
   aiBomToMarkdown,
@@ -88,7 +89,7 @@ export interface ActivityScreenProps {
   loadEvents?: (afterCursor: number) => Promise<DesktopEventPage>;
   /** Last page already loaded; kept for static renders and tests. */
   initialEvents?: DesktopEventPage | null;
-  /** Gap between long-polls; the 900 ms wait keeps latency under 1 s. */
+  /** Gap between long-polls; with the 700 ms wait this keeps delivery under 1 s. */
   pollIntervalMs?: number;
 }
 
@@ -102,7 +103,7 @@ export function ActivityScreen({
   usage,
   loadEvents,
   initialEvents,
-  pollIntervalMs = 250,
+  pollIntervalMs = ACTIVITY_POLL_GAP_MS,
 }: ActivityScreenProps) {
   const projection = createActivityProjection(snapshot);
   const savingsProven = snapshot.savings.proofKind === "measured" || snapshot.savings.proofKind === "replayed" || snapshot.savings.proofKind === "mixed";
@@ -175,6 +176,13 @@ export function ActivityScreen({
   function exportAiBom(format: "json" | "markdown") {
     if (replay === null) return;
     const bom = buildAiBom(replay, { source: snapshot.source === "runtime" ? "runtime" : "preview" });
+    // Fail closed: an export that does not satisfy its own schema is not offered.
+    const validation = validateAiBom(bom);
+    if (!validation.ok) {
+      setBomSaved(null);
+      setEventsError("AI-BOM inválido: " + validation.errors.slice(0, 3).join("; "));
+      return;
+    }
     if (format === "json") {
       downloadText("simplicio-ai-bom.json", "application/json", aiBomToJson(bom));
       setBomSaved("simplicio-ai-bom.json");
