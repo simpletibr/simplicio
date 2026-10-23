@@ -35,6 +35,7 @@ import {
 } from "./runtime_install";
 import { parseRuntimeLifecycleReceipt, type RuntimeLifecycleAction, type RuntimeLifecycleReceipt } from "./runtime_lifecycle";
 import { parseIdleSessionFinalization, IDLE_SESSION_TIMEOUT_MS, type IdleSessionFinalization } from "./session_idle";
+import { parseCacheMeter, type CacheMeterReceipt } from "./cache_meter";
 import {
   canonicalAuthoritativeHostProvider,
   parseProviderSessionBinding,
@@ -377,6 +378,15 @@ export async function refreshDesktopSnapshot(): Promise<DesktopSnapshot> {
 export async function planDesktopIntegrations(): Promise<IntegrationPlan> {
   if (!isTauri()) return createPreviewIntegrationPlan();
   return parseIntegrationPlan(await withTimeout(invoke<unknown>("desktop_plan_integrations"), 60_000, "integration_plan_timeout"));
+}
+
+export async function loadDesktopCacheMeter(options: { sessionId?: string } = {}): Promise<CacheMeterReceipt> {
+  if (!isTauri()) throw new Error("preview_no_runtime");
+  return parseCacheMeter(await withTimeout(
+    invoke<unknown>("desktop_cache_meter", { sessionId: options.sessionId ?? null }),
+    60_000,
+    "cache_meter_timeout",
+  ));
 }
 
 export async function loadDesktopTokenReport(request: TokenQuery): Promise<TokenUsageReport> {
