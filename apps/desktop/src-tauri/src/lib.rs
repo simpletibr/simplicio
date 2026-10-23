@@ -24,6 +24,7 @@ mod project_usage;
 mod projection_exports;
 mod projection_queries;
 mod remote_fleet;
+mod review_git;
 mod review_submit;
 mod runtime_install;
 mod runtime_lifecycle;
@@ -1051,10 +1052,7 @@ async fn desktop_review_submit(
         let review = review_snapshot(&repo, base.as_deref())?;
         review_submit::validate_digest(&review, &digest)?;
         let plan_digest = review_submit::resolve_plan_digest(&repo, plan_digest.as_deref());
-        let now_epoch_ms = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|duration| duration.as_millis() as u64)
-            .unwrap_or(0);
+        let now_epoch_ms = now_epoch_ms();
         review_submit::submit(
             &repo,
             &review,
@@ -1065,6 +1063,68 @@ async fn desktop_review_submit(
     })
     .await
     .map_err(|_| "review_submit_unavailable".to_string())?
+}
+
+fn now_epoch_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or(0)
+}
+
+/// Recomputes the review, refuses a stale digest, then commits exactly the
+/// reviewed paths. The receipt carries the real commit sha.
+pub(crate) fn review_commit_from_repo(
+    repo: &str,
+    digest: &str,
+    message: &str,
+    base: Option<&str>,
+) -> Result<Value, String> {
+    require_active_access()?;
+    let repo = validated_repo_path(repo)?;
+    let review = review_snapshot(&repo, base)?;
+    review_submit::validate_digest(&review, digest)?;
+    review_git::commit(&repo, &review, message, now_epoch_ms())
+}
+
+/// Pushes a commit that this repository recorded from an approved review.
+pub(crate) fn review_push_from_repo(
+    repo: &str,
+    digest: &str,
+    sha: &str,
+    create_upstream: bool,
+) -> Result<Value, String> {
+    require_active_access()?;
+    let repo = validated_repo_path(repo)?;
+    review_git::push(&repo, digest, sha, create_upstream, now_epoch_ms())
+}
+
+#[tauri::command]
+async fn desktop_review_commit(
+    repo: String,
+    digest: String,
+    message: String,
+    base: Option<String>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        review_commit_from_repo(&repo, &digest, &message, base.as_deref())
+    })
+    .await
+    .map_err(|_| "review_commit_unavailable".to_string())?
+}
+
+#[tauri::command]
+async fn desktop_review_push(
+    repo: String,
+    digest: String,
+    sha: String,
+    create_upstream: Option<bool>,
+) -> Result<Value, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        review_push_from_repo(&repo, &digest, &sha, create_upstream.unwrap_or(false))
+    })
+    .await
+    .map_err(|_| "review_push_unavailable".to_string())?
 }
 
 fn git_output(repo: &Path, args: &[&str]) -> Result<std::process::Output, String> {
@@ -2175,6 +2235,8 @@ pub fn run() {
             desktop_activity_events,
             desktop_review,
             desktop_review_submit,
+            desktop_review_commit,
+            desktop_review_push,
             desktop_worktrees,
             desktop_remote_fleet,
             desktop_worktree_create,
