@@ -1,0 +1,12 @@
+{
+  "name": "opencode-simplicio",
+  "version": "0.2.20",
+  "private": true,
+  "description": "Simplicio enforcement plugin for OpenCode: routes host-native file and shell tools to the governed MCP surface.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "license": "MIT"
+}
