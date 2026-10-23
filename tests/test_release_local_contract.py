@@ -144,8 +144,9 @@ def test_public_publisher_keeps_executables_out_of_the_source_commit(tmp_path, m
 def test_publication_paths_gate_the_executable_codex_hook_contract():
     publisher = (ROOT / "scripts/publish_release_local.py").read_text(encoding="utf-8")
     assert 'shutil.which("pwsh")' in publisher
-    assert 'run(["bash", str(ROOT / "tests/test_codex_hooks.sh")], timeout=60)' in publisher
-    assert publisher.count("verify_codex_hook_contract()") == 3
+    assert 'str(ROOT / "tests/test_codex_hooks.sh")' in publisher
+    assert 'timeout=300' in publisher
+    assert publisher.count("verify_codex_hook_contract(bundle)") == 2
 
 
 def test_publication_fails_closed_when_powershell_is_unavailable(monkeypatch):
@@ -157,7 +158,7 @@ def test_publication_fails_closed_when_powershell_is_unavailable(monkeypatch):
     monkeypatch.setattr(module.shutil, "which", lambda _name: None)
 
     try:
-        module.verify_codex_hook_contract()
+        module.verify_codex_hook_contract(ROOT / "dist" / "bundle")
     except module.PublishError as exc:
         assert "PowerShell is required" in str(exc)
     else:
