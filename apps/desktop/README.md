@@ -110,5 +110,14 @@ prove a final Tauri installer bundle; release publication must still stage the
 same verified asset under `src-tauri/binaries/simplicio-<target-triple>` and run
 the platform packaging/manual installation checks.
 
+## Review inbox
+
+The review surface writes comments to the repository-local
+`.simplicio/review-inbox/` queue with a `simplicio.review-receipt/v1` receipt.
+The owning agent reads that inbox; the Desktop does not notify a live session.
+Plan-lane auto-merge requires a plan digest matching the diff and no guardrail.
+The full contract, eligibility reasons and redaction rules are in
+[`../../docs/desktop/REVIEW.md`](../../docs/desktop/REVIEW.md).
+
 See [`../../docs/desktop/ADR-0001-public-tauri-shell.md`](../../docs/desktop/ADR-0001-public-tauri-shell.md)
 for the ownership and security decision.
