@@ -23,7 +23,9 @@ from urllib.request import urlopen
 from . import __version__
 from .host_integrations import build_summary, write_summary
 
-INSTALL_DIR = os.path.expanduser("~/.local/bin")
+# One managed binary for every channel. The PyPI console script is a
+# thin launcher on PATH; it must never own a second copy of the runtime.
+INSTALL_DIR = os.path.expanduser(os.environ.get("SIMPLICIO_BIN_DIR") or "~/.simplicio/bin")
 BINARY_NAME = "simplicio" + (".exe" if platform.system() == "Windows" else "")
 BINARY_PATH = os.path.join(INSTALL_DIR, BINARY_NAME)
 RELEASE_API_BASE = "https://api.github.com/repos/simpletibr/simplicio/releases/tags"
