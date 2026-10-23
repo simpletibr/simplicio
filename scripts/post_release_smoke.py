@@ -281,6 +281,69 @@ def host_target() -> str:
     raise RuntimeError(f"unsupported host platform: {platform.system()} {platform.machine()}")
 
 
+
+def mcp_roundtrip(command, env, requests, timeout=90):
+    """Run a real MCP handshake and return {id: response}.
+
+    The stdio front supervises its backend and ignores a tools/call that
+    arrives before initialize is answered or while stdin is already closed,
+    so requests are sent one handshake step at a time and stdin stays open
+    until every expected id has been answered.
+    """
+    import queue
+    import threading
+    import time
+
+    process = subprocess.Popen(
+        command,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        env=env,
+    )
+    rows: "queue.Queue" = queue.Queue()
+
+    def pump():
+        for line in process.stdout or ():
+            line = line.strip()
+            if not line.startswith("{"):
+                continue
+            try:
+                rows.put(json.loads(line))
+            except ValueError:
+                continue
+        rows.put(None)
+
+    def send(payload):
+        process.stdin.write(json.dumps(payload) + "\n")
+        process.stdin.flush()
+
+    threading.Thread(target=pump, daemon=True).start()
+    deadline = time.monotonic() + timeout
+    responses = {}
+    expected = {item["id"] for item in requests if "id" in item}
+    try:
+        send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}})
+        send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        pending = list(requests)
+        while time.monotonic() < deadline and expected - set(responses):
+            for item in list(pending):
+                send(item)
+                pending.remove(item)
+            try:
+                row = rows.get(timeout=max(0.1, deadline - time.monotonic()))
+            except queue.Empty:
+                break
+            if row is None:
+                break
+            if isinstance(row, dict) and row.get("id") in expected:
+                responses[row["id"]] = row
+    finally:
+        process.kill()
+        process.wait()
+    return responses
+
 def reported_runtime_version(version_json: Mapping[str, object]) -> str:
     """Read the Runtime version from its canonical version JSON envelope."""
     runtime = version_json.get("runtime")
@@ -317,33 +380,31 @@ def run_native_smoke(target: str, manifest: Mapping[str, object], binary: bytes)
                 "USERPROFILE": home,
                 "XDG_CONFIG_HOME": str(Path(home) / ".config"),
                 "SIMPLICIO_LOGIN_REQUIRED": "1",
+                # tools/list is profile-scoped since 3.10.0: the default exec
+                # profile exposes the hot lane only, so assert the full public
+                # catalogue the release ships.
+                "SIMPLICIO_MCP_PROFILE": "full",
             })
             auth = subprocess.run(command + ["auth", "status", "--json"], env=clean_env, capture_output=True, text=True, timeout=90)
             auth_text = (auth.stdout + auth.stderr).lower()
             if "login" not in auth_text and "unauthenticated" not in auth_text and "not authenticated" not in auth_text:
                 raise RuntimeError("clean-home auth status did not enforce login")
-            handshake = "".join(json.dumps(item) + "\n" for item in (
-                {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
-                {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-                {
-                    "jsonrpc": "2.0",
-                    "id": 3,
-                    "method": "tools/call",
-                    "params": {
-                        "name": "simplicio_map",
-                        "arguments": {"repo": home, "task": "post-release login gate"},
+            responses = mcp_roundtrip(
+                command + ["serve", "--mcp", "--stdio", "--json"],
+                clean_env,
+                [
+                    {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 3,
+                        "method": "tools/call",
+                        "params": {
+                            "name": "simplicio_map",
+                            "arguments": {"repo": home, "task": "post-release login gate"},
+                        },
                     },
-                },
-            ))
-            mcp = subprocess.run(command + ["serve", "--mcp", "--stdio", "--json"], input=handshake, env=clean_env, capture_output=True, text=True, timeout=90)
-            responses = {}
-            for line in mcp.stdout.splitlines():
-                try:
-                    response = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                if response.get("id") is not None:
-                    responses[response["id"]] = response
+                ],
+            )
             listed_tools = {
                 str(tool.get("name"))
                 for tool in responses.get(2, {}).get("result", {}).get("tools", [])
@@ -353,9 +414,28 @@ def run_native_smoke(target: str, manifest: Mapping[str, object], binary: bytes)
             missing_tools = sorted(required_tools - listed_tools)
             if missing_tools:
                 raise RuntimeError("MCP tools/list is missing required tools: " + ", ".join(missing_tools))
-            call_error = responses.get(3, {}).get("error", {})
+            call_row = responses.get(3, {})
+            call_error = call_row.get("error", {}) if isinstance(call_row, dict) else {}
             call_data = call_error.get("data", {}) if isinstance(call_error, dict) else {}
-            if call_error.get("code") != -32001 or call_data.get("login_required") is not True:
+            call_result = call_row.get("result", {}) if isinstance(call_row, dict) else {}
+            structured = (
+                call_result.get("structuredContent")
+                if isinstance(call_result, dict)
+                else None
+            )
+            # The gate is structured either as a JSON-RPC error (-32001) or as
+            # an isError tool result carrying structuredContent.error.
+            rpc_gate = (
+                isinstance(call_error, dict)
+                and call_error.get("code") == -32001
+                and call_data.get("login_required") is True
+            )
+            result_gate = (
+                isinstance(structured, dict)
+                and structured.get("error") == "login_required"
+                and bool(call_result.get("isError"))
+            )
+            if not (rpc_gate or result_gate):
                 raise RuntimeError("MCP tools/call did not return structured login_required gate")
         return {
             "target": target,
