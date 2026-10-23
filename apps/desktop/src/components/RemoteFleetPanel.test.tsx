@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { RemoteFleetList } from "./RemoteFleetPanel";
+import { RemoteFleetList, RemoteFleetPanel } from "./RemoteFleetPanel";
 import {
   REMOTE_FLEET_SCHEMA,
   parseRemoteFleet,
@@ -113,5 +113,33 @@ describe("RemoteFleetList", () => {
     const html = render(value, { selectedId: "mac-mini" });
     expect(html).toContain("Máquina selecionada: Mac mini");
     expect(html).toContain("Nenhuma ação remota foi enviada");
+  });
+});
+
+describe("RemoteFleetPanel breakpoint", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function renderPanel(width: number): string {
+    vi.stubGlobal("window", {
+      innerWidth: width,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    });
+    return renderToStaticMarkup(<RemoteFleetPanel />);
+  }
+
+  it("mounts the read-mostly mobile layout at 375 px and 480 px", () => {
+    for (const width of [375, 480]) {
+      const html = renderPanel(width);
+      expect(html).toContain('data-testid="mobile-fleet"');
+      expect(html).toContain(`data-width="${width}"`);
+      expect(html).not.toContain('data-testid="remote-fleet"');
+    }
+  });
+
+  it("keeps the existing panel above the breakpoint", () => {
+    const html = renderPanel(481);
+    expect(html).toContain('data-testid="remote-fleet"');
+    expect(html).not.toContain('data-testid="mobile-fleet"');
   });
 });

@@ -26,14 +26,32 @@ const MAX_LABEL_CHARS: usize = 80;
 const MAX_URL_BYTES: usize = 2_048;
 const MAX_VERSION_CHARS: usize = 64;
 const MAX_LATENCY_MS: u64 = 60_000;
+const MAX_WORKERS: usize = 32;
+const MAX_WORKER_LABEL_CHARS: usize = 80;
+const MAX_WORKER_CLAIM_CHARS: usize = 120;
+const MAX_WORKER_PROGRESS: u64 = 1_000_000;
+const WORKER_STATES: [&str; 5] = ["queued", "running", "paused", "blocked", "done"];
 const TIMEOUT: Duration = Duration::from_secs(3);
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct Remote {
-    id: String,
-    label: String,
-    base_url: String,
-    token_env: Option<String>,
+pub(crate) struct Remote {
+    pub(crate) id: String,
+    pub(crate) label: String,
+    pub(crate) base_url: String,
+    pub(crate) token_env: Option<String>,
+}
+
+/// One worker the remote reported in its health body. Read-mostly: this module
+/// only projects it, and no worker is derived from a neighbouring machine.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct Worker {
+    pub(crate) id: String,
+    pub(crate) label: String,
+    pub(crate) claim: Option<String>,
+    pub(crate) state: String,
+    pub(crate) done: u64,
+    pub(crate) total: Option<u64>,
+    pub(crate) receipt_id: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -43,6 +61,7 @@ struct Observation {
     version: Option<String>,
     latency_ms: Option<u64>,
     reason_code: Option<&'static str>,
+    workers: Vec<Worker>,
 }
 
 impl Observation {
@@ -53,6 +72,7 @@ impl Observation {
             version: None,
             latency_ms,
             reason_code: Some(reason_code),
+            workers: Vec::new(),
         }
     }
 
@@ -63,6 +83,7 @@ impl Observation {
             version: None,
             latency_ms: None,
             reason_code: Some(reason_code),
+            workers: Vec::new(),
         }
     }
 }
@@ -255,6 +276,138 @@ fn health_version(body: &[u8]) -> Option<Option<String>> {
     }
 }
 
+fn bounded_text(value: Option<&Value>, max: usize) -> Option<String> {
+    let text = value?.as_str()?.trim();
+    if text.is_empty() || text.chars().count() > max || text.chars().any(char::is_control) {
+        return None;
+    }
+    Some(text.to_string())
+}
+
+fn valid_worker_id(value: &str) -> bool {
+    let mut chars = value.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    value.len() <= 64
+        && first.is_ascii_alphanumeric()
+        && chars.all(|character| {
+            character.is_ascii_alphanumeric() || matches!(character, '.' | '_' | ':' | '-')
+        })
+}
+
+/// A Runtime receipt id is opaque but bounded; this module only forwards it.
+pub(crate) fn valid_receipt_id(value: &str) -> bool {
+    let mut chars = value.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    value.len() <= 128
+        && first.is_ascii_alphanumeric()
+        && chars.all(|character| {
+            character.is_ascii_alphanumeric() || matches!(character, '.' | '_' | ':' | '-')
+        })
+}
+
+fn parse_worker(value: &Value) -> Result<Worker, ()> {
+    let object = value.as_object().ok_or(())?;
+    if object.keys().any(|key| {
+        !matches!(
+            key.as_str(),
+            "id" | "label" | "claim" | "state" | "progress" | "receipt_id" | "receiptId"
+        )
+    }) {
+        return Err(());
+    }
+    let id = object
+        .get("id")
+        .and_then(Value::as_str)
+        .filter(|value| valid_worker_id(value))
+        .ok_or(())?
+        .to_string();
+    let label = bounded_text(object.get("label"), MAX_WORKER_LABEL_CHARS).ok_or(())?;
+    let claim = match object.get("claim") {
+        None | Some(Value::Null) => None,
+        Some(_) => Some(bounded_text(object.get("claim"), MAX_WORKER_CLAIM_CHARS).ok_or(())?),
+    };
+    let state = object
+        .get("state")
+        .and_then(Value::as_str)
+        .filter(|value| WORKER_STATES.contains(value))
+        .ok_or(())?
+        .to_string();
+    let (done, total) = match object.get("progress") {
+        None | Some(Value::Null) => (0, None),
+        Some(progress) => {
+            let progress = progress.as_object().ok_or(())?;
+            if progress
+                .keys()
+                .any(|key| !matches!(key.as_str(), "done" | "total"))
+            {
+                return Err(());
+            }
+            let done = progress
+                .get("done")
+                .and_then(Value::as_u64)
+                .filter(|done| *done <= MAX_WORKER_PROGRESS)
+                .ok_or(())?;
+            let total = match progress.get("total") {
+                None | Some(Value::Null) => None,
+                Some(candidate) => Some(
+                    candidate
+                        .as_u64()
+                        .filter(|total| *total >= done && *total <= MAX_WORKER_PROGRESS)
+                        .ok_or(())?,
+                ),
+            };
+            (done, total)
+        }
+    };
+    let receipt_id = match object.get("receipt_id").or_else(|| object.get("receiptId")) {
+        None | Some(Value::Null) => None,
+        Some(candidate) => Some(
+            candidate
+                .as_str()
+                .filter(|value| valid_receipt_id(value))
+                .ok_or(())?
+                .to_string(),
+        ),
+    };
+    Ok(Worker {
+        id,
+        label,
+        claim,
+        state,
+        done,
+        total,
+        receipt_id,
+    })
+}
+
+/// Strict parser for the optional bounded worker list in the health body. An
+/// absent list means "the remote reported no workers", never "unknown".
+fn health_workers(body: &[u8]) -> Result<Vec<Worker>, ()> {
+    let value = serde_json::from_slice::<Value>(body).map_err(|_| ())?;
+    let object = value.as_object().ok_or(())?;
+    let workers = match object.get("workers") {
+        None | Some(Value::Null) => return Ok(Vec::new()),
+        Some(candidate) => candidate.as_array().ok_or(())?,
+    };
+    if workers.len() > MAX_WORKERS {
+        return Err(());
+    }
+    let mut parsed = Vec::with_capacity(workers.len());
+    let mut ids = BTreeSet::new();
+    for worker in workers {
+        let worker = parse_worker(worker)?;
+        if !ids.insert(worker.id.clone()) {
+            return Err(());
+        }
+        parsed.push(worker);
+    }
+    Ok(parsed)
+}
+
 fn probe(remote: &Remote, token: Option<&str>) -> Observation {
     let started = Instant::now();
     let client = match reqwest::blocking::Client::builder()
@@ -285,11 +438,16 @@ fn probe(remote: &Remote, token: Option<&str>) -> Observation {
     if !(200..300).contains(&status) {
         return Observation::offline(latency_ms, "remote_http_error");
     }
-    let Some(version) = read_bounded(response)
-        .ok()
-        .and_then(|body| health_version(&body))
-    else {
+    let Some(body) = read_bounded(response).ok() else {
         return Observation::offline(latency_ms, "remote_health_invalid");
+    };
+    let Some(version) = health_version(&body) else {
+        return Observation::offline(latency_ms, "remote_health_invalid");
+    };
+    // A malformed worker list fails the machine instead of publishing a partial
+    // fleet: an unusable worker row must not reach the mobile layout.
+    let Ok(workers) = health_workers(&body) else {
+        return Observation::offline(latency_ms, "remote_workers_invalid");
     };
     Observation {
         status: "online",
@@ -298,6 +456,7 @@ fn probe(remote: &Remote, token: Option<&str>) -> Observation {
         version,
         latency_ms,
         reason_code: None,
+        workers,
     }
 }
 
@@ -333,6 +492,18 @@ fn entry(remote: &Remote, observation: &Observation) -> Value {
         "version": observation.version,
         "latencyMs": observation.latency_ms,
         "reasonCode": observation.reason_code,
+        "workers": observation.workers.iter().map(worker_json).collect::<Vec<_>>(),
+    })
+}
+
+fn worker_json(worker: &Worker) -> Value {
+    json!({
+        "id": worker.id,
+        "label": worker.label,
+        "claim": worker.claim,
+        "state": worker.state,
+        "progress": { "done": worker.done, "total": worker.total },
+        "receiptId": worker.receipt_id,
     })
 }
 
@@ -383,37 +554,68 @@ fn project(remotes: &[Remote], observed_at: i64) -> Value {
 /// empty fleet, never a demo. An unreadable or invalid file is an empty fleet
 /// plus a reason code, so the Desktop cannot invent machines.
 pub fn read_at(home: &Path, observed_at: i64) -> Value {
+    match load_config(home) {
+        ConfigLoad::Missing => empty(false, None, observed_at),
+        ConfigLoad::Invalid(code) => empty(true, Some(code.as_str()), observed_at),
+        ConfigLoad::Remotes(remotes) => project(&remotes, observed_at),
+    }
+}
+
+/// One allowlist load, shared by the read projection and the steer command so
+/// both enforce the same file rules.
+enum ConfigLoad {
+    Missing,
+    Invalid(String),
+    Remotes(Vec<Remote>),
+}
+
+fn load_config(home: &Path) -> ConfigLoad {
     let path = home.join(CONFIG_PATH);
     let metadata = match fs::metadata(&path) {
         Ok(metadata) => metadata,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            return empty(false, None, observed_at)
-        }
-        Err(_) => return empty(true, Some("remote_config_unreadable"), observed_at),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return ConfigLoad::Missing,
+        Err(_) => return ConfigLoad::Invalid("remote_config_unreadable".into()),
     };
     if !metadata.is_file() {
-        return empty(true, Some("remote_config_unreadable"), observed_at);
+        return ConfigLoad::Invalid("remote_config_unreadable".into());
     }
     if metadata.len() > MAX_CONFIG_BYTES {
-        return empty(true, Some("remote_config_too_large"), observed_at);
+        return ConfigLoad::Invalid("remote_config_too_large".into());
     }
     let bytes = match fs::read(&path) {
         Ok(bytes) if bytes.len() as u64 <= MAX_CONFIG_BYTES => bytes,
-        Ok(_) => return empty(true, Some("remote_config_too_large"), observed_at),
-        Err(_) => return empty(true, Some("remote_config_unreadable"), observed_at),
+        Ok(_) => return ConfigLoad::Invalid("remote_config_too_large".into()),
+        Err(_) => return ConfigLoad::Invalid("remote_config_unreadable".into()),
     };
     let value = match serde_json::from_slice::<Value>(&bytes) {
         Ok(value) => value,
-        Err(_) => return empty(true, Some("remote_config_invalid"), observed_at),
+        Err(_) => return ConfigLoad::Invalid("remote_config_invalid".into()),
     };
     match parse_config(&value) {
-        Ok(remotes) => project(&remotes, observed_at),
-        Err(code) => empty(true, Some(code.as_str()), observed_at),
+        Ok(remotes) => ConfigLoad::Remotes(remotes),
+        Err(code) => ConfigLoad::Invalid(code),
+    }
+}
+
+/// Resolves one allowlisted machine for a steer action. An absent, unreadable
+/// or invalid allowlist never becomes a machine: it is the same error the read
+/// projection reports, so the UI states the real reason.
+pub(crate) fn find_remote(home: &Path, id: &str) -> Result<Remote, String> {
+    if !valid_id(id) {
+        return Err("fleet_steer_machine_unknown".into());
+    }
+    match load_config(home) {
+        ConfigLoad::Remotes(remotes) => remotes
+            .into_iter()
+            .find(|remote| remote.id == id)
+            .ok_or_else(|| "fleet_steer_machine_unknown".to_string()),
+        ConfigLoad::Missing => Err("fleet_steer_machine_unknown".into()),
+        ConfigLoad::Invalid(code) => Err(code),
     }
 }
 
 /// Windows resolves `%USERPROFILE%`; other platforms use `$HOME`.
-fn default_home() -> Option<PathBuf> {
+pub(crate) fn default_home() -> Option<PathBuf> {
     #[cfg(windows)]
     {
         std::env::var_os("USERPROFILE")
@@ -557,6 +759,126 @@ mod tests {
         assert_eq!(health_version(br#"{"status":"degraded"}"#), None);
         assert_eq!(health_version(br#"{"status":"ok","version":42}"#), None);
         assert_eq!(health_version(b"not-json"), None);
+    }
+
+    #[test]
+    fn maps_the_optional_worker_list_and_defaults_to_none() {
+        assert_eq!(health_workers(br#"{"status":"ok"}"#), Ok(Vec::new()));
+        assert_eq!(health_workers(br#"{"workers":null}"#), Ok(Vec::new()));
+        let body = json!({
+            "status": "ok",
+            "workers": [
+                {
+                    "id": "w-1",
+                    "label": "issue-468",
+                    "claim": "issue:468",
+                    "state": "running",
+                    "progress": {"done": 3, "total": 7},
+                    "receipt_id": "rcpt-abc"
+                },
+                {"id": "w-2", "label": "review", "state": "paused"}
+            ]
+        });
+        let parsed = health_workers(body.to_string().as_bytes()).unwrap();
+        assert_eq!(parsed.len(), 2);
+        assert_eq!(parsed[0].state, "running");
+        assert_eq!(parsed[0].claim.as_deref(), Some("issue:468"));
+        assert_eq!((parsed[0].done, parsed[0].total), (3, Some(7)));
+        assert_eq!(parsed[0].receipt_id.as_deref(), Some("rcpt-abc"));
+        assert_eq!(parsed[1].claim, None);
+        assert_eq!((parsed[1].done, parsed[1].total), (0, None));
+    }
+
+    #[test]
+    fn refuses_worker_rows_that_break_the_contract() {
+        let invalid = [
+            // duplicate id
+            json!({"workers": [{"id": "w-1", "label": "a", "state": "running"}, {"id": "w-1", "label": "b", "state": "done"}]}),
+            // unknown state
+            json!({"workers": [{"id": "w-1", "label": "a", "state": "paused-by-user"}]}),
+            // progress total below done
+            json!({"workers": [{"id": "w-1", "label": "a", "state": "running", "progress": {"done": 5, "total": 2}}]}),
+            // unknown field
+            json!({"workers": [{"id": "w-1", "label": "a", "state": "running", "token": "x"}]}),
+            // path traversal in the id
+            json!({"workers": [{"id": "../w", "label": "a", "state": "running"}]}),
+            // receipt that could not be forwarded
+            json!({"workers": [{"id": "w-1", "label": "a", "state": "running", "receipt_id": "rcpt with space"}]}),
+        ];
+        for body in invalid {
+            assert!(
+                health_workers(body.to_string().as_bytes()).is_err(),
+                "{body} must be refused"
+            );
+        }
+        let too_many = json!({
+            "workers": (0..=MAX_WORKERS)
+                .map(|index| json!({"id": format!("w-{index}"), "label": "x", "state": "queued"}))
+                .collect::<Vec<_>>()
+        });
+        assert!(health_workers(too_many.to_string().as_bytes()).is_err());
+    }
+
+    #[test]
+    fn projects_workers_next_to_the_machine() {
+        let remote = Remote {
+            id: "mac-mini".into(),
+            label: "Mac mini".into(),
+            base_url: "http://127.0.0.1:8787".into(),
+            token_env: None,
+        };
+        let observation = Observation {
+            status: "online",
+            authenticated: false,
+            version: Some("3.10.0".into()),
+            latency_ms: Some(9),
+            reason_code: None,
+            workers: vec![Worker {
+                id: "w-1".into(),
+                label: "issue-468".into(),
+                claim: Some("issue:468".into()),
+                state: "running".into(),
+                done: 1,
+                total: Some(4),
+                receipt_id: None,
+            }],
+        };
+        let value = entry(&remote, &observation);
+        assert_eq!(value["workers"][0]["id"], "w-1");
+        assert_eq!(value["workers"][0]["claim"], "issue:468");
+        assert_eq!(value["workers"][0]["progress"]["done"], 1);
+        assert_eq!(value["workers"][0]["progress"]["total"], 4);
+        assert_eq!(value["workers"][0]["receiptId"], Value::Null);
+    }
+
+    #[test]
+    fn resolves_an_allowlisted_machine_for_steer() {
+        let home = std::env::temp_dir().join(format!("simplicio-fleet-{}", std::process::id()));
+        let _ = fs::create_dir_all(home.join(".simplicio"));
+        let path = home.join(CONFIG_PATH);
+        fs::write(
+            &path,
+            config(vec![
+                json!({"id": "mac-mini", "label": "Mac mini", "url": "http://127.0.0.1:8787"}),
+            ])
+            .to_string(),
+        )
+        .unwrap();
+        assert_eq!(
+            find_remote(&home, "mac-mini").unwrap().base_url,
+            "http://127.0.0.1:8787"
+        );
+        assert_eq!(
+            find_remote(&home, "studio").unwrap_err(),
+            "fleet_steer_machine_unknown"
+        );
+        // A path-shaped id never reaches the filesystem.
+        assert_eq!(
+            find_remote(&home, "../etc").unwrap_err(),
+            "fleet_steer_machine_unknown"
+        );
+        let _ = fs::remove_file(&path);
+        let _ = fs::remove_dir_all(&home);
     }
 
     #[test]

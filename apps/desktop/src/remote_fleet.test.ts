@@ -3,16 +3,23 @@ import {
   MAX_REMOTE_FLEET,
   REMOTE_CONFIG_SCHEMA,
   REMOTE_FLEET_SCHEMA,
+  REMOTE_STEER_SCHEMA,
   canActOnRemote,
+  canSteerWorker,
   classifyRemoteHealth,
   normalizeRemoteUrl,
   parseRemoteConfig,
   parseRemoteFleet,
+  parseSteerReceipt,
   redactRemoteText,
   remoteActionBlocker,
   remoteFleetErrorMessage,
   summarizeRemoteFleet,
+  summarizeRemoteWorkers,
+  workerSteerActions,
+  workerSteerBlocker,
   type RemoteMachine,
+  type RemoteWorker,
 } from "./remote_fleet";
 
 function config(remotes: unknown[]) {
@@ -178,6 +185,102 @@ describe("status mapping", () => {
       machine({ id: "d", authenticated: false }),
     ]);
     expect(summary).toEqual({ total: 4, online: 2, offline: 1, unauthorized: 1, actionable: 1 });
+  });
+});
+
+describe("worker steering contract", () => {
+  function worker(overrides: Partial<RemoteWorker> = {}): RemoteWorker {
+    return {
+      id: "w-1",
+      label: "issue-468",
+      claim: "issue:468",
+      state: "running",
+      progress: { done: 1, total: 4 },
+      receiptId: "rcpt-1",
+      ...overrides,
+    };
+  }
+
+  it("allows pause for a running worker and resume for a paused one", () => {
+    expect(workerSteerActions(worker())).toEqual(["pause"]);
+    expect(workerSteerActions(worker({ state: "paused" }))).toEqual(["resume"]);
+    expect(workerSteerActions(worker({ state: "done" }))).toEqual([]);
+    expect(canSteerWorker(machine(), worker(), "pause")).toBe(true);
+    expect(canSteerWorker(machine(), worker(), "resume")).toBe(false);
+    expect(canSteerWorker(machine(), worker({ state: "paused" }), "resume")).toBe(true);
+    expect(workerSteerBlocker(machine(), worker(), "resume")).toContain("pausado");
+  });
+
+  it("requires an online and authenticated machine for any steering action", () => {
+    for (const offline of [
+      machine({ status: "offline" }),
+      machine({ status: "unauthorized", authenticated: false }),
+      machine({ authenticated: false }),
+      machine({ status: "unknown" }),
+    ]) {
+      expect(canSteerWorker(offline, worker(), "pause")).toBe(false);
+      expect(workerSteerBlocker(offline, worker(), "pause")).not.toBeNull();
+    }
+  });
+
+  it("parses the native steer receipt and rejects a fabricated one", () => {
+    const parsed = parseSteerReceipt(
+      {
+        schema: REMOTE_STEER_SCHEMA,
+        machineId: "mac-mini",
+        workerId: "w-1",
+        action: "pause",
+        receiptId: "rcpt-468-1",
+        status: "sent",
+      },
+      { machineId: "mac-mini", workerId: "w-1", action: "pause" },
+    );
+    expect(parsed.receiptId).toBe("rcpt-468-1");
+    const expected = { machineId: "mac-mini", workerId: "w-1", action: "pause" as const };
+    expect(() => parseSteerReceipt({}, expected)).toThrow("fleet_steer_response_schema");
+    expect(() =>
+      parseSteerReceipt(
+        {
+          schema: REMOTE_STEER_SCHEMA,
+          machineId: "mac-mini",
+          workerId: "w-1",
+          action: "pause",
+          receiptId: "",
+          status: "sent",
+        },
+        expected,
+      ),
+    ).toThrow("fleet_steer_receipt_missing");
+    expect(() =>
+      parseSteerReceipt(
+        {
+          schema: REMOTE_STEER_SCHEMA,
+          machineId: "studio",
+          workerId: "w-1",
+          action: "pause",
+          receiptId: "rcpt-1",
+          status: "sent",
+        },
+        expected,
+      ),
+    ).toThrow("fleet_steer_response_mismatch");
+    expect(remoteFleetErrorMessage("fleet_steer_unauthorized")).toContain("não autorizado");
+  });
+
+  it("summarizes the workers the remote reported", () => {
+    expect(
+      summarizeRemoteWorkers([
+        machine({ workers: [worker(), worker({ id: "w-2", state: "paused", receiptId: null })] }),
+        machine({ id: "studio", workers: [worker({ id: "w-3", state: "blocked" })] }),
+      ]),
+    ).toEqual({ total: 3, running: 1, paused: 1, blocked: 1, withReceipt: 2 });
+    expect(summarizeRemoteWorkers([machine({ workers: [] })])).toEqual({
+      total: 0,
+      running: 0,
+      paused: 0,
+      blocked: 0,
+      withReceipt: 0,
+    });
   });
 });
 
