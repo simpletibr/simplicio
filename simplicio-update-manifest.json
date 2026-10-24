@@ -1,23 +1,23 @@
 {
   "schema": "simplicio.update-manifest/v1",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "channel": "stable",
-  "release_tag": "v3.10.0",
+  "release_tag": "v3.10.1",
   "repository": "simpletibr/simplicio",
-  "commit": "d6b84602fc74c25cc3dcb626e6f6d68205befd95",
+  "commit": "5117a0eef7278e16143bc76429ba94a142b22ac6",
   "signing_pubkey": "t9n5AmQT2VUVR4LJ0mjQ07C0lEPIMG7oCJGc/5kR4/U=",
-  "generated_at": "2026-10-23T10:03:11.846427Z",
+  "generated_at": "2026-10-24T11:31:22.693217Z",
   "source": {
     "version": "Cargo.toml",
-    "tag": "v3.10.0",
-    "commit": "d6b84602fc74c25cc3dcb626e6f6d68205befd95"
+    "tag": "v3.10.1",
+    "commit": "5117a0eef7278e16143bc76429ba94a142b22ac6"
   },
   "host_plugins": {
     "schema": "simplicio.host-plugin-release-binding/v1",
-    "runtime_commit": "d6b84602fc74c25cc3dcb626e6f6d68205befd95",
-    "public_commit": "8dcf2297f343789e08cd6c3200de3d799e621a68",
-    "bundle_manifest_sha256": "ed04cb39d3e99210b341846e5c24b9117fc31b52308074f274b880a28ed998fe",
-    "payload_tree_sha256": "b82623dc0d7cb9eca1b8269950e1f35a9d22828e7a2fe2cef5343757f8bc4559"
+    "runtime_commit": "5117a0eef7278e16143bc76429ba94a142b22ac6",
+    "public_commit": "1d5051711194775833c255c74b6a6df544245bdb",
+    "bundle_manifest_sha256": "0d2bd28c2365a33f6f03433f02ef0429d0f87fe4a649c3ef3099f1a88ee318b3",
+    "payload_tree_sha256": "e58981eac1ce6c7fa2f229d59e3033903dcfd223fdc731aa246dbd7f6f4a3b03"
   },
   "security": {
     "checksum_algorithm": "SHA256",
@@ -31,11 +31,11 @@
     {
       "target": "macos-arm64",
       "artifact": "simplicio-macos-arm64",
-      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.0/simplicio-macos-arm64",
-      "size": 55838080,
+      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.1/simplicio-macos-arm64",
+      "size": 56098912,
       "checksum_file": "SHA256SUMS",
-      "sha256": "bdeecac8be78e071d07696aad924252fca93f235cf1b328df1996f909ccc332d",
-      "signature": "ed25519:DbM7UJ/nTlL4If0UoF03BKHcEz6hZcYwEtu+PqI/NZmKMfqZSm7vsGTHHRyb42dZy4SlmjaIVdo/HAa+ASOIDQ==",
+      "sha256": "63ce8577682c55769783b00639691e14dc0935be2802f57fcf08fc44aac39709",
+      "signature": "ed25519:/4B+nZtx+op2nYbbmxlphd0zwZ5HDLknPVEfFgZLwtWQWCr1+udZh3D6PqMsCLP8TWoqR0t51jeA9VDCba7lDA==",
       "signature_file": "simplicio-macos-arm64.sig",
       "signature_algorithm": "ed25519",
       "sbom": {
@@ -56,11 +56,11 @@
     {
       "target": "macos-x64",
       "artifact": "simplicio-macos-x64",
-      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.0/simplicio-macos-x64",
-      "size": 63980960,
+      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.1/simplicio-macos-x64",
+      "size": 64318480,
       "checksum_file": "SHA256SUMS",
-      "sha256": "a572214d6ebd08ec79fa133f799634342f26b298423841e77a489790336284cf",
-      "signature": "ed25519:Mp8XaZ+LmZcgmSie+1fRIodYkfoYWYgG53zrbpr1HAURiRKpTacEaVii7azhFopY75m8QXywpnX6RX24WY4lAQ==",
+      "sha256": "3793625ea1ce312233515fcc0bfbc8955b13c07450589cbb72ecf74a9f81e15f",
+      "signature": "ed25519:CcylNE0+i/ZEyhQlh7p0ePwEZds5EGJdFZgCaIepYb+jY2V173ozpzfo/eXC5jMK3yB1Fu/PgTzVYhEWItuxCg==",
       "signature_file": "simplicio-macos-x64.sig",
       "signature_algorithm": "ed25519",
       "sbom": {
@@ -81,11 +81,11 @@
     {
       "target": "linux-x64",
       "artifact": "simplicio-linux-x64",
-      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.0/simplicio-linux-x64",
-      "size": 69136584,
+      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.1/simplicio-linux-x64",
+      "size": 69761736,
       "checksum_file": "SHA256SUMS",
-      "sha256": "36a359009acccb1b6c018eca9cefef158ffbb1d123753ef00473d603fac884db",
-      "signature": "ed25519:7HrSmk9wlW6Z6QsEYM6p28Z2TBeuX5iurI90fGQywVl02JTKI0bx4zTWSBnl5Jh7kRVmHKnxGzAGHHOcf6V2DQ==",
+      "sha256": "30a90fa2058acbfa45ff2fc4b4c497592e159fa2c0bec5de4e06596b17abd63d",
+      "signature": "ed25519:QJJHrmh4/Drqde0LV/TkiebI7YmtiAo3wOb1O6QE9AMS/3MwSPQzs1BIAcyA4hhqtihmEHx7lzYPb3oUkntKDw==",
       "signature_file": "simplicio-linux-x64.sig",
       "signature_algorithm": "ed25519",
       "sbom": {
@@ -106,11 +106,11 @@
     {
       "target": "windows-x64",
       "artifact": "simplicio-windows-x64.exe",
-      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.0/simplicio-windows-x64.exe",
-      "size": 100146688,
+      "url": "https://github.com/simpletibr/simplicio/releases/download/v3.10.1/simplicio-windows-x64.exe",
+      "size": 100695040,
       "checksum_file": "SHA256SUMS",
-      "sha256": "dd7e17304f3227626b203f2394413da6a52987689ac56eb2c09a8911052f78a7",
-      "signature": "ed25519:f89N7pbYLQj7WBKF6rMGoJB7jhLoqFc6bJstvdWseQLJgNNCNS8Tuiqsvx6U+PTYW/OLba/hJIXZXAxkr50LDg==",
+      "sha256": "b56bb47c26876963e94b133fae721f398d68c56b99c79a14e0989114128c80d4",
+      "signature": "ed25519:zyXesvEsk3FKh81hgPqe2YhoQxcUURfnunuEofhmWgFPMSQcyq7kACWumLSwRm7R2WqYHlHyZIaFMzwWjyQRBA==",
       "signature_file": "simplicio-windows-x64.exe.sig",
       "signature_algorithm": "ed25519",
       "sbom": {
