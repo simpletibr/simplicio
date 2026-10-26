@@ -1,0 +1,42 @@
+{
+ "create_mcp": {
+  "cost": 0.006307,
+  "in": 27076,
+  "out": 1610,
+  "reason": 1124,
+  "cache_read": 201728,
+  "wall_s": 36.73,
+  "messages": 12,
+  "tool_calls": 9
+ },
+ "create_native": {
+  "cost": 0.001438,
+  "in": 5290,
+  "out": 690,
+  "reason": 7,
+  "cache_read": 75520,
+  "wall_s": 9.17,
+  "messages": 7,
+  "tool_calls": 5
+ },
+ "edit_mcp": {
+  "cost": 0.002984,
+  "in": 11953,
+  "out": 1071,
+  "reason": 278,
+  "cache_read": 127104,
+  "wall_s": 40.37,
+  "messages": 8,
+  "tool_calls": 5
+ },
+ "edit_native": {
+  "cost": 0.002003,
+  "in": 3247,
+  "out": 1285,
+  "reason": 322,
+  "cache_read": 183936,
+  "wall_s": 30.15,
+  "messages": 13,
+  "tool_calls": 6
+ }
+}
