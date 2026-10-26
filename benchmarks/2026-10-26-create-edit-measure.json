@@ -1,0 +1,92 @@
+{
+ "schema": "simplicio.create-edit-measure/v1",
+ "measured_at": "2026-10-26T03:20:00-03:00",
+ "host": {
+  "os": "macos",
+  "arch": "arm64",
+  "cpu_count": 8
+ },
+ "fixture": {
+  "files": 66,
+  "note": "fixture-base + bench_target.rs"
+ },
+ "reps": {
+  "create": 5,
+  "edit": 5,
+  "measure": 3
+ },
+ "no_daemon": true,
+ "results": {
+  "create": {
+   "3.9.2": 0.06,
+   "3.10.2": 0.01,
+   "main": 0.01,
+   "no-simplicio": 0.0
+  },
+  "edit": {
+   "3.9.2": 2.79,
+   "3.10.2": 0.36,
+   "main": 0.36,
+   "no-simplicio": 0.02
+  },
+  "measure_s": {
+   "3.9.2": 0.09,
+   "3.10.2": 0.28,
+   "main": 0.26,
+   "no-simplicio": 0.09
+  },
+  "measure_bytes": {
+   "3.9.2": 13738,
+   "3.10.2": 28311,
+   "main": 28269,
+   "no-simplicio": 1191678
+  }
+ },
+ "ratios": {
+  "create": 6.0,
+  "edit": 7.75,
+  "measure_payload": 42.2
+ },
+ "regressions": [
+  {
+   "surface": "plan",
+   "3.9.2_s": 0.18,
+   "3.10.2_s": 0.48,
+   "main_s": 0.37,
+   "note": "identical ~1.97KB document"
+  },
+  {
+   "surface": "context",
+   "3.9.2_s": 0.09,
+   "3.10.2_s": 0.28,
+   "main_s": 0.26,
+   "note": "payload 13.7KB -> 28.3KB"
+  }
+ ],
+ "blockers": [
+  {
+   "id": "plan-regression",
+   "impact": "every routed task pays 0.2-0.3s before first tool call"
+  },
+  {
+   "id": "context-growth",
+   "impact": "2x orientation tokens"
+  },
+  {
+   "id": "auth-lockout",
+   "impact": "~2h lost; native tools blocked while MCP failed verification"
+  },
+  {
+   "id": "flaky-bin-tests",
+   "impact": "27 tests fail under parallel load -> --no-verify on every push"
+  },
+  {
+   "id": "jev",
+   "impact": "opencode/jev-1.13 needs OPENCODE_API_KEY; free backend rate-limited; not wired into plan"
+  },
+  {
+   "id": "build-time",
+   "impact": "cold codegen check 99.94s; 16 main_parts chunks left (68,226 lines)"
+  }
+ ]
+}
