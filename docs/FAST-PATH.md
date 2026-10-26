@@ -138,27 +138,27 @@ Rules:
 - Edit only non-generated files; `simplicio codegen sync --check` is the drift gate before verify.
 - Verify after regenerating, in the same turn.
 
-## No contract yet: never block the edit on the contract (measured)
+## No contract yet: infer it, but never block the edit on it (measured)
 
-Today `map` returns repository evidence (artifacts, symbols, cache state) — not a contract — and `codegen generate` requires an explicit `--schema`. Deriving a contract from repository evidence is tracked separately (#7793). Until that lands, the rule is still: **do not wait for the contract before changing code**.
+`simplicio codegen infer --repo . --lang <lang>` reads the repository through `simplicio_map` and writes a minimal TypeSpec contract to `.simplicio/codegen/inferred.tsp`, with `x-simplicio-source` provenance per declaration. On a 65-file repository it takes **0.79 s**; `codegen generate --schema .simplicio/codegen/inferred.tsp --lang <lang> --repo .` takes **0.32 s**.
 
 Measured on the same edit (one replace), process cold:
 
 | shape | time to first change | total |
 |---|---|---|
-| sequential: `map` (wait) then `edit` | **1.056 s** | 1.056 s |
-| interleaved: `map` in background, `edit` immediately | **0.551 s** | **0.677 s** |
+| sequential: infer -> generate -> edit | **1.50 s** | 1.50 s |
+| interleaved: infer in background, edit, then generate | **0.56 s** | **0.88 s** |
 
-The non-blocking shape nearly halves the time to the first useful change (**1.9x**) and cuts the total by 1.56x, because the map runs alongside the edit instead of in front of it.
+The non-blocking shape is **2.7x** faster to the first useful change and **1.7x** faster on the total.
 
 Flow when there is no contract:
 
-1. Start the contract source in the background — `map` today, the inferred contract when #7793 lands.
-2. Immediately `edit` the non-generated code (the actual change).
-3. When the contract source is ready, `codegen generate` (or `sync`) and `codegen sync --check` for drift.
+1. Start `codegen infer` in the background — it is the map -> contract step.
+2. Immediately `edit` the non-generated code; the edit never depends on the contract.
+3. When infer finishes, `codegen generate --schema .simplicio/codegen/inferred.tsp` and `codegen sync --check` for drift.
 4. Verify in the same turn.
 
-Never serialize a programming task behind contract generation: the edit does not depend on it, and the contract work is the long pole.
+Never serialize a programming task behind contract inference: the edit does not depend on it, and inferring is the long pole.
 
 ## CPU executor and the daemon (where the default actually applies)
 
