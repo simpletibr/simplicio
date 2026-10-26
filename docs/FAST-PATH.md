@@ -119,6 +119,39 @@ The ceremony costs **2.7x** more than the minimal path and produces the same res
 
 The floor for a known-file edit is therefore two calls and ~0.6 s of tool time, not five and ~1.7 s. The remaining cost is process startup and the governed baseline per call; the resident daemon is the designed lever for that, but `simplicio daemon start --detached` hangs in a script on this host (filed as a bug), so the flow above assumes no daemon.
 
+## Programming flows: codegen is mandatory (measured)
+
+Every programming task goes through the contract: **codegen first**, then edit only the non-generated code, then verify. Cost measured on the same task (add a field to the contract, regenerate, edit the impl, verify), median of 3:
+
+| arm | total |
+|---|---|
+| baseline (native hand-write, no codegen) | 0.091 s |
+| Simplicio 3.9.2 (codegen + edit + verify) | 2.897 s |
+| Simplicio 3.10.2 | 0.578 s |
+| Simplicio main | **0.570 s** |
+
+main is **5.1x** faster than 3.9.2 and **6.3x** above the native baseline. The gap is not codegen (0.01-0.17 s): it is process startup plus the governed baseline on every call. Codegen is the cheap step and it removes hand-written entity drift, so it stays mandatory.
+
+Rules:
+
+- A contract exists -> `simplicio codegen generate` (or `sync`) is step 1. Never hand-write a generated entity.
+- Edit only non-generated files; `simplicio codegen sync --check` is the drift gate before verify.
+- Verify after regenerating, in the same turn.
+
+## CPU executor and the daemon (where the default actually applies)
+
+| surface | path | executor |
+|---|---|---|
+| MCP `tools/call` | `mcp_cpu_dispatch` | **cpu_executor**, classified per tool |
+| CLI CPU-classified command | `dispatch_via_cpu_executor` | **cpu_executor** |
+| Daemon cold `get_map` / `get_anchor` / codegen-on-change / refresh | inline on the connection `std::thread` | **none** (bypasses the executor) |
+
+Source: `docs/DAEMON_EXECUTION_PATH.md` in the runtime repository. So the CPU executor is the default for **MCP and CLI**, but the daemon's four CPU-bound handlers still bypass it.
+
+That is exactly what a "CPU executor daemon" would fix, and the measurements support it: the CPU executor is never worse than Tokio on the scheduling axis (**WIN 4 / TIE 9 / LOSS 0** vs bounded Tokio, WIN 4 / TIE 8 / LOSS 1 vs spawn-blocking), and the resident transport measured **159 ms vs 183 ms** p50 on `list_tools` and 10.6 s vs 12.1 s on a cold `context` (TIE at n=7, 13 % better at p50). Moving those four handlers onto the executor keeps the warm state **and** adds admission, permits and bounded workers; it is not a second daemon, it is the existing daemon using the executor.
+
+Windows has no daemon arm at all (`Daemon server not supported on Windows (in-process fallback active)`), so there the CPU executor is the only path.
+
 ## The floor
 
 For a task that needs all of it - orient, narrow, create, edit, verify - the tool time on `main` today is **0.37 + 0.26 + 0.01 + 0.36 + 0.42 = ~1.4 s**. The agent loop around it (planning, tool calls, model latency) dominates: 23.7 s for the smallest task measured, 99 s when the model had to use MCP for a trivial one. The fastest flow is therefore the one that spends the fewest *agent turns*, not the fewest milliseconds: one orient, one edit, one verify, stop.
