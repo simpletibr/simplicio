@@ -7,7 +7,7 @@ The order below is the cheapest measured path to a delivered task. Every number 
 ```
 task arrives
    │
-   ├─ 0. classify (deterministic, 0.004 ms) ─────────────── lane?
+   ├─ 0. shape (deterministic, 0 tokens, 138 ms p50) ────── native? mcp? none?
    │
    ├─ A. greenfield, <=3 files, no navigation ──────────── native write + shell   (~24 s agent loop)
    ├─ B. known single file / small change ──────────────── read + edit            (~0.4 s tools)
@@ -22,7 +22,7 @@ task arrives
 
 | # | step | tool | measured cost | when |
 |---|---|---|---|---|
-| 0 | **classify** | `plan --mode decide` / router | **0.004 ms**, 0 tokens | always, before anything |
+| 0 | **shape** | `shape "<task>" --json` | **138 ms** p50 (local), 0 tokens; **215 ms** with JEV | always, before anything |
 | 1 | **orient** | `map` | **0.34-0.37 s**, 4.5 KB | repo unknown, or >10 files involved |
 | 2 | **narrow** | `context --term <t>` | **0.26-0.28 s**, 28.3 KB | instead of reading files; 42x less than `grep -rn` + `cat` (1.19 MB) |
 | 3 | **create** | `codegen generate --schema ... --lang ... --repo .` | **0.01 s**, 2 files | a contract (OpenAPI/JSON Schema/SQL DDL/TypeSpec) exists |
@@ -32,7 +32,7 @@ task arrives
 | 6 | **fan out** | CPU executor (`plan --agents N`, `benchmark mcp-cpu`) | **0.25-0.32 s** | >=2 independent units, no shared files |
 | 7 | **iterate** | loop (fast-path -> converge) | per-iteration = 0.4-0.6 s of tools | the evidence gate is not met on the first pass |
 | 8 | **prove** | video (hyperframes) | minutes (render) | only when the deliverable is visual |
-| 9 | **classify hard cases** | JEV | **unmeasured** (blocked) | only after rules + task_class abstain |
+| 9 | **classify hard cases** | JEV (inside `shape`) | **215 ms** p50 vs 138 ms local; +3.2 pp lane+risk on TEST | only after rules + task_class abstain, gated at p >= 0.8 |
 
 ## Task -> entry -> cost
 
@@ -196,6 +196,38 @@ Rule:
 | repeated turns on the same repository | **MCP** (cached prefix, reused orientation) |
 
 The MCP is a governance and navigation layer, not a speed layer for small edits. Choose by task shape.
+
+## Step 0: the shape selector (measured)
+
+`simplicio shape "<task>" --repo . --json` answers the question this document asks a human to answer: **which path**. One call, no model call, no tokens, and the same classifier the `build` pipeline acts on (rules -> change verbs -> task class -> optional JEV vote at p >= 0.8).
+
+```
+shape: plan/approval kind=modify via rules -> native
+why:  named change without a contract: the native write path measured 3.42x cheaper
+next: write the file, then run the verify command
+```
+
+Measured on the frozen TEST split of `docs/laya-eval/dataset.jsonl` (n=127), release build, one process per item, empty repository:
+
+| arm | lane | risk | lane+risk | p50 | p90 |
+|---|---|---|---|---|---|
+| local (`--no-jev`) | 111/127 = 87.4% | 105/127 = 82.7% | 93/127 = 73.2% | **138 ms** | **227 ms** |
+| with JEV | **112/127 = 88.2%** | **108/127 = 85.0%** | **97/127 = 76.4%** | 215 ms | 647 ms |
+| published rules-only baseline | 87.4% | 82.7% | 73.2% | — | — |
+
+The local arm reproduces the frozen baseline exactly — the selector does not move it, it only makes the decision explicit and cheap. JEV reaches the model on 50 of 127 requests, clears the 0.8 cutoff on 28, and improves **4 items with 0 regressions**: one lane correction (manifest wiring is codegen) and three risk escalations to `block` on destructive text (`delete the database`, `dd if=… of=/dev/sda`, `Drop the users table`). No dangerous error in either arm.
+
+Rule the selector applies to `shape`:
+
+| situation | shape |
+|---|---|
+| named change, no contract | `native` |
+| a contract exists, or the codegen lane | `mcp` |
+| model filled a change verb | `mcp` (the shape is unproven) |
+| model said read/plan at p >= 0.8 | `native` |
+| model vote under 0.8, or nothing decided | `mcp` / `none` |
+
+Full report: `benchmarks/2026-10-26-shape-selector.md`.
 
 ## The floor
 
