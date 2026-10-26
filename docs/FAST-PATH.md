@@ -99,6 +99,26 @@ The MCP twins are the same operations with the same contracts: `simplicio_contex
 4. **JEV**: needs `OPENCODE_API_KEY` (or typesafe/openrouter), an install, and a measured p50/accuracy before it can be the last hop of step 0.
 5. **Flaky bin tests**: the verify step must be trustworthy without `--no-verify`.
 
+## The fastest complete flow is the one with the fewest calls (measured)
+
+Same edit (one replace in one file), three call shapes, cold process each:
+
+| shape | calls | measured total |
+|---|---|---|
+| **edit + verify** (known file) | 2 | **0.642 s** |
+| map + edit (unknown tree) | 2 | 1.008 s |
+| plan + map + context + edit + verify (ceremony) | 5 | **1.731 s** |
+
+The ceremony costs **2.7x** more than the minimal path and produces the same result. So:
+
+- **Skip `plan`** unless the lane is genuinely ambiguous (multi-unit, shared writes, release). For a concrete edit it changes nothing: the plan document is identical to 3.9.2's, and it costs 0.28-0.85 s.
+- **Skip `map`** when you already know the file. Use it only for an unknown tree or more than ten files.
+- **Skip `context`** when the map already names the file — one `edit` on that path is enough.
+- **Do not fold verification into `edit --check`**: it added 0.7-1.9 s on a trivial check, more than a separate shell call (0.02 s).
+- **Verify with the cheapest runner that proves the change** (a shell command, not the 0.42 s benchmark suite).
+
+The floor for a known-file edit is therefore two calls and ~0.6 s of tool time, not five and ~1.7 s. The remaining cost is process startup and the governed baseline per call; the resident daemon is the designed lever for that, but `simplicio daemon start --detached` hangs in a script on this host (filed as a bug), so the flow above assumes no daemon.
+
 ## The floor
 
 For a task that needs all of it - orient, narrow, create, edit, verify - the tool time on `main` today is **0.37 + 0.26 + 0.01 + 0.36 + 0.42 = ~1.4 s**. The agent loop around it (planning, tool calls, model latency) dominates: 23.7 s for the smallest task measured, 99 s when the model had to use MCP for a trivial one. The fastest flow is therefore the one that spends the fewest *agent turns*, not the fewest milliseconds: one orient, one edit, one verify, stop.
