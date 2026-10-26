@@ -27,7 +27,8 @@ task arrives
 | 2 | **narrow** | `context --term <t>` | **0.26-0.28 s**, 28.3 KB | instead of reading files; 42x less than `grep -rn` + `cat` (1.19 MB) |
 | 3 | **create** | `codegen generate --schema ... --lang ... --repo .` | **0.01 s**, 2 files | a contract (OpenAPI/JSON Schema/SQL DDL/TypeSpec) exists |
 | 4 | **edit** | `edit '<plan>' --repo . --json` | **0.36 s**, byte-identical result | any mechanical change; 7.75x faster than 3.9.2 |
-| 5 | **verify** | `shell` / `simplicio exec` / `benchmark run` | **0.01 s** local shell · **0.42 s** benchmark suite | after every change, same turn |
+| 5 | **verify** | `shell` / `exec` / `benchmark run` | **0.01 s** local shell · **0.42 s** benchmark suite | after every change, same turn |
+| 5b | **run a Runtime surface** | `exec "<subcommand>"` | inherits the subcommand (0.01-0.4 s) | a Runtime command is needed and only a command string is available |
 | 6 | **fan out** | CPU executor (`plan --agents N`, `benchmark mcp-cpu`) | **0.25-0.32 s** | >=2 independent units, no shared files |
 | 7 | **iterate** | loop (fast-path -> converge) | per-iteration = 0.4-0.6 s of tools | the evidence gate is not met on the first pass |
 | 8 | **prove** | video (hyperframes) | minutes (render) | only when the deliverable is visual |
@@ -85,6 +86,10 @@ simplicio loop ...
 ```
 
 The MCP twins are the same operations with the same contracts: `simplicio_context`, `simplicio_map`, `simplicio_codegen`, `simplicio_edit`, `simplicio_exec`, `simplicio_run`.
+
+### `exec` — the gated router
+
+`simplicio exec "<subcommand>"` runs a Runtime subcommand through the gate: no raw shell, no shell expansion, the argv is a Runtime command. It is the right call when a step needs a Runtime surface (`map`, `context`, `edit`, `codegen`, `benchmark`) but the caller only has a string — for example from an agent that cannot spawn processes directly. It is not a shell: use the native shell for arbitrary local commands (`pytest`, `cargo`, `git`), and `simplicio_exec` (MCP, `kind=argv`) when the host profile blocks native tools; that lane is restricted to `git`, `gh`, `cargo`, `python`, `python3`, `npm`, `pytest`.
 
 ## What still has to be fixed for this to be the fastest
 
