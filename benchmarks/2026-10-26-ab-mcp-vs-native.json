@@ -1,0 +1,64 @@
+{
+ "schema": "simplicio.ab-benchmark/v1",
+ "measured_at": "2026-10-26T00:40:00-03:00",
+ "host": "macos-arm64",
+ "model": {
+  "id": "deepseek-v4.1-flash",
+  "provider": "opencode-go",
+  "variant": "high"
+ },
+ "task": {
+  "kind": "greenfield-micro",
+  "files_seeded": 3,
+  "tests_seeded": 5,
+  "tests_required": 7,
+  "verification": "python3 -m pytest slug -q == 7 passed",
+  "identical_outcome": true
+ },
+ "arms": {
+  "mcp": {
+   "session": "ses_e89c0353dffe78iEobKgG9v7vq",
+   "cost_usd": 0.007769634,
+   "tokens_input": 15875,
+   "tokens_output": 3788,
+   "tokens_reasoning": 2840,
+   "tokens_cache_read": 470528,
+   "tokens_cache_write": 0,
+   "wall_s": 99.01,
+   "messages": 22,
+   "tool_calls_total": 19,
+   "resident_peak_rss_mb": 328.6,
+   "server_cpu_time_s": 13.58
+  },
+  "native": {
+   "session": "ses_e89bea0faffeYfDGnqRrMr50w4",
+   "cost_usd": 0.001760988,
+   "tokens_input": 2930,
+   "tokens_output": 973,
+   "tokens_reasoning": 553,
+   "tokens_cache_read": 135296,
+   "tokens_cache_write": 0,
+   "wall_s": 23.69,
+   "messages": 10,
+   "tool_calls_total": 8,
+   "tool_calls": {
+    "read": 3,
+    "shell": 2,
+    "write": 2,
+    "edit": 1
+   },
+   "resident_peak_rss_mb": 0,
+   "server_cpu_time_s": 0
+  }
+ },
+ "ratios": {
+  "cost": 4.41,
+  "wall": 4.18,
+  "input_tokens": 5.42,
+  "output_tokens": 3.89,
+  "reasoning_tokens": 5.14,
+  "cache_read": 3.48,
+  "tool_calls": 2.38
+ },
+ "scope": "greenfield micro-task; does not measure repository-navigation tasks where bounded context applies"
+}
