@@ -1,0 +1,10 @@
+version	metric	rep	exit	wall_s	maxrss_mb	bytes	files
+3.9.2	codegen	1	0	0.10	9.6	297	2
+3.9.2	codegen	2	0	0.06	9.6	297	2
+3.9.2	codegen	3	0	0.06	9.6	297	2
+3.10.2	codegen	1	0	0.01	9.2	299	2
+3.10.2	codegen	2	0	0.01	9.2	299	2
+3.10.2	codegen	3	0	0.01	9.2	299	2
+main	codegen	1	0	0.02	9.3	295	2
+main	codegen	2	0	0.01	9.3	295	2
+main	codegen	3	0	0.01	9.3	295	2
