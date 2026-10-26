@@ -1,0 +1,87 @@
+{
+ "mcp": {
+  "creation": {
+   "cost": 0.004773042,
+   "in": 14003,
+   "out": 1915,
+   "reason": 1219,
+   "cache_read": 264064,
+   "wall_s": 68.14,
+   "wall": {
+    "msgs": 13,
+    "turns": 12,
+    "active_s": 67.97,
+    "span_s": 68.12
+   }
+  },
+  "edition": {
+   "cost": 0.0022247640000000006,
+   "in": 3006,
+   "out": 1060,
+   "reason": 1003,
+   "cache_read": 178688,
+   "wall_s": 47.75,
+   "wall": {
+    "msgs": 9,
+    "turns": 6,
+    "active_s": 33.55,
+    "span_s": 47.75
+   }
+  },
+  "session_total": {
+   "cost": 0.0069978060000000005,
+   "in": 17009,
+   "out": 2975,
+   "reason": 2222,
+   "cache_read": 442752,
+   "wall_s": 115.89,
+   "tool_calls": {
+    "execute": 16
+   }
+  }
+ },
+ "native": {
+  "creation": {
+   "cost": 0.0007999619999999999,
+   "in": 1323,
+   "out": 508,
+   "reason": 99,
+   "cache_read": 79104,
+   "wall_s": 8.49,
+   "wall": {
+    "msgs": 6,
+    "turns": 5,
+    "active_s": 8.41,
+    "span_s": 8.47
+   }
+  },
+  "edition": {
+   "cost": 0.001245366,
+   "in": 1973,
+   "out": 861,
+   "reason": 34,
+   "cache_read": 137472,
+   "wall_s": 87.08,
+   "wall": {
+    "msgs": 11,
+    "turns": 8,
+    "active_s": 13.19,
+    "span_s": 87.08
+   }
+  },
+  "session_total": {
+   "cost": 0.002045328,
+   "in": 3296,
+   "out": 1369,
+   "reason": 133,
+   "cache_read": 216576,
+   "wall_s": 95.58,
+   "tool_calls": {
+    "read": 3,
+    "shell": 3,
+    "write": 2,
+    "edit": 4
+   }
+  }
+ }
+}
