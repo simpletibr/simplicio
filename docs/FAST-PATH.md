@@ -174,6 +174,29 @@ That is exactly what a "CPU executor daemon" would fix, and the measurements sup
 
 Windows has no daemon arm at all (`Daemon server not supported on Windows (in-process fallback active)`), so there the CPU executor is the only path.
 
+## Creation and edition: measured A/B (with vs without the MCP)
+
+Same task, same model, same host, four sessions: creation (3-file module) then edition (add a function + 2 tests), each arm in its own repository.
+
+| phase | MCP cost | native cost | MCP wall | native wall |
+|---|---|---|---|---|
+| creation | 0.006307 | **0.001438** | 36.73 s | **9.17 s** |
+| edition | 0.002984 | **0.002003** | 40.37 s | **30.15 s** |
+| both | 0.009291 | **0.003441** | 77.10 s | **39.32 s** |
+
+Native wins both phases: **4.4x** cheaper and **4.0x** faster on creation, **1.49x** and **1.34x** on edition, **2.70x** and **1.96x** overall. The edition gap narrows because the second phase reuses the shape of the first (fewer messages, less cache read). Both arms produced the same artifacts (3 passed, then 5 passed).
+
+Rule:
+
+| situation | path |
+|---|---|
+| create or edit 1-3 files in a known layout | **native** |
+| unfamiliar tree, >10 files, or a contract to derive | **MCP** (map/context/codegen) |
+| governed write, receipt, drift gate, or audit trail | **MCP** |
+| repeated turns on the same repository | **MCP** (cached prefix, reused orientation) |
+
+The MCP is a governance and navigation layer, not a speed layer for small edits. Choose by task shape.
+
 ## The floor
 
 For a task that needs all of it - orient, narrow, create, edit, verify - the tool time on `main` today is **0.37 + 0.26 + 0.01 + 0.36 + 0.42 = ~1.4 s**. The agent loop around it (planning, tool calls, model latency) dominates: 23.7 s for the smallest task measured, 99 s when the model had to use MCP for a trivial one. The fastest flow is therefore the one that spends the fewest *agent turns*, not the fewest milliseconds: one orient, one edit, one verify, stop.
