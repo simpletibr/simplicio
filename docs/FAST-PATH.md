@@ -138,6 +138,28 @@ Rules:
 - Edit only non-generated files; `simplicio codegen sync --check` is the drift gate before verify.
 - Verify after regenerating, in the same turn.
 
+## No contract yet: never block the edit on the contract (measured)
+
+Today `map` returns repository evidence (artifacts, symbols, cache state) — not a contract — and `codegen generate` requires an explicit `--schema`. Deriving a contract from repository evidence is tracked separately (#7793). Until that lands, the rule is still: **do not wait for the contract before changing code**.
+
+Measured on the same edit (one replace), process cold:
+
+| shape | time to first change | total |
+|---|---|---|
+| sequential: `map` (wait) then `edit` | **1.056 s** | 1.056 s |
+| interleaved: `map` in background, `edit` immediately | **0.551 s** | **0.677 s** |
+
+The non-blocking shape nearly halves the time to the first useful change (**1.9x**) and cuts the total by 1.56x, because the map runs alongside the edit instead of in front of it.
+
+Flow when there is no contract:
+
+1. Start the contract source in the background — `map` today, the inferred contract when #7793 lands.
+2. Immediately `edit` the non-generated code (the actual change).
+3. When the contract source is ready, `codegen generate` (or `sync`) and `codegen sync --check` for drift.
+4. Verify in the same turn.
+
+Never serialize a programming task behind contract generation: the edit does not depend on it, and the contract work is the long pole.
+
 ## CPU executor and the daemon (where the default actually applies)
 
 | surface | path | executor |
