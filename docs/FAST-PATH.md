@@ -176,15 +176,15 @@ Windows has no daemon arm at all (`Daemon server not supported on Windows (in-pr
 
 ## Creation and edition: measured A/B (with vs without the MCP)
 
-Same task, same model, same host, four sessions: creation (3-file module) then edition (add a function + 2 tests), each arm in its own repository.
+Same task, same model, same host, **two sessions** (one per arm): each session creates a 3-file module and then edits it (add a function + 2 tests). Billing is per phase inside the session (edition = state after phase 2 minus the snapshot between the phases); wall is active turn time.
 
-| phase | MCP cost | native cost | MCP wall | native wall |
+| phase | MCP cost | native cost | MCP active | native active |
 |---|---|---|---|---|
-| creation | 0.006307 | **0.001438** | 36.73 s | **9.17 s** |
-| edition | 0.002984 | **0.002003** | 40.37 s | **30.15 s** |
-| both | 0.009291 | **0.003441** | 77.10 s | **39.32 s** |
+| creation | 0.004773 | **0.000800** | 67.97 s | **8.41 s** |
+| edition | 0.002225 | **0.001245** | 33.55 s | **13.19 s** |
+| both | 0.006998 | **0.002045** | 101.52 s | **21.60 s** |
 
-Native wins both phases: **4.4x** cheaper and **4.0x** faster on creation, **1.49x** and **1.34x** on edition, **2.70x** and **1.96x** overall. The edition gap narrows because the second phase reuses the shape of the first (fewer messages, less cache read). Both arms produced the same artifacts (3 passed, then 5 passed).
+Native wins both phases: **5.97x** cheaper and **8.08x** faster on creation, **1.79x** and **2.54x** on edition, **3.42x** and **4.70x** over the session. The edition gap is 3.2x smaller than the creation gap because the second phase reuses the shape of the first (fewer turns, fewer tool calls, less cache read), which is the measured case for the MCP on repeated turns. Both arms produced the same artifacts (3 passed, then 5 passed).
 
 Rule:
 
