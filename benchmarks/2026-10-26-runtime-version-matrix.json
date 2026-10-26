@@ -1,0 +1,364 @@
+{
+ "schema": "simplicio.version-matrix-benchmark/v1",
+ "measured_at": "2026-10-26T02:30:00-03:00",
+ "host": {
+  "os": "macos",
+  "arch": "arm64",
+  "cpu_count": 8
+ },
+ "fixture": {
+  "files": 65,
+  "rust_files": 56,
+  "source": "crates/simplicio-memory, crates/simplicio-edit, src/version_provenance.rs"
+ },
+ "binaries": {
+  "3.9.2": "signed release v3.9.2",
+  "3.10.2": "signed release v3.10.2",
+  "main": "local build 8883ddc73 (release profile)"
+ },
+ "reps": 3,
+ "no_daemon": true,
+ "results": {
+  "3.9.2": {
+   "map": {
+    "wall_s": 4.45,
+    "rss_mb": 38.9,
+    "bytes": 22672,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "context": {
+    "wall_s": 0.08,
+    "rss_mb": 14.6,
+    "bytes": 2121,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "plan": {
+    "wall_s": 0.18,
+    "rss_mb": 23.4,
+    "bytes": 1975,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "codegen": {
+    "wall_s": 0.06,
+    "rss_mb": 9.6,
+    "bytes": 297,
+    "files": 2
+   },
+   "bench_run": {
+    "wall_s": 2.8,
+    "rss_mb": 14.0,
+    "bytes": 477,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "mcp_cpu": {
+    "wall_s": 2.73,
+    "rss_mb": 27.2,
+    "bytes": 19867,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "context2": {
+    "wall_s": 0.09,
+    "rss_mb": 16.8,
+    "bytes": 13748,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "codegen2": {
+    "wall_s": 0.06,
+    "rss_mb": 10.1,
+    "bytes": 299,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "generated_files": {
+    "wall_s": null,
+    "rss_mb": null,
+    "bytes": 168,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  },
+  "3.10.2": {
+   "map": {
+    "wall_s": 0.34,
+    "rss_mb": 34.3,
+    "bytes": 4529,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "context": {
+    "wall_s": 0.19,
+    "rss_mb": 31.8,
+    "bytes": 6611,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "plan": {
+    "wall_s": 0.48,
+    "rss_mb": 21.5,
+    "bytes": 1977,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "codegen": {
+    "wall_s": 0.01,
+    "rss_mb": 9.2,
+    "bytes": 299,
+    "files": 2
+   },
+   "bench_run": {
+    "wall_s": 0.42,
+    "rss_mb": 17.0,
+    "bytes": 477,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "mcp_cpu": {
+    "wall_s": 0.32,
+    "rss_mb": 27.3,
+    "bytes": 19852,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "context2": {
+    "wall_s": 0.18,
+    "rss_mb": 29.4,
+    "bytes": 28311,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "codegen2": {
+    "wall_s": 0.33,
+    "rss_mb": 14.7,
+    "bytes": 0,
+    "exits": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "generated_files": {
+    "wall_s": null,
+    "rss_mb": null,
+    "bytes": 171,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  },
+  "main": {
+   "map": {
+    "wall_s": 0.37,
+    "rss_mb": 34.7,
+    "bytes": 4514,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "context": {
+    "wall_s": 0.21,
+    "rss_mb": 32.8,
+    "bytes": 6599,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "plan": {
+    "wall_s": 0.37,
+    "rss_mb": 21.7,
+    "bytes": 1973,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "codegen": {
+    "wall_s": 0.01,
+    "rss_mb": 9.3,
+    "bytes": 295,
+    "files": 2
+   },
+   "bench_run": {
+    "wall_s": 0.46,
+    "rss_mb": 17.4,
+    "bytes": 477,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "mcp_cpu": {
+    "wall_s": 0.25,
+    "rss_mb": 26.7,
+    "bytes": 19867,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "context2": {
+    "wall_s": 0.18,
+    "rss_mb": 30.3,
+    "bytes": 28299,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "codegen2": {
+    "wall_s": 0.27,
+    "rss_mb": 15.1,
+    "bytes": 0,
+    "exits": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "generated_files": {
+    "wall_s": null,
+    "rss_mb": null,
+    "bytes": 171,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  },
+  "no-simplicio": {
+   "file_list": {
+    "wall_s": 0.0,
+    "rss_mb": 1.9,
+    "bytes": 7544,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "grep_term": {
+    "wall_s": 0.01,
+    "rss_mb": 1.9,
+    "bytes": 0,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "read_matches": {
+    "wall_s": 0.01,
+    "rss_mb": 1.9,
+    "bytes": 0,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "grep_term2": {
+    "wall_s": 0.01,
+    "rss_mb": 1.9,
+    "bytes": 161889,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "read_matches2": {
+    "wall_s": 0.07,
+    "rss_mb": 1.9,
+    "bytes": 1038379,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  }
+ },
+ "jev": {
+  "plugin_installed": false,
+  "backends": {
+   "opencode-free": {
+    "model": "jev-1.13-free",
+    "ready": true,
+    "rate_limited": true
+   },
+   "opencode": {
+    "model": "jev-1.13",
+    "ready": false,
+    "reason": "OPENCODE_API_KEY missing"
+   },
+   "typesafe": {
+    "ready": false,
+    "reason": "key missing"
+   },
+   "openrouter": {
+    "ready": false,
+    "reason": "key missing"
+   }
+  },
+  "in_fast_path": false,
+  "note": "docs/PLUGIN_JEV.md: routing wiring lands in a separate change; plan JSON has no jev field"
+ }
+}
