@@ -1,0 +1,35 @@
+{
+ "rounds": 3,
+ "daemon_start_ms": [
+  457.6,
+  449.3,
+  341.1
+ ],
+ "medians": {
+  "daemon_off": {
+   "generate_react": 207.1,
+   "map_cold": 213.0,
+   "map_warm": 177.5,
+   "context_term": 195.4,
+   "regenerate_react": 258.5,
+   "shape": 165.6,
+   "total_ms": 1217.1
+  },
+  "daemon_on": {
+   "generate_react": 195.9,
+   "map_cold": 286.4,
+   "map_warm": 210.5,
+   "context_term": 74.1,
+   "regenerate_react": 262.8,
+   "shape": 177.5,
+   "total_ms": 1207.2
+  }
+ },
+ "delta_pct": -0.8,
+ "mcp_cpu": {
+  "ms": 286.1,
+  "exit": 0,
+  "out": "{\n  \"schema\": \"simplicio.mcp-cpu-benchmark/v1\",\n  \"rows\": [\n    {\n      \"temperature\": \"cold\",\n      \"workload\": \"tiny\",\n      \"slots\": 1,\n      \"p50_us\": 113578,\n      \"p95_us\": 113578,\n      \"throughput_calls_per_sec\": 8.796915533987551,\n      \"cpu_percent\": {\n        \"value\": 34,\n        \"unavailable_reason\": null\n      },\n      \"rss_bytes\": {\n        \"value\": null,\n        \"unavailable_reason\": \"process_rss_probe_unavailable_on_platform\"\n      },\n      \"queue_wait_p50_us\": {\n        \"value\": 376,\n        \"unavailable_reason\": null\n      },\n      \"coalesced_calls\": 0,\n      \"deterministic_digest\": \"sha256:7fa7e24e8eb96bc8b341b70d8a0ebb9b34cde8def68871ceb6bc18e71b1f000d\"\n    },\n    {\n      \"temperature\": \"cold\",\n      \"workload\": \"tiny\",\n      \"slots\": 5,\n      \"p50_us\": 343,\n      \"p95_us\": 372,\n      \"throughput_calls_per_sec\": 6142.506142506142,\n      \"cpu_percent\": {\n        \"value\": 34,\n        \"unavailable_reason\": null\n      },\n      \"rss_bytes\": {\n        \"value\": null,\n        \"unavailable_reason\": \"process_rss_probe_unavailable_on_platform\"\n      },\n      \"queue_wait_p50_us\": {\n        \"value\": 123,\n        \"unavailable_reason\": null\n      },\n      \"coalesced_calls\": 0,\n      \"deterministic_digest\": \"sha256:2afc6c6b1f03e7b7152a2f63c6bdeaae691e12de935571a0b432586a171ba9d6\"\n    },\n    {\n      \"temperature\": \"cold\",\n      \"workload\": \"tiny\",\n      \"slots\": 10,\n      \"p50_us\": 326,\n      \"p95_us\": 516,\n      \"throughput_calls_per_sec\": 7960.458809003915,\n      \"cpu_percent\": {\n        \"value\": 34,\n        \"unavailable_reason\": null\n      },\n      \"rss_bytes\": {\n        \"value\": null,\n        \"unavailable_reason\": \"process_rss_probe_unavailable_on_platform\"\n      },\n      \"queue_wait_p50_us\": {\n        \"value\": 29,\n        \"unavailable_reason\": null\n      },\n    ",
+  "err": ""
+ }
+}

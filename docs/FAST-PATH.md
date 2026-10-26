@@ -186,6 +186,8 @@ Same task, same model, same host, **two sessions** (one per arm): each session c
 
 Native wins both phases: **5.97x** cheaper and **8.08x** faster on creation, **1.79x** and **2.54x** on edition, **3.42x** and **4.70x** over the session. The edition gap is 3.2x smaller than the creation gap because the second phase reuses the shape of the first (fewer turns, fewer tool calls, less cache read), which is the measured case for the MCP on repeated turns. Both arms produced the same artifacts (3 passed, then 5 passed).
 
+That comparison is the *model editing files*. When a contract exists, the third path beats both by two orders of magnitude: `codegen` creates 16-27 files in **96-235 ms** and regenerates 9-22 files after a contract change in **110-223 ms**, with **0 tokens**. Full numbers and method: `benchmarks/2026-10-26-codegen-create-edit.md`.
+
 Rule:
 
 | situation | path |
@@ -196,6 +198,10 @@ Rule:
 | repeated turns on the same repository | **MCP** (cached prefix, reused orientation) |
 
 The MCP is a governance and navigation layer, not a speed layer for small edits. Choose by task shape.
+
+## The full flow, in one page
+
+`docs/FLOW.md` is the end-to-end flow (nine steps, what to use and what to skip, with the measured cost of each layer). The short version: **contract -> codegen -> implement the one seam -> change the contract to change code**, with `shape` choosing that path in one zero-token call.
 
 ## Step 0: the shape selector (measured)
 
