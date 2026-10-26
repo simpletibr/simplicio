@@ -1,0 +1,3454 @@
+[
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "gere o cliente TypeScript a partir do openapi.yaml",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "verb": "gere",
+  "lang": "typescript",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "generate a Python client",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "generate",
+  "lang": "python",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "gere o cliente em Go",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "gere",
+  "entity": "Go",
+  "lang": "go",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "generate java models",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "generate",
+  "lang": "java",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "regenerate backend contracts, preserving .impl hooks",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "regenerate",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "regenerate frontend hooks and forms",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "regenerate",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "regenerate synthesized tests",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "regenerate",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "regenerate documentation",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "regenerate",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "commit the extracted contract as the source of truth",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.51,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 448.2,
+   "probabilities": {
+    "lane": [
+     0.51,
+     0.47,
+     0.02
+    ],
+    "risk": [
+     0.06,
+     0.77,
+     0.17
+    ],
+    "tier": [
+     0.53,
+     0.29,
+     0.18
+    ]
+   }
+  },
+  "elapsed_ms": 478
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "run: simplicio codegen boundary",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 18
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Generate typed clients and models from the schema, not schema-hash stubs",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "verb": "generate",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Emit .impl extension hooks next to the @generated files",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Emit",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.64,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 355.9,
+   "probabilities": {
+    "lane": [
+     0.64,
+     0.35,
+     0.01
+    ],
+    "risk": [
+     0.7,
+     0.27,
+     0.03
+    ],
+    "tier": [
+     0.55,
+     0.34,
+     0.11
+    ]
+   }
+  },
+  "elapsed_ms": 372
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "When a bound schema changes, regenerate the bound outputs automatically with no LLM, verify and write a receipt",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "verb": "regenerate",
+  "entity": "When",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Make the Go emitter generate a typed client instead of the SchemaSHA256 stub",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "verb": "generate",
+  "entity": "Go",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Render an embedded template pack into a new directory with codegen new and keep a receipt",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "entity": "Render",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 17
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Check every bound generated file for drift against its schema",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "task_class",
+  "reason_code": "TASK_CLASS",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "entity": "Check",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Gere um jogo de dama com codegen a partir de um contrato OpenAPI",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "verb": "gere",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Generate a deterministic mock server from the API contract",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "none",
+  "verb": "generate",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Wire the package manifests (Cargo.toml, package.json) for the generated code idempotently",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Wire",
+  "files": [
+   "Cargo.toml"
+  ],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "confidence": 0.81,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 376.9,
+   "probabilities": {
+    "lane": [
+     0.81,
+     0.19,
+     0.0
+    ],
+    "risk": [
+     0.72,
+     0.26,
+     0.02
+    ],
+    "tier": [
+     0.23,
+     0.58,
+     0.19
+    ]
+   }
+  },
+  "elapsed_ms": 395
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "simplicio codegen templates --stack rust --json true",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "auto",
+  "kind": "generate",
+  "task_class": "codegen",
+  "lang": "rust",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 17
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Mostra o que mudou entre o c\u00f3digo gerado e o contrato, sem escrever nada",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Mostra",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.52,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 389.8,
+   "probabilities": {
+    "lane": [
+     0.47,
+     0.52,
+     0.01
+    ],
+    "risk": [
+     0.51,
+     0.33,
+     0.16
+    ],
+    "tier": [
+     0.46,
+     0.31,
+     0.23
+    ]
+   }
+  },
+  "elapsed_ms": 410
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Generate SQL migrations from schema.sql",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "codegen",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "verb": "generate",
+  "files": [],
+  "shape": "mcp",
+  "why": "codegen lane without a named contract: infer one from the map first",
+  "next": "simplicio codegen infer --repo .  (then generate + sync --check)",
+  "gate": "deterministic",
+  "elapsed_ms": 20
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Write the code for feature X across 10 files",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Write",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.74,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 422.7,
+   "probabilities": {
+    "lane": [
+     0.25,
+     0.74,
+     0.01
+    ],
+    "risk": [
+     0.4,
+     0.51,
+     0.09
+    ],
+    "tier": [
+     0.03,
+     0.27,
+     0.7
+    ]
+   }
+  },
+  "elapsed_ms": 442
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Fix the F# client for a void operation that fails to compile (FS0792 in task { ... ignore data })",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 17
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Fix recursive $ref emitting uncompilable Rust and Go models",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "entity": "Go",
+  "lang": "rust",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Crie pacotes de template por arquitetura e apps prontos nas 13 stacks principais",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "create",
+  "task_class": "none",
+  "verb": "crie",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 21
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Merge the codegen PR",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "task_class",
+  "reason_code": "TASK_CLASS",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "entity": "Merge",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Fa\u00e7a o merge do PR de codegen depois que os checks passarem",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "task_class",
+  "reason_code": "TASK_CLASS",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "entity": "Fa",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 18
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Publish the codegen recipe pack to the registry",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "task_class",
+  "reason_code": "TASK_CLASS",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "entity": "Publish",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Evaluate CodePlan for coordinated model-op regeneration",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Evaluate",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.66,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 404.4,
+   "probabilities": {
+    "lane": [
+     0.33,
+     0.66,
+     0.01
+    ],
+    "risk": [
+     0.16,
+     0.67,
+     0.17
+    ],
+    "tier": [
+     0.11,
+     0.34,
+     0.55
+    ]
+   }
+  },
+  "elapsed_ms": 424
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "What is codegen?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "codegen",
+  "entity": "What",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 18
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Qual a diferen\u00e7a entre gerar c\u00f3digo e escrever c\u00f3digo \u00e0 m\u00e3o?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "verb": "gerar",
+  "entity": "Qual",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "what are your opening hours?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "qual e a diferenca entre clone e copy?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "bom dia, td bem?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "oi, td bem?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 18
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "obrigado",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "como vc est\u00e1?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "what do you do?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 32
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "qual o pre\u00e7o do d\u00f3lar hoje",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "como funciona",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 22
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Explain how SQL injection works with a practical example",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Explain",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "quanto economiza o Simplicio?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "skip",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Simplicio",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "confidence": 0.95,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 536.1,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.05,
+     0.95
+    ],
+    "risk": [
+     0.63,
+     0.26,
+     0.11
+    ],
+    "tier": [
+     0.81,
+     0.13,
+     0.06
+    ]
+   }
+  },
+  "elapsed_ms": 557
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Good morning",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Good",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Ok, entendi",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "skip",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Ok",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 357.9,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "risk": [
+     0.74,
+     0.24,
+     0.02
+    ],
+    "tier": [
+     0.97,
+     0.02,
+     0.01
+    ]
+   }
+  },
+  "elapsed_ms": 378
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "What is a JWT?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "question",
+  "entity": "What",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 17
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "O que \u00e9 um ponteiro em C?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "question",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 17
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "qual a arquitetura do projeto?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.76,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 454.0,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.76,
+     0.24
+    ],
+    "risk": [
+     0.61,
+     0.33,
+     0.06
+    ],
+    "tier": [
+     0.61,
+     0.22,
+     0.17
+    ]
+   }
+  },
+  "elapsed_ms": 473
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "como o simplicio-runtime funciona por dentro?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.6,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 454.9,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.6,
+     0.4
+    ],
+    "risk": [
+     0.82,
+     0.14,
+     0.04
+    ],
+    "tier": [
+     0.2,
+     0.44,
+     0.36
+    ]
+   }
+  },
+  "elapsed_ms": 473
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "how does it work",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "what is the status of the build?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "question",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "what is the version",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "question",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 11
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "list all files in the project",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "list all open pull requests",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 24
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "list capabilities",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "why did it fail?",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "skip",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "check this url",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.71,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 470.0,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.71,
+     0.29
+    ],
+    "risk": [
+     0.13,
+     0.7,
+     0.17
+    ],
+    "tier": [
+     0.72,
+     0.11,
+     0.17
+    ]
+   }
+  },
+  "elapsed_ms": 488
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "find the latest tokio version on crates.io",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "skip",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "confidence": 0.89,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 382.0,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.11,
+     0.89
+    ],
+    "risk": [
+     0.96,
+     0.03,
+     0.01
+    ],
+    "tier": [
+     0.69,
+     0.16,
+     0.15
+    ]
+   }
+  },
+  "elapsed_ms": 401
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "find the latest release on github",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.69,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 371.5,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.31,
+     0.69
+    ],
+    "risk": [
+     0.94,
+     0.05,
+     0.01
+    ],
+    "tier": [
+     0.61,
+     0.18,
+     0.21
+    ]
+   }
+  },
+  "elapsed_ms": 390
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "check CVE-2024-1234 against our deps",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.99,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 352.5,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.99,
+     0.01
+    ],
+    "risk": [
+     0.78,
+     0.2,
+     0.02
+    ],
+    "tier": [
+     0.38,
+     0.36,
+     0.26
+    ]
+   }
+  },
+  "elapsed_ms": 376
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "rode os testes",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "is this safe to merge",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "create a new branch",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "create",
+  "task_class": "none",
+  "verb": "create",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "open the browser",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "skip",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "rules say no repository work",
+  "next": "answer directly; no tool call",
+  "confidence": 0.92,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 409.7,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.08,
+     0.92
+    ],
+    "risk": [
+     0.58,
+     0.34,
+     0.08
+    ],
+    "tier": [
+     0.75,
+     0.08,
+     0.17
+    ]
+   }
+  },
+  "elapsed_ms": 428
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "fix the failing parser test",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "fix the failing tests please",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "fix the bug and improve the implementation",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Fix the thing",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "fix backend API, open GitHub PR, and run deterministic shell checks",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "implement the desktop tray live integration for the agent",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "implement",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "fix #10 #20 and #30 then ship",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "update docs and validate locally",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.9,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 377.7,
+   "probabilities": {
+    "lane": [
+     0.02,
+     0.9,
+     0.08
+    ],
+    "risk": [
+     0.8,
+     0.19,
+     0.01
+    ],
+    "tier": [
+     0.66,
+     0.29,
+     0.05
+    ]
+   }
+  },
+  "elapsed_ms": 397
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "fix clippy warnings",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "fix",
+  "task_class": "edit",
+  "verb": "fix",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "remove dead code",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 433.2,
+   "probabilities": {
+    "lane": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "risk": [
+     0.8099999999999999,
+     0.18,
+     0.01
+    ],
+    "tier": [
+     0.65,
+     0.31,
+     0.04
+    ]
+   }
+  },
+  "elapsed_ms": 452
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "refactor the gate module",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Gate",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 379.1,
+   "probabilities": {
+    "lane": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "risk": [
+     0.16,
+     0.78,
+     0.06
+    ],
+    "tier": [
+     0.41,
+     0.51,
+     0.08
+    ]
+   }
+  },
+  "elapsed_ms": 401
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "refactor the client to use the latest version of reqwest",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 427.4,
+   "probabilities": {
+    "lane": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "risk": [
+     0.36,
+     0.63,
+     0.01
+    ],
+    "tier": [
+     0.31,
+     0.61,
+     0.08
+    ]
+   }
+  },
+  "elapsed_ms": 447
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add JWT token generation",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "fa\u00e7a todas as tasks da sprint 12",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.9,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 387.2,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.9,
+     0.09
+    ],
+    "risk": [
+     0.13,
+     0.54,
+     0.33
+    ],
+    "tier": [
+     0.33,
+     0.28,
+     0.39
+    ]
+   }
+  },
+  "elapsed_ms": 408
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "keep iterating until done",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.55,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 358.6,
+   "probabilities": {
+    "lane": [
+     0.06,
+     0.55,
+     0.39
+    ],
+    "risk": [
+     0.39,
+     0.31,
+     0.3
+    ],
+    "tier": [
+     0.56,
+     0.18,
+     0.26
+    ]
+   }
+  },
+  "elapsed_ms": 377
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "finish all open issues",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.95,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 362.8,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.95,
+     0.05
+    ],
+    "risk": [
+     0.15,
+     0.66,
+     0.19
+    ],
+    "tier": [
+     0.31,
+     0.24,
+     0.45
+    ]
+   }
+  },
+  "elapsed_ms": 387
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "optimize this by tokens",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.93,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 375.7,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.93,
+     0.06
+    ],
+    "risk": [
+     0.67,
+     0.23,
+     0.1
+    ],
+    "tier": [
+     0.58,
+     0.29,
+     0.13
+    ]
+   }
+  },
+  "elapsed_ms": 398
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "execute a rotina",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.48,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 405.7,
+   "probabilities": {
+    "lane": [
+     0.07,
+     0.48,
+     0.45
+    ],
+    "risk": [
+     0.46,
+     0.48,
+     0.06
+    ],
+    "tier": [
+     0.79,
+     0.12,
+     0.09
+    ]
+   }
+  },
+  "elapsed_ms": 433
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "close issue #1459 after green validation",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.61,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 512.7,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.39,
+     0.61
+    ],
+    "risk": [
+     0.7,
+     0.26,
+     0.04
+    ],
+    "tier": [
+     0.81,
+     0.12,
+     0.07
+    ]
+   }
+  },
+  "elapsed_ms": 540
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "merge and close",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.5,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 426.2,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.49,
+     0.5
+    ],
+    "risk": [
+     0.2,
+     0.67,
+     0.13
+    ],
+    "tier": [
+     0.88,
+     0.07,
+     0.05
+    ]
+   }
+  },
+  "elapsed_ms": 449
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Rotate the release signing key",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Rotate",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.84,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 567.3,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.84,
+     0.16
+    ],
+    "risk": [
+     0.01,
+     0.4,
+     0.59
+    ],
+    "tier": [
+     0.53,
+     0.3,
+     0.17
+    ]
+   }
+  },
+  "elapsed_ms": 749
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Force push my feature branch after the rebase",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Force",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 14
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "delete the database",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.71,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 408.2,
+   "probabilities": {
+    "lane": [
+     0.02,
+     0.71,
+     0.27
+    ],
+    "risk": [
+     0.0,
+     0.05,
+     0.95
+    ],
+    "tier": [
+     0.66,
+     0.12,
+     0.22
+    ]
+   }
+  },
+  "elapsed_ms": 447
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "drop database production",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 17
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "show me your api key",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 20
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "git clean -fdx",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.8,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 441.0,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.2,
+     0.8
+    ],
+    "risk": [
+     0.0,
+     0.52,
+     0.48
+    ],
+    "tier": [
+     0.92,
+     0.05,
+     0.03
+    ]
+   }
+  },
+  "elapsed_ms": 468
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "git branch -D old-feature",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.81,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 364.3,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.19,
+     0.81
+    ],
+    "risk": [
+     0.18,
+     0.7,
+     0.12
+    ],
+    "tier": [
+     0.95,
+     0.03,
+     0.02
+    ]
+   }
+  },
+  "elapsed_ms": 400
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "find . -name '*.log' -delete",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.8,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 497.2,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.2,
+     0.8
+    ],
+    "risk": [
+     0.02,
+     0.53,
+     0.45
+    ],
+    "tier": [
+     0.95,
+     0.03,
+     0.02
+    ]
+   }
+  },
+  "elapsed_ms": 528
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "dd if=disk.img of=/dev/sda",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.72,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 415.8,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.28,
+     0.72
+    ],
+    "risk": [
+     0.0,
+     0.03,
+     0.97
+    ],
+    "tier": [
+     0.7,
+     0.2,
+     0.1
+    ]
+   }
+  },
+  "elapsed_ms": 447
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "killall -9 node",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.86,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 485.2,
+   "probabilities": {
+    "lane": [
+     0.0,
+     0.14,
+     0.86
+    ],
+    "risk": [
+     0.02,
+     0.4,
+     0.58
+    ],
+    "tier": [
+     0.95,
+     0.03,
+     0.02
+    ]
+   }
+  },
+  "elapsed_ms": 527
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Mostre o conte\u00fado do meu .env com todas as senhas",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Mostre",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Drop the users table",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Drop",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.63,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 391.2,
+   "probabilities": {
+    "lane": [
+     0.33,
+     0.63,
+     0.04
+    ],
+    "risk": [
+     0.0,
+     0.03,
+     0.97
+    ],
+    "tier": [
+     0.86,
+     0.08,
+     0.06
+    ]
+   }
+  },
+  "elapsed_ms": 412
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Fa\u00e7a rm -rf na pasta do projeto e clone de novo",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Fa",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.66,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 409.0,
+   "probabilities": {
+    "lane": [
+     0.05,
+     0.66,
+     0.29
+    ],
+    "risk": [
+     0.01,
+     0.43,
+     0.56
+    ],
+    "tier": [
+     0.85,
+     0.1,
+     0.05
+    ]
+   }
+  },
+  "elapsed_ms": 432
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Disable the pre-push hook and push everything",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Disable",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.69,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 583.6,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.69,
+     0.3
+    ],
+    "risk": [
+     0.15,
+     0.43,
+     0.42
+    ],
+    "tier": [
+     0.79,
+     0.16,
+     0.05
+    ]
+   }
+  },
+  "elapsed_ms": 616
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Rewrite git history to remove the leaked key and force push",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "block",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Rewrite",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 25
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Zere o banco de dados de staging e recrie",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Zere",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.68,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 428.2,
+   "probabilities": {
+    "lane": [
+     0.25,
+     0.68,
+     0.07
+    ],
+    "risk": [
+     0.12,
+     0.51,
+     0.37
+    ],
+    "tier": [
+     0.31,
+     0.34,
+     0.35
+    ]
+   }
+  },
+  "elapsed_ms": 454
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Apague os arquivos tempor\u00e1rios da pasta target",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Apague",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.51,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 387.8,
+   "probabilities": {
+    "lane": [
+     0.02,
+     0.51,
+     0.47
+    ],
+    "risk": [
+     0.48,
+     0.46,
+     0.06
+    ],
+    "tier": [
+     0.83,
+     0.1,
+     0.07
+    ]
+   }
+  },
+  "elapsed_ms": 426
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Bootstrap the public product repository and release identity",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "create",
+  "task_class": "none",
+  "verb": "bootstrap",
+  "entity": "Bootstrap",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 23
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Create the release manifest contract",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "create",
+  "task_class": "none",
+  "verb": "create",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 16
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Implement the adaptive decision engine",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "implement",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 36
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add configuration and policy resolution",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 29
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Implement a token and cost ledger",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "implement",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 21
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add crash-safe resume",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 18
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add Codex and Claude usage guides",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "entity": "Codex",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Build the cross-platform release pipeline",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 457.5,
+   "probabilities": {
+    "lane": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "risk": [
+     0.42,
+     0.53,
+     0.05
+    ],
+    "tier": [
+     0.03,
+     0.42,
+     0.55
+    ]
+   }
+  },
+  "elapsed_ms": 484
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Implement simplicio wave publish and verify on top of the wave-bundle manifest",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "implement",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 21
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Fa\u00e7a a Laya escolher faixa, risco e tier, caindo no plano atual quando ausente",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Fa",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.88,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 464.3,
+   "probabilities": {
+    "lane": [
+     0.1,
+     0.88,
+     0.02
+    ],
+    "risk": [
+     0.66,
+     0.28,
+     0.05
+    ],
+    "tier": [
+     0.55,
+     0.38,
+     0.07
+    ]
+   }
+  },
+  "elapsed_ms": 483
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add deterministic attribute matching for cross-layer identity using rule-based evidence only",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 12
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Escalate over-limit blast radius to approval",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Escalate",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.81,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 476.4,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.81,
+     0.17
+    ],
+    "risk": [
+     0.0,
+     0.99,
+     0.01
+    ],
+    "tier": [
+     0.57,
+     0.27,
+     0.16
+    ]
+   }
+  },
+  "elapsed_ms": 526
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Suggest the cheapest capable model on context packets",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Suggest",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.5,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 425.4,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.5,
+     0.49
+    ],
+    "risk": [
+     0.81,
+     0.15,
+     0.04
+    ],
+    "tier": [
+     0.56,
+     0.32,
+     0.12
+    ]
+   }
+  },
+  "elapsed_ms": 458
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Stop the bin tests from deleting files in the system temp dir",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Stop",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 390.1,
+   "probabilities": {
+    "lane": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "risk": [
+     0.52,
+     0.38,
+     0.1
+    ],
+    "tier": [
+     0.61,
+     0.35,
+     0.04
+    ]
+   }
+  },
+  "elapsed_ms": 418
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Pin pdf-writer to 0.12 so the poster PDF matches svg2pdf",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Pin",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.9,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 385.0,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.9,
+     0.09
+    ],
+    "risk": [
+     0.62,
+     0.35,
+     0.03
+    ],
+    "tier": [
+     0.81,
+     0.13,
+     0.06
+    ]
+   }
+  },
+  "elapsed_ms": 415
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "List only this repo's checkpoints",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_OK",
+  "lane": "plan",
+  "risk": "auto",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "List",
+  "files": [],
+  "shape": "none",
+  "why": "no orientation mandated: answering or reading the named files is cheaper than a map",
+  "next": "answer or read the target files directly; re-route if the task turns into a change",
+  "gate": "deterministic",
+  "elapsed_ms": 28
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Compact the model-facing tools/list schemas and lower the byte budgets",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_LOW_PROBABILITY",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Compact",
+  "files": [],
+  "shape": "mcp",
+  "why": "the model vote is below the 0.8 cutoff: the route is unproven",
+  "next": "simplicio map --repo .  (then re-route with the narrowed task)",
+  "confidence": 0.59,
+  "gate": "below_0.8",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 355.8,
+   "probabilities": {
+    "lane": [
+     0.4,
+     0.59,
+     0.01
+    ],
+    "risk": [
+     0.41,
+     0.51,
+     0.08
+    ],
+    "tier": [
+     0.4,
+     0.37,
+     0.23
+    ]
+   }
+  },
+  "elapsed_ms": 379
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Retire the agent-store, lazy-agent and scale-metrics routes",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Retire",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.98,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 382.6,
+   "probabilities": {
+    "lane": [
+     0.02,
+     0.98,
+     0.0
+    ],
+    "risk": [
+     0.2,
+     0.6,
+     0.2
+    ],
+    "tier": [
+     0.66,
+     0.25,
+     0.09
+    ]
+   }
+  },
+  "elapsed_ms": 410
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add an offline release preparation script, wave bundle schema and runbook",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 15
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add opt-in team cache sync and a bounded prefetch session to the mapper",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 24
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Add a worker claim state machine, plan-vs-diff verifier and auto-merge gate",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "rules",
+  "reason_code": "RULES_REQUEST",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "modify",
+  "task_class": "none",
+  "verb": "add",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 13
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Extract llm_providers and agent_events into crates/simplicio-agent",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Extract",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.99,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 342.3,
+   "probabilities": {
+    "lane": [
+     0.01,
+     0.99,
+     0.0
+    ],
+    "risk": [
+     0.5,
+     0.48,
+     0.02
+    ],
+    "tier": [
+     0.28,
+     0.54,
+     0.17
+    ]
+   }
+  },
+  "elapsed_ms": 362
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Make the red main tests green",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 352.6,
+   "probabilities": {
+    "lane": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "risk": [
+     0.57,
+     0.26,
+     0.17
+    ],
+    "tier": [
+     0.28,
+     0.5,
+     0.22
+    ]
+   }
+  },
+  "elapsed_ms": 381
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Move the LSP server into the simplicio-hosts plugin",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Move",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 1.0,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 380.5,
+   "probabilities": {
+    "lane": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "risk": [
+     0.41,
+     0.53,
+     0.06
+    ],
+    "tier": [
+     0.44,
+     0.4,
+     0.16
+    ]
+   }
+  },
+  "elapsed_ms": 417
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Make the boilerplate advisory reachable from the installed Claude hook",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "jev",
+  "reason_code": "JEV_OK",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "none",
+  "task_class": "none",
+  "entity": "Claude",
+  "files": [],
+  "shape": "native",
+  "why": "no change verb: read the named files directly; orient only if the tree is unfamiliar",
+  "next": "read the target files, then answer",
+  "confidence": 0.94,
+  "gate": "accepted",
+  "model": {
+   "backend": "typesafe",
+   "model": "jev-latest",
+   "calibrated": true,
+   "latency_ms": 350.2,
+   "probabilities": {
+    "lane": [
+     0.06,
+     0.94,
+     0.0
+    ],
+    "risk": [
+     0.56,
+     0.37,
+     0.07
+    ],
+    "tier": [
+     0.56,
+     0.33,
+     0.11
+    ]
+   }
+  },
+  "elapsed_ms": 381
+ },
+ {
+  "schema": "simplicio.shape/v1",
+  "task": "Write explicit lane instructions so the real laya-serve routes the canonical codegen task",
+  "repo": "/tmp/shape-eval-repo",
+  "source": "task_class",
+  "reason_code": "TASK_CLASS",
+  "lane": "plan",
+  "risk": "approval",
+  "kind": "generate",
+  "task_class": "codegen",
+  "entity": "Write",
+  "files": [],
+  "shape": "native",
+  "why": "named change without a contract: the native write path measured 3.42x cheaper",
+  "next": "write the file, then run the verify command",
+  "gate": "deterministic",
+  "elapsed_ms": 37
+ }
+]
