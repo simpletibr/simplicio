@@ -1,0 +1,270 @@
+{
+ "schema": "simplicio.edit-shapes-benchmark/v1",
+ "measured_at": "2026-10-26T04:10:00-03:00",
+ "host": {
+  "os": "macos",
+  "arch": "arm64",
+  "cpu_count": 8
+ },
+ "fixture": {
+  "files": 66
+ },
+ "reps": 3,
+ "no_daemon": true,
+ "results": {
+  "3.9.2": {
+   "create": {
+    "wall_s": 0.06,
+    "rss_mb": 10.1,
+    "bytes": 301,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_map": {
+    "wall_s": 4.59,
+    "rss_mb": 34.4,
+    "bytes": 23452,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_map_apply": {
+    "wall_s": 2.78,
+    "rss_mb": 34.3,
+    "bytes": 2687,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_codegen": {
+    "wall_s": 0.05,
+    "rss_mb": 10.1,
+    "bytes": 301,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_loose": {
+    "wall_s": 2.8,
+    "rss_mb": 34.3,
+    "bytes": 2586,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "measure": {
+    "wall_s": 0.08,
+    "rss_mb": 16.5,
+    "bytes": 13750,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  },
+  "3.10.2": {
+   "create": {
+    "wall_s": 0.09,
+    "rss_mb": 11.8,
+    "bytes": 378,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_map": {
+    "wall_s": 0.37,
+    "rss_mb": 35.1,
+    "bytes": 4959,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_map_apply": {
+    "wall_s": 0.29,
+    "rss_mb": 35.7,
+    "bytes": 2690,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_codegen": {
+    "wall_s": 0.1,
+    "rss_mb": 11.9,
+    "bytes": 378,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_loose": {
+    "wall_s": 0.31,
+    "rss_mb": 35.6,
+    "bytes": 2589,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "measure": {
+    "wall_s": 0.21,
+    "rss_mb": 33.6,
+    "bytes": 28572,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  },
+  "main": {
+   "create": {
+    "wall_s": 0.12,
+    "rss_mb": 12.0,
+    "bytes": 374,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_map": {
+    "wall_s": 0.29,
+    "rss_mb": 36.0,
+    "bytes": 4945,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_map_apply": {
+    "wall_s": 0.31,
+    "rss_mb": 36.2,
+    "bytes": 2684,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_codegen": {
+    "wall_s": 0.17,
+    "rss_mb": 12.1,
+    "bytes": 374,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_loose": {
+    "wall_s": 0.32,
+    "rss_mb": 36.3,
+    "bytes": 2583,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "measure": {
+    "wall_s": 0.23,
+    "rss_mb": 36.4,
+    "bytes": 28560,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  },
+  "no-simplicio": {
+   "create": {
+    "wall_s": 0.0,
+    "rss_mb": 1.9,
+    "bytes": 0,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_map": {
+    "wall_s": 0.05,
+    "rss_mb": 14.4,
+    "bytes": 0,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "edit_loose": {
+    "wall_s": 0.02,
+    "rss_mb": 14.4,
+    "bytes": 0,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "measure": {
+    "wall_s": 0.09,
+    "rss_mb": 1.9,
+    "bytes": 1196832,
+    "exits": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  }
+ },
+ "correctness": {
+  "3.9.2": {
+   "edit_map_result": true,
+   "edit_codegen_result": true,
+   "edit_loose_result": true
+  },
+  "3.10.2": {
+   "edit_map_result": true,
+   "edit_codegen_result": true,
+   "edit_loose_result": true
+  },
+  "main": {
+   "edit_map_result": true,
+   "edit_codegen_result": true,
+   "edit_loose_result": true
+  },
+  "no-simplicio": {
+   "edit_map_result": true,
+   "edit_loose_result": true
+  }
+ },
+ "shapes": [
+  "map+edit",
+  "codegen regenerate",
+  "loose file"
+ ]
+}
