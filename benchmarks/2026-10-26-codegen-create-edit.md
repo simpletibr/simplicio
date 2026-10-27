@@ -82,6 +82,24 @@ Daemon start costs 341-458 ms. The resident daemon does not speed up codegen (it
 
 Rule: one-shot CLI batch -> daemon off; an agent making many context/tool calls -> daemon on.
 
+
+## Sandbox confirmation (3.10.3, isolated HOME)
+
+The same benchmark re-run against the **shipped 3.10.3 binary** inside the sandbox environment (sandbox-simplicio-mcp/envs/3.10.3, its own HOME, its own device login - no credential copied between homes), once with the resident daemon off and once on.
+
+| case | create (daemon off) | field edition | entity edition | create (daemon on) | field | entity |
+|---|---|---|---|---|---|---|
+| basic-react | **198.8 ms** | 111.7 ms | 190.5 ms | **119.0 ms** | 181.6 ms | 120.5 ms |
+| basic-csharp | **125.6 ms** | 200.3 ms | 130.1 ms | **130.3 ms** | 116.1 ms | 177.4 ms |
+| advanced-react | **221.9 ms** | 185.0 ms | 105.3 ms | **118.8 ms** | 124.1 ms | 111.5 ms |
+| advanced-csharp | **153.7 ms** | 235.9 ms | 106.3 ms | **139.2 ms** | 119.3 ms | 192.7 ms |
+
+Files landing and the hand-written seam match the source-build run: 16-27 files created, 9-22 regenerated, the React implementation file byte-identical (kept per case: basic-react=True, basic-csharp=False, advanced-react=True, advanced-csharp=False).
+
+Map reuse in the sandbox: cold **361.2 / 299.8 ms**, warm **198.5 / 214.0 ms**, context --term **239.9 ms** with the daemon off and **100.6 ms** on - the same 2.4x context win, same 5,693-byte map.
+
+JEV inside the same sandbox: plugin installed into that HOME, backend typesafe, key at 0600. A task the rules cannot decide, "resuma o README", returned source=jev, gate=accepted, p=0.84 in **518 ms**; a rules-decided task stayed deterministic in **25 ms** with no network.
+
 ## Reproduce
 
 ```bash
