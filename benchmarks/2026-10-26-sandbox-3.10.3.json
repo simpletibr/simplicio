@@ -1,0 +1,456 @@
+{
+ "daemon_off": {
+  "bin": "/Users/wesleysimplicio/Projetos/ai/sandbox-simplicio-mcp/envs/3.10.3/bin/simplicio",
+  "cases": [
+   {
+    "case": "basic-react",
+    "target": "react",
+    "schema": "openapi-small.yaml",
+    "create": {
+     "ms": 198.8,
+     "exit": 0,
+     "files": 16,
+     "bytes": 23361,
+     "sample": [
+      "index.html",
+      "package.json",
+      "src/App.generated.tsx",
+      "src/App.impl.tsx",
+      "src/api/client.generated.ts",
+      "src/index.css"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 111.7,
+      "apply_exit": 0,
+      "files_changed": 9,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 22113,
+      "err": ""
+     },
+     "entity": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 190.5,
+      "apply_exit": 0,
+      "files_changed": 11,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 28032,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": true
+   },
+   {
+    "case": "basic-csharp",
+    "target": "csharp",
+    "schema": "openapi-small.yaml",
+    "create": {
+     "ms": 125.6,
+     "exit": 0,
+     "files": 2,
+     "bytes": 2768,
+     "sample": [
+      ".simplicio/codegen/bindings.json",
+      "Generated/Api.generated.cs"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "sync",
+      "check_ms": 170.4,
+      "check_exit": 1,
+      "apply_ms": 200.3,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 3543,
+      "err": ""
+     },
+     "entity": {
+      "mode": "sync",
+      "check_ms": 136.6,
+      "check_exit": 1,
+      "apply_ms": 130.1,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 4069,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": false
+   },
+   {
+    "case": "advanced-react",
+    "target": "react",
+    "schema": "openapi-advanced.yaml",
+    "create": {
+     "ms": 221.9,
+     "exit": 0,
+     "files": 27,
+     "bytes": 59829,
+     "sample": [
+      "index.html",
+      "package.json",
+      "src/App.generated.tsx",
+      "src/App.impl.tsx",
+      "src/api/client.generated.ts",
+      "src/index.css"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 185.0,
+      "apply_exit": 0,
+      "files_changed": 20,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 58104,
+      "err": ""
+     },
+     "entity": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 105.3,
+      "apply_exit": 0,
+      "files_changed": 22,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 64023,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": true
+   },
+   {
+    "case": "advanced-csharp",
+    "target": "csharp",
+    "schema": "openapi-advanced.yaml",
+    "create": {
+     "ms": 153.7,
+     "exit": 0,
+     "files": 2,
+     "bytes": 8829,
+     "sample": [
+      ".simplicio/codegen/bindings.json",
+      "Generated/Api.generated.cs"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "sync",
+      "check_ms": 204.1,
+      "check_exit": 1,
+      "apply_ms": 235.9,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 9604,
+      "err": ""
+     },
+     "entity": {
+      "mode": "sync",
+      "check_ms": 135.7,
+      "check_exit": 1,
+      "apply_ms": 106.3,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 10130,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": false
+   }
+  ],
+  "map": {
+   "repo_files": 28,
+   "map_cold_ms": 361.2,
+   "map_warm_ms": 198.5,
+   "map_cold_exit": 0,
+   "map_warm_exit": 0,
+   "context_term_ms": 239.9,
+   "context_exit": 0,
+   "project_map_bytes": 5693
+  }
+ },
+ "daemon_on": {
+  "bin": "/Users/wesleysimplicio/Projetos/ai/sandbox-simplicio-mcp/envs/3.10.3/bin/simplicio",
+  "cases": [
+   {
+    "case": "basic-react",
+    "target": "react",
+    "schema": "openapi-small.yaml",
+    "create": {
+     "ms": 119.0,
+     "exit": 0,
+     "files": 16,
+     "bytes": 23361,
+     "sample": [
+      "index.html",
+      "package.json",
+      "src/App.generated.tsx",
+      "src/App.impl.tsx",
+      "src/api/client.generated.ts",
+      "src/index.css"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 181.6,
+      "apply_exit": 0,
+      "files_changed": 9,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 22113,
+      "err": ""
+     },
+     "entity": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 120.5,
+      "apply_exit": 0,
+      "files_changed": 11,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 28032,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": true
+   },
+   {
+    "case": "basic-csharp",
+    "target": "csharp",
+    "schema": "openapi-small.yaml",
+    "create": {
+     "ms": 130.3,
+     "exit": 0,
+     "files": 2,
+     "bytes": 2768,
+     "sample": [
+      ".simplicio/codegen/bindings.json",
+      "Generated/Api.generated.cs"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "sync",
+      "check_ms": 212.3,
+      "check_exit": 1,
+      "apply_ms": 116.1,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 3543,
+      "err": ""
+     },
+     "entity": {
+      "mode": "sync",
+      "check_ms": 140.6,
+      "check_exit": 1,
+      "apply_ms": 177.4,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 4069,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": false
+   },
+   {
+    "case": "advanced-react",
+    "target": "react",
+    "schema": "openapi-advanced.yaml",
+    "create": {
+     "ms": 118.8,
+     "exit": 0,
+     "files": 27,
+     "bytes": 59829,
+     "sample": [
+      "index.html",
+      "package.json",
+      "src/App.generated.tsx",
+      "src/App.impl.tsx",
+      "src/api/client.generated.ts",
+      "src/index.css"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 124.1,
+      "apply_exit": 0,
+      "files_changed": 20,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 58104,
+      "err": ""
+     },
+     "entity": {
+      "mode": "generate",
+      "check_ms": null,
+      "check_exit": null,
+      "apply_ms": 111.5,
+      "apply_exit": 0,
+      "files_changed": 22,
+      "sample": [
+       "src/App.generated.tsx",
+       "src/api/client.generated.ts",
+       "src/main.tsx",
+       "src/work-with/customer/ListPage.generated.tsx",
+       "src/work-with/customer/api.generated.ts"
+      ],
+      "bytes_changed": 64023,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": true
+   },
+   {
+    "case": "advanced-csharp",
+    "target": "csharp",
+    "schema": "openapi-advanced.yaml",
+    "create": {
+     "ms": 139.2,
+     "exit": 0,
+     "files": 2,
+     "bytes": 8829,
+     "sample": [
+      ".simplicio/codegen/bindings.json",
+      "Generated/Api.generated.cs"
+     ],
+     "err": ""
+    },
+    "editions": {
+     "field": {
+      "mode": "sync",
+      "check_ms": 127.6,
+      "check_exit": 1,
+      "apply_ms": 119.3,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 9604,
+      "err": ""
+     },
+     "entity": {
+      "mode": "sync",
+      "check_ms": 136.5,
+      "check_exit": 1,
+      "apply_ms": 192.7,
+      "apply_exit": 0,
+      "files_changed": 3,
+      "sample": [
+       ".simplicio/codegen/bindings.json",
+       ".simplicio/codegen/sync-receipt.json",
+       "Generated/Api.generated.cs"
+      ],
+      "bytes_changed": 10130,
+      "err": ""
+     }
+    },
+    "handwritten_preserved": false
+   }
+  ],
+  "map": {
+   "repo_files": 28,
+   "map_cold_ms": 299.8,
+   "map_warm_ms": 214.0,
+   "map_cold_exit": 0,
+   "map_warm_exit": 0,
+   "context_term_ms": 100.6,
+   "context_exit": 0,
+   "project_map_bytes": 5693
+  }
+ }
+}
