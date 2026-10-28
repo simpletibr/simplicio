@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info: { title: Commerce, version: 2.1.0 }
+servers: [{ url: https://api.example.com/v2 }]
+paths:
+  /products:
+    get:
+      operationId: listProducts
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: size, in: query, schema: { type: integer, default: 20 } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ProductStatus' } }
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductPage' }
+    post:
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductInput' }
+      responses: { '201': { description: created, content: { application/json: { schema: { $ref: '#/components/schemas/Product' } } } } }
+  /products/{id}:
+    get:
+      operationId: getProduct
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: ok, content: { application/json: { schema: { $ref: '#/components/schemas/Product' } } } } }
+    patch:
+      operationId: updateProduct
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody:
+        required: true
+        content: { application/merge-patch+json: { schema: { $ref: '#/components/schemas/ProductInput' } } }
+      responses: { '200': { description: ok } }
+    delete:
+      operationId: deleteProduct
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '204': { description: gone } }
+  /customers:
+    get:
+      operationId: listCustomers
+      responses: { '200': { description: ok, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Customer' } } } } } }
+  /orders:
+    get:
+      operationId: listOrders
+      responses: { '200': { description: ok, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Order' } } } } } }
+    post:
+      operationId: createOrder
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/OrderInput' } } }
+      responses: { '201': { description: created } }
+  /invoices:
+    get:
+      operationId: listInvoices
+      responses: { '200': { description: ok, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Invoice' } } } } } }
+  /warehouses:
+    get:
+      operationId: listWarehouses
+      responses: { '200': { description: ok, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Warehouse' } } } } } }
+  /shipments:
+    get:
+      operationId: listShipments
+      responses: { '200': { description: ok, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Shipment' } } } } } }
+components:
+  schemas:
+    ProductStatus:
+      type: string
+      enum: [draft, active, archived]
+    Product:
+      type: object
+      required: [id, name, price, status]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        description: { type: string }
+        price: { type: number, format: double }
+        status: { $ref: '#/components/schemas/ProductStatus' }
+        tags: { type: array, items: { type: string }, maxItems: 20 }
+        dimensions: { $ref: '#/components/schemas/Dimensions' }
+        warehouse: { $ref: '#/components/schemas/Warehouse' }
+        created_at: { type: string, format: date-time }
+    ProductInput:
+      type: object
+      required: [name, price]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        price: { type: number }
+        status: { $ref: '#/components/schemas/ProductStatus' }
+        tags: { type: array, items: { type: string } }
+        dimensions: { $ref: '#/components/schemas/Dimensions' }
+    ProductPage:
+      type: object
+      required: [items, total]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/Product' } }
+        total: { type: integer }
+        page: { type: integer }
+        size: { type: integer }
+    Dimensions:
+      type: object
+      properties:
+        width: { type: number }
+        height: { type: number }
+        depth: { type: number }
+        unit: { type: string, enum: [mm, cm, in] }
+    Customer:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        tier: { type: string, enum: [free, pro, enterprise] }
+        orders: { type: array, items: { $ref: '#/components/schemas/Order' } }
+    Order:
+      type: object
+      required: [id, customer_id, total]
+      properties:
+        id: { type: string, format: uuid }
+        customer_id: { type: string, format: uuid }
+        lines: { type: array, items: { $ref: '#/components/schemas/OrderLine' } }
+        total: { type: number }
+        placed_at: { type: string, format: date-time }
+        invoice: { $ref: '#/components/schemas/Invoice' }
+    OrderInput:
+      type: object
+      required: [customer_id, lines]
+      properties:
+        customer_id: { type: string, format: uuid }
+        lines: { type: array, items: { $ref: '#/components/schemas/OrderLine' } }
+    OrderLine:
+      type: object
+      required: [product_id, quantity]
+      properties:
+        product_id: { type: string, format: uuid }
+        quantity: { type: integer, minimum: 1 }
+        unit_price: { type: number }
+    Invoice:
+      type: object
+      required: [id, order_id, amount]
+      properties:
+        id: { type: string, format: uuid }
+        order_id: { type: string, format: uuid }
+        amount: { type: number }
+        issued_at: { type: string, format: date-time }
+        paid: { type: boolean }
+    Warehouse:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        region: { type: string }
+        capacity: { type: integer }
+    Shipment:
+      type: object
+      required: [id, order_id, status]
+      properties:
+        id: { type: string, format: uuid }
+        order_id: { type: string, format: uuid }
+        status: { type: string, enum: [pending, shipped, delivered] }
+        tracking: { type: string }
+        delivered_at: { type: string, format: date-time }
