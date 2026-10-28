@@ -1,0 +1,32 @@
+openapi: 3.0.3
+info: { title: Shop, version: 1.0.0 }
+paths:
+  /products:
+    get:
+      operationId: listProducts
+      responses: { '200': { description: ok, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Product' } } } } } }
+    post:
+      operationId: createProduct
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/Product' } } } }
+      responses: { '201': { description: created } }
+  /customers:
+    get:
+      operationId: listCustomers
+      responses: { '200': { description: ok, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Customer' } } } } } }
+components:
+  schemas:
+    Product:
+      type: object
+      required: [id, name, price]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        price: { type: number }
+        tags: { type: array, items: { type: string } }
+    Customer:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
