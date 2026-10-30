@@ -8,12 +8,12 @@ This is the **public distribution repo** for [Simplicio](https://github.com/simp
 
 The Rust Runtime source lives in the private [`simplicio-runtime`](https://github.com/simpletibr/simplicio-runtime) repo. Runtime and Desktop executables are GitHub Release assets, not tracked source files.
 
-## Runtime snapshot: v3.10.5
+## Runtime snapshot: v3.10.7
 
-## Current Version: v3.10.5
+## Current Version: v3.10.7
 
 - **Source:** `simplicio-runtime` main at commit
-  `2c0c81fde2ee35cb6c1ddbab7994242e35d14161` (Runtime v3.8.40).
+  `b53ce841ef1bcdc5024f2b0309ddb936aa67cbce` (Runtime v3.8.40).
 - **Runtime targets:** macOS ARM64, macOS x64, Linux x64, and Windows x64.
   The canonical target table and release manifest define the asset, checksum,
   Ed25519 signature, SBOM, and provenance for each Runtime platform.

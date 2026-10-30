@@ -9,10 +9,10 @@ const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
 
 const POLICY = Object.freeze({
-  runtimeVersion: "3.10.5",
+  runtimeVersion: "3.10.7",
   minimumRuntimeVersion: "3.8.40",
   unifiedSurfaceMinimumVersion: "3.8.40",
-  installerCommit: "59b3cfe3b468c8c7b84c4888deb6f34238e0a1fd",
+  installerCommit: "dd64e132cddba02f627046fccf8fe8acfebcd415",
   installers: Object.freeze({
     posix: Object.freeze({
       filename: "install.sh",
