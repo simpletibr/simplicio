@@ -1,7 +1,7 @@
 # ⚡ Simplicio
 
 > **The High-Performance Native AI Coding Runtime & Agent (100% Rust)**  
-> Save up to 96% of tokens with sub-millisecond local orientation, atomic edits, and governed concurrency.
+> A page a generator covers takes 14 s and $0.0021, against 166 s and $0.0215 on 3.9.2. Local orientation, atomic edits and governed concurrency.
 
 <p align="center">
   <img src="assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="840" />
@@ -52,7 +52,7 @@ Requisitos e repro: [docs/flow/README.md](docs/flow/README.md).
 
 - **100% Native Rust**: Single ~46MB standalone binary. No Python, virtualenvs, or heavy background processes.
 - **Ultra-Low Latency**: ~4ms cold start vs. seconds in interpreted runtimes.
-- **Token Economy**: Saves up to 96% of tokens by projecting bounded AST graphs instead of dumping raw file trees.
+- **Token Economy**: A generator writes what it covers with 0 LLM tokens, and bounded context replaces raw file trees for the rest. See the [benchmark](#-measured-benchmark-simplicio-3108-vs-392-vs-no-mcp).
 - **Fail-Closed Safety**: Every code modification uses SHA-256 pre-image checks, atomic replacements, and immutable audit receipts.
 
 ---

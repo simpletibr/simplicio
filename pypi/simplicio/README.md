@@ -1,6 +1,6 @@
 # Simplicio — AI Coding Agent
 
-Save up to 96% on AI tokens. Single binary, runs on your machine.
+A page a generator covers takes 14 s and $0.0021, against 166 s and $0.0215 on 3.9.2. Single binary, runs on your machine.
 
 ## Install
 
