@@ -75,6 +75,22 @@ The gain comes from the generator: on the page tasks, `simplicio_map` routes the
 
 > **Setup:** OpenCode 2.1.4, DeepSeek V4.1 Flash on one fixed OpenRouter endpoint, the same for every run. Cost is computed at $0.15 input, $0.60 output and $0.003 cache read per million tokens. Measured on commit `6e232bb`; one real session per task repeated it on the release code. **Prompts, method and limits:** [`benchmarks/2026-10-31-map-codegen.md`](benchmarks/2026-10-31-map-codegen.md) · **Per-session data:** [`benchmarks/2026-10-31-map-codegen.json`](benchmarks/2026-10-31-map-codegen.json).
 
+Same tasks on other models, with and without Simplicio. Each model ran in one client, so compare a model with itself.
+
+| Model | Task | Simplicio 3.10.8 | No MCP | Delivered |
+|:---|:---|---:|---:|---:|
+| **Claude Sonnet 5.5** (Claude Code) | Page from a JSON file, a generator covers it | **17.5 s · $0.0672** | 33.4 s · $0.0927 | 10/10 |
+|  | New page, other data, other language, not used to build the generator | **16.3 s · $0.0514** | 22.5 s · $0.0610 | 10/10 |
+|  | Python script, no generator covers it | **19.6 s · $0.0548** | 11.4 s · $0.0283 | 10/10 |
+| **Grok 4.7** (Grok Build) | Page from a JSON file, a generator covers it | **31.0 s · $0.1690** | 359.7 s · $0.8590 | 6/6 |
+|  | New page, other data, other language, not used to build the generator | **36.0 s · $0.2059** | 387.5 s · $0.8518 | 6/6 |
+|  | Python script, no generator covers it | **82.0 s · $0.3315** | 63.1 s · $0.2452 | 6/6 |
+| **Claude Haiku 5.5** (OpenCode) | Page from a JSON file, a generator covers it | **13.7 s · $0.0046** | 29.3 s · $0.0083 | 10/10 |
+|  | New page, other data, other language, not used to build the generator | **13.8 s · $0.0023** | 28.7 s · $0.0057 | 10/10 |
+|  | Python script, no generator covers it | **19.2 s · $0.0033** | 16.6 s · $0.0030 | 10/10 |
+
+[Prompts, method, limits and per-session data](benchmarks/2026-11-01-multi-model.md).
+
 ---
 
 ## 📦 Quick Install

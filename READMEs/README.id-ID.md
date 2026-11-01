@@ -138,6 +138,22 @@ Keuntungan datang dari generator: pada tugas halaman, `simplicio_map` merutekan 
 
 > OpenCode 2.1.4 dan DeepSeek V4.1 Flash pada satu endpoint OpenRouter tetap, sama untuk setiap eksekusi. Biaya dihitung dengan $0.15 input, $0.60 output, dan $0.003 cache per sejuta token. Ini satu model pada tiga tugas kecil: tugas lain akan memberi angka lain. [Prompt, metode, batasan, dan data per sesi](../benchmarks/2026-10-31-map-codegen.md).
 
+Tugas yang sama pada model lain, dengan dan tanpa Simplicio. Setiap model berjalan di satu klien, jadi bandingkan model dengan dirinya sendiri.
+
+| Model | Tugas | Simplicio 3.10.8 | Tanpa MCP | Terkirim |
+|:---|:---|---:|---:|---:|
+| **Claude Sonnet 5.5** (Claude Code) | Halaman dari file JSON, dicakup generator | **17.5 s · $0.0672** | 33.4 s · $0.0927 | 10/10 |
+|  | Halaman baru, data dan bahasa lain, tidak dipakai untuk membangun generator | **16.3 s · $0.0514** | 22.5 s · $0.0610 | 10/10 |
+|  | Skrip Python, tidak dicakup generator mana pun | **19.6 s · $0.0548** | 11.4 s · $0.0283 | 10/10 |
+| **Grok 4.7** (Grok Build) | Halaman dari file JSON, dicakup generator | **31.0 s · $0.1690** | 359.7 s · $0.8590 | 6/6 |
+|  | Halaman baru, data dan bahasa lain, tidak dipakai untuk membangun generator | **36.0 s · $0.2059** | 387.5 s · $0.8518 | 6/6 |
+|  | Skrip Python, tidak dicakup generator mana pun | **82.0 s · $0.3315** | 63.1 s · $0.2452 | 6/6 |
+| **Claude Haiku 5.5** (OpenCode) | Halaman dari file JSON, dicakup generator | **13.7 s · $0.0046** | 29.3 s · $0.0083 | 10/10 |
+|  | Halaman baru, data dan bahasa lain, tidak dipakai untuk membangun generator | **13.8 s · $0.0023** | 28.7 s · $0.0057 | 10/10 |
+|  | Skrip Python, tidak dicakup generator mana pun | **19.2 s · $0.0033** | 16.6 s · $0.0030 | 10/10 |
+
+[Prompt, metode, batasan, dan data per sesi](../benchmarks/2026-11-01-multi-model.md).
+
 ---
 
 ## 🎯 Yang Dilakukan

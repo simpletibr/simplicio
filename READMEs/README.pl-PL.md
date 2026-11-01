@@ -138,6 +138,22 @@ Zysk pochodzi z generatora: w zadaniach ze stronami `simplicio_map` kieruje żą
 
 > OpenCode 2.1.4 i DeepSeek V4.1 Flash na jednym stałym endpoincie OpenRouter, tak samo dla każdego uruchomienia. Koszt liczony po 0,15 $ za wejście, 0,60 $ za wyjście i 0,003 $ za pamięć podręczną na milion tokenów. To jeden model i trzy małe zadania: inne zadania dadzą inne liczby. [Prompty, metoda, ograniczenia i dane dla każdej sesji](../benchmarks/2026-10-31-map-codegen.md).
 
+Te same zadania na innych modelach, z Simplicio i bez niego. Każdy model działał w jednym kliencie, więc porównuj model tylko z nim samym.
+
+| Model | Zadanie | Simplicio 3.10.8 | Bez MCP | Dostarczono |
+|:---|:---|---:|---:|---:|
+| **Claude Sonnet 5.5** (Claude Code) | Strona z pliku JSON, obsługiwana przez generator | **17.5 s · $0.0672** | 33.4 s · $0.0927 | 10/10 |
+|  | Nowa strona, inne dane i inny język, nieużyta przy budowie generatora | **16.3 s · $0.0514** | 22.5 s · $0.0610 | 10/10 |
+|  | Skrypt Python, żaden generator go nie obsługuje | **19.6 s · $0.0548** | 11.4 s · $0.0283 | 10/10 |
+| **Grok 4.7** (Grok Build) | Strona z pliku JSON, obsługiwana przez generator | **31.0 s · $0.1690** | 359.7 s · $0.8590 | 6/6 |
+|  | Nowa strona, inne dane i inny język, nieużyta przy budowie generatora | **36.0 s · $0.2059** | 387.5 s · $0.8518 | 6/6 |
+|  | Skrypt Python, żaden generator go nie obsługuje | **82.0 s · $0.3315** | 63.1 s · $0.2452 | 6/6 |
+| **Claude Haiku 5.5** (OpenCode) | Strona z pliku JSON, obsługiwana przez generator | **13.7 s · $0.0046** | 29.3 s · $0.0083 | 10/10 |
+|  | Nowa strona, inne dane i inny język, nieużyta przy budowie generatora | **13.8 s · $0.0023** | 28.7 s · $0.0057 | 10/10 |
+|  | Skrypt Python, żaden generator go nie obsługuje | **19.2 s · $0.0033** | 16.6 s · $0.0030 | 10/10 |
+
+[Prompty, metoda, ograniczenia i dane dla każdej sesji](../benchmarks/2026-11-01-multi-model.md).
+
 ---
 
 ## 🎯 Co robi
