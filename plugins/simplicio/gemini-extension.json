@@ -1,6 +1,6 @@
 {
   "name": "simplicio",
-  "version": "0.2.26",
+  "version": "0.2.27",
   "description": "Verified Simplicio Runtime MCP bootstrap and governed coding skills for Gemini CLI.",
   "mcpServers": {
     "simplicio-runtime": {
