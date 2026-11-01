@@ -138,6 +138,22 @@ Keuntungan datang daripada penjana: dalam tugasan halaman, `simplicio_map` mengh
 
 > OpenCode 2.1.4 dan DeepSeek V4.1 Flash pada satu titik akhir OpenRouter yang tetap, sama bagi setiap larian. Kos dikira pada $0.15 input, $0.60 output dan $0.003 cache bagi setiap sejuta token. Ini satu model pada tiga tugasan kecil: tugasan lain akan memberi angka lain. [Prompt, kaedah, had dan data setiap sesi](../benchmarks/2026-10-31-map-codegen.md).
 
+Tugasan yang sama pada model lain, dengan dan tanpa Simplicio. Setiap model berjalan dalam satu klien, jadi bandingkan model dengan dirinya sendiri.
+
+| Model | Tugasan | Simplicio 3.10.8 | Tanpa MCP | Dihantar |
+|:---|:---|---:|---:|---:|
+| **Claude Sonnet 5.5** (Claude Code) | Halaman daripada fail JSON, diliputi penjana | **17.5 s · $0.0672** | 33.4 s · $0.0927 | 10/10 |
+|  | Halaman baharu, data dan bahasa lain, tidak digunakan untuk membina penjana | **16.3 s · $0.0514** | 22.5 s · $0.0610 | 10/10 |
+|  | Skrip Python, tiada penjana yang meliputinya | **19.6 s · $0.0548** | 11.4 s · $0.0283 | 10/10 |
+| **Grok 4.7** (Grok Build) | Halaman daripada fail JSON, diliputi penjana | **31.0 s · $0.1690** | 359.7 s · $0.8590 | 6/6 |
+|  | Halaman baharu, data dan bahasa lain, tidak digunakan untuk membina penjana | **36.0 s · $0.2059** | 387.5 s · $0.8518 | 6/6 |
+|  | Skrip Python, tiada penjana yang meliputinya | **82.0 s · $0.3315** | 63.1 s · $0.2452 | 6/6 |
+| **Claude Haiku 5.5** (OpenCode) | Halaman daripada fail JSON, diliputi penjana | **13.7 s · $0.0046** | 29.3 s · $0.0083 | 10/10 |
+|  | Halaman baharu, data dan bahasa lain, tidak digunakan untuk membina penjana | **13.8 s · $0.0023** | 28.7 s · $0.0057 | 10/10 |
+|  | Skrip Python, tiada penjana yang meliputinya | **19.2 s · $0.0033** | 16.6 s · $0.0030 | 10/10 |
+
+[Prompt, kaedah, had dan data setiap sesi](../benchmarks/2026-11-01-multi-model.md).
+
 ---
 
 ## 🎯 Apa Yang Ia Lakukan

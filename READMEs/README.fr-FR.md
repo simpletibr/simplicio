@@ -138,6 +138,22 @@ Le gain vient du générateur : sur les tâches de page, `simplicio_map` route l
 
 > OpenCode 2.1.4 et DeepSeek V4.1 Flash sur un seul endpoint OpenRouter, identique pour chaque exécution. Coût calculé à 0,15 $ en entrée, 0,60 $ en sortie et 0,003 $ en cache par million de tokens. Un seul modèle sur trois petites tâches : d'autres tâches donneront d'autres chiffres. [Prompts, méthode, limites et données par session](../benchmarks/2026-10-31-map-codegen.md).
 
+Les mêmes tâches sur d'autres modèles, avec et sans Simplicio. Chaque modèle a tourné dans un seul client : comparez un modèle avec lui-même.
+
+| Modèle | Tâche | Simplicio 3.10.8 | Sans MCP | Livraisons |
+|:---|:---|---:|---:|---:|
+| **Claude Sonnet 5.5** (Claude Code) | Page à partir d'un JSON, couverte par un générateur | **17.5 s · $0.0672** | 33.4 s · $0.0927 | 10/10 |
+|  | Nouvelle page, autres données et autre langue, non utilisée pour construire le générateur | **16.3 s · $0.0514** | 22.5 s · $0.0610 | 10/10 |
+|  | Script Python, aucun générateur ne le couvre | **19.6 s · $0.0548** | 11.4 s · $0.0283 | 10/10 |
+| **Grok 4.7** (Grok Build) | Page à partir d'un JSON, couverte par un générateur | **31.0 s · $0.1690** | 359.7 s · $0.8590 | 6/6 |
+|  | Nouvelle page, autres données et autre langue, non utilisée pour construire le générateur | **36.0 s · $0.2059** | 387.5 s · $0.8518 | 6/6 |
+|  | Script Python, aucun générateur ne le couvre | **82.0 s · $0.3315** | 63.1 s · $0.2452 | 6/6 |
+| **Claude Haiku 5.5** (OpenCode) | Page à partir d'un JSON, couverte par un générateur | **13.7 s · $0.0046** | 29.3 s · $0.0083 | 10/10 |
+|  | Nouvelle page, autres données et autre langue, non utilisée pour construire le générateur | **13.8 s · $0.0023** | 28.7 s · $0.0057 | 10/10 |
+|  | Script Python, aucun générateur ne le couvre | **19.2 s · $0.0033** | 16.6 s · $0.0030 | 10/10 |
+
+[Prompts, méthode, limites et données par session](../benchmarks/2026-11-01-multi-model.md).
+
 ---
 
 ## 🎯 Ce Qu'il Fait
