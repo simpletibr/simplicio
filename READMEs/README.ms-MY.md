@@ -1,4 +1,4 @@
-# 🔥 Simplicio — Ejen AI Yang MENJIMATKAN SEHINGGA 96% TOKEN ANDA
+# 🔥 Simplicio
 
 <p align="center">
   <img src="../assets/simplicio-hero.png" alt="Simplicio — ejen pengekodan AI" width="920" />
@@ -14,7 +14,7 @@
 <p align="center">
   <a href="#-pemasangan">Pasang</a> ·
   <a href="#-apa-yang-ia-lakukan">Ciri</a> ·
-  <a href="#-penjimatan-token">Penjimatan 96%</a> ·
+  <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">Laman Web</a>
 </p>
 
@@ -49,7 +49,6 @@ dan penghantaran PR berasaskan bukti.
 **Berjalan di mesin anda. Kod anda tidak pernah meninggalkan kawalan anda. Model
 jarak jauh adalah pilihan, bukan keperluan.**
 
-> **🔥 Jimat sehingga 96% token berbanding ejen tradisional — lebih daripada Caveman (65%) atau RTK (80%).**
 > Setiap interaksi menunjukkan dengan tepat berapa banyak token yang anda jimatkan. Binari Rust tunggal, sifar kebergantungan.
 
 ## 🚀 Pemasangan
@@ -120,86 +119,37 @@ Selesai. Satu arahan. Tiada pengurus pakej, tiada konfigurasi model.
 
 ---
 
-## 💰 Penjimatan Token — 96% Adalah Nyata
+## 📊 Benchmark (2026-10-31)
 
-### Bukti terukur OpenRouter — penciptaan + suntingan CRUD (2026-09-01)
+Model sebenar mencipta fail dan menyuntingnya dalam sesi yang sama. Hasilnya disemak di luar sesi: halaman dalam Chrome headless, skrip dengan menjalankannya. 60 sesi, nilai median.
 
-Kedua-dua aliran menggunakan OpenRouter dan `deepseek/deepseek-v4-flash-0731`
-dengan `seed=42`, `temperature=0` dan penaakulan dimatikan. Penciptaan ialah
-kawalan. Semasa suntingan, aliran biasa menghantar dan menjana semula seluruh
-HTML; Simplicio menghantar pelan padat lalu menerapkannya melalui MCP.
+| Tugasan | Konfigurasi | n | Masa | Permintaan model | Token output | Kos | Dihantar |
+|:---|:---|---:|---:|---:|---:|---:|---:|
+| **Halaman daripada fail JSON, diliputi penjana** | **Simplicio 3.10.8** | 10 | **14.1 s** | **6** | **602** | **$0.0021** | **10/10** |
+|  | Simplicio 3.9.2 | 10 | 166.2 s | 24.5 | 19,944 | $0.0215 | 10/10 |
+|  | Tanpa MCP | 10 | 176.3 s | 32.5 | 17,929 | $0.0203 | 10/10 |
+| **Halaman baharu, data dan bahasa lain, tidak digunakan untuk membina penjana** | **Simplicio 3.10.8** | 6 | **14.1 s** | **6** | **524** | **$0.0010** | **6/6** |
+|  | Simplicio 3.9.2 | 6 | 110.9 s | 17.5 | 16,091 | $0.0153 | 6/6 |
+| **Skrip Python, tiada penjana yang meliputinya** | **Simplicio 3.10.8** | 6 | **30.7 s** | **10.5** | **1,796** | **$0.0031** | **6/6** |
+|  | Simplicio 3.9.2 | 6 | 34.1 s | 11.5 | 2,485 | $0.0051 | 6/6 |
+|  | Tanpa MCP | 6 | 22.7 s | 8 | 1,268 | $0.0024 | 6/6 |
 
-| Peringkat suntingan | Tanpa Simplicio | Dengan Simplicio MCP | Pengurangan |
-|---|---:|---:|---:|
-| Token input | 5,430 | 415 | 92.36% |
-| Token output | 5,144 | 58 | 98.87% |
-| Jumlah token | 10,574 | 473 | **95.53%** |
-| Kos OpenRouter | US$0.00078559 | US$0.00002654 | **96.62%** |
-| Kependaman | 17,615.78 ms | 1,296.79 ms | 92.64% |
-| Semakan kualiti | Gagal | Lulus | — |
+Keuntungan datang daripada penjana: dalam tugasan halaman, `simplicio_map` menghala permintaan dan `simplicio_codegen` menulis fail dengan 0 token LLM. Apabila tiada penjana meliputi tugasan, 3.10.8 mengatasi 3.9.2, tetapi menelan kira-kira 8 s dan $0.0007 lebih bagi setiap sesi berbanding tanpa MCP.
 
-Untuk kedua-dua peringkat, penggunaan turun daripada 16,043 kepada 6,175 token
-(**61.51% kurang**) dan kos daripada US$0.00132192 kepada US$0.00058617
-(**55.66% kurang**). Kawalan penciptaan menggunakan 4.26% lebih token dengan
-Simplicio, jadi bukti utama ialah suntingan, bukan kawalan. Ini satu pasangan
-aliran kerja terukur, bukan jaminan universal atau perbandingan output serupa.
-Token cache dan penaakulan ialah sifar. Ulang ujian sebelum tuntutan statistik.
-[Bukti boleh dibaca mesin](../docs/evidence/openrouter-deepseek-v4-crud-2026-09-01.json).
-
-**Tanpa Simplicio:** setiap sesi AI menemui semula repositori anda, memuatkan terlalu
-banyak konteks, mengulang gesaan, membakar token berbayar.
-
-**Dengan Simplicio:**
-
-| Pengoptimuman | Penjimatan |
-|---|---|
-| 🗺️ **Peta Repo** — konteks dimampatkan dan bukannya membaca fail mentah | ~70% |
-| 🧠 **Ingatan Semula** — fakta diketahui tidak diterbitkan semula | ~80% |
-| ✏️ **Suntingan Deterministik** — perubahan tanpa menggunakan token LLM | 100% (output) |
-| 🏠 **LLM Tempatan** — pengelasan, rumusan, suntingan berisiko rendah | ~90% |
-| 📡 **LLM Jarak Jauh** — hanya untuk perancangan dan keputusan kompleks | ~85% |
-| 🔀 **Fan-out Tempatan** — 64→600 ejen sebelum penskalaan ke awan | ~95% |
-| **💎 Gabungan: sehingga 96% jumlah penjimatan** | **~96%** |
-
-**Setiap respons Simplicio menunjukkan penjimatan sebenar:** `Simplicio: ~X token digunakan · jimat ~Y (Z%)`
+> OpenCode 2.1.4 dan DeepSeek V4.1 Flash pada satu titik akhir OpenRouter yang tetap, sama bagi setiap larian. Kos dikira pada $0.15 input, $0.60 output dan $0.003 cache bagi setiap sejuta token. Ini satu model pada tiga tugasan kecil: tugasan lain akan memberi angka lain. [Prompt, kaedah, had dan data setiap sesi](../benchmarks/2026-10-31-map-codegen.md).
 
 ---
 
 ## 🎯 Apa Yang Ia Lakukan
 
-| Perintah | Penerangan | Token |
-|---|---|---|
-| `simplicio map --repo .` | Memetakan repositori untuk LLM | ~70% penjimatan |
-| `simplicio memory "query"` | Ingatan semula neural (FTS + vektor) | ~80% penjimatan |
-| `simplicio edit '{...}'` | Suntingan fail deterministik | **Sifar token** |
-| `simplicio coding-loop "tugas"` | Berulang sehingga ujian lulus | Auto-pembaikan |
-| `simplicio deliver certify` | 5 pintu kualiti sebelum penghantaran | Deterministik |
-| `simplicio run "tugas" --agents N` | Orkestrasi multi-ejen | Tempatan-dahulu |
-
----
-
-## 🆚 Simplicio vs Caveman vs RTK
-
-| | 🪨 Caveman | 🔧 RTK | 🔥 **Simplicio** |
-|---|---|---|---|
-| **Pendekatan** | Mampatan gaya output | Proksi arahan shell | **Runtime ejen penuh** |
-| **Penjimatan maks** | ~65% token output | ~80% pada arahan shell | **Sehingga 96% jumlah** |
-| **Mampatan input** | ❌ | ✅ (ditapis) | ✅ **Peta repo + ingatan neural** |
-| **Mampatan output** | ✅ (caveman-speak) | ❌ | ✅ **Suntingan deterministik sifar token** |
-| **LLM Tempatan** | ❌ | ❌ | ✅ **llama.cpp terbina dalam** |
-| **Multi-ejen** | ❌ | ❌ | ✅ **64 → 600 ejen tempatan** |
-| **Ingatan merentas sesi** | ❌ | ❌ | ✅ **FTS + ingatan vektor** |
-| **Rantaian bukti** | ❌ | ❌ | ✅ **Resit bermeterai sha256** |
-| **Bahasa** | JS/Python (kemahiran) | Rust (binari) | **Rust (binari tunggal)** |
-| **Lesen** | MIT | Apache 2.0 | Proprietari |
-| **Bintang** | 72.5k | 62.2k | ⭐ **Anda awal** |
-
-**Kesimpulan:** Caveman membuat AI *bercakap* kurang. RTK membuat arahan *output* kurang.
-Simplicio membuat AI *berfikir* kurang — dengan mengingat, memetakan, menyunting secara
-deterministik, dan berjalan secara tempatan sebelum menyentuh LLM berbayar.
-
-| **Simplicio menjimatkan 96% di mana Caveman menjimatkan 65% dan RTK menjimatkan 80%.** |
-
+| Perintah | Penerangan |
+|---|---|
+| `simplicio map --repo .` | Memetakan repositori untuk LLM |
+| `simplicio memory "query"` | Ingatan semula neural (FTS + vektor) |
+| `simplicio edit '{...}'` | Suntingan fail deterministik |
+| `simplicio coding-loop "tugas"` | Berulang sehingga ujian lulus |
+| `simplicio deliver certify` | 5 pintu kualiti sebelum penghantaran |
+| `simplicio run "tugas" --agents N` | Orkestrasi multi-ejen |
 ---
 
 ## 🏗️ Seni Bina
@@ -295,5 +245,5 @@ semasa beta awam. Lihat [LICENSE](../plugins/simplicio/LICENSE).
 ---
 
 <p align="center">
-  <strong>🔥 Simplicio — Kod anda, mesin anda, 96% lebih murah. 🔥</strong>
+  <strong>🔥 Simplicio 🔥</strong>
 </p>

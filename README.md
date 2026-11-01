@@ -1,7 +1,7 @@
 # ⚡ Simplicio
 
 > **The High-Performance Native AI Coding Runtime & Agent (100% Rust)**  
-> Save up to 96% of tokens with sub-millisecond local orientation, atomic edits, and governed concurrency.
+> A page a generator covers takes 14 s and $0.0021, against 166 s and $0.0215 on 3.9.2. Local orientation, atomic edits and governed concurrency.
 
 <p align="center">
   <img src="assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="840" />
@@ -37,7 +37,7 @@ Requisitos e repro: [docs/flow/README.md](docs/flow/README.md).
 
 <p align="center">
   <a href="#-quick-install">Quick Install</a> •
-  <a href="#-real-world-measured-benchmark-simplicio-suite-vs-standard-agent">Benchmarks</a> •
+  <a href="#-measured-benchmark-simplicio-3108-vs-392-vs-no-mcp">Benchmarks</a> •
   <a href="#-first-60-seconds">First 60 Seconds</a> •
   <a href="#-mcp--ide-integration">MCP & IDEs</a> •
   <a href="#-core-architecture">Architecture</a> •
@@ -52,25 +52,28 @@ Requisitos e repro: [docs/flow/README.md](docs/flow/README.md).
 
 - **100% Native Rust**: Single ~46MB standalone binary. No Python, virtualenvs, or heavy background processes.
 - **Ultra-Low Latency**: ~4ms cold start vs. seconds in interpreted runtimes.
-- **Token Economy**: Saves up to 96% of tokens by projecting bounded AST graphs instead of dumping raw file trees.
+- **Token Economy**: A generator writes what it covers with 0 LLM tokens, and bounded context replaces raw file trees for the rest. See the [benchmark](#-measured-benchmark-simplicio-3108-vs-392-vs-no-mcp).
 - **Fail-Closed Safety**: Every code modification uses SHA-256 pre-image checks, atomic replacements, and immutable audit receipts.
 
 ---
-## 📊 Real-World Measured Benchmark: Simplicio Suite vs Standard Agent
+## 📊 Measured Benchmark: Simplicio 3.10.8 vs 3.9.2 vs No MCP
 
-In an audited head-to-head A/B benchmark on a real codebase task (AST-safe bug fix and regression test verification using `deepseek/deepseek-v4.1-flash` via OpenRouter):
+A real model creates a file and edits it in the same session. The result is checked outside the session: pages in headless Chrome, scripts by running them. 60 sessions on 2026-10-31, medians.
 
-| Metric | Standard Agent (No Simplicio) | Simplicio Suite (With Loop) | Advantage |
-|:---|:---|:---|:---|
-| **Wall-Clock Duration** | `55.19 s` | **`13.60 s`** | 🚀 **4.05x faster (-75.4%)** |
-| **Prompt Tokens** | `7,747 tokens` | **`550 tokens`** | 📉 **-92.9% prompt tokens** |
-| **Completion Tokens** | `661 tokens` | **`294 tokens`** | 📉 **-55.5% output tokens** |
-| **Total Tokens Consumed** | `8,408 tokens` | **`844 tokens`** | 💎 **-90.0% total tokens** |
-| **Billed API Cost (USD)** | `$0.001786` | **`$0.000259`** | 💰 **6.9x cheaper (-85.5%)** |
-| **Agent Turns** | 2 turns (retry needed) | **1 turn** | 🎯 **1st-turn deterministic resolution** |
-| **Code Modification Safety** | Unchecked raw edits | **AST-safe plan + SHA256 receipt** | 🔒 **Deterministic fail-closed** |
+| Task | Setup | n | Time | Model requests | Output tokens | Cost | Delivered |
+|:---|:---|---:|---:|---:|---:|---:|---:|
+| **Page from a JSON file**, a generator covers it | **Simplicio 3.10.8** | 10 | **14.1 s** | **6** | **602** | **$0.0021** | **10/10** |
+| | Simplicio 3.9.2 | 10 | 166.2 s | 24.5 | 19,944 | $0.0215 | 10/10 |
+| | No MCP | 10 | 176.3 s | 32.5 | 17,929 | $0.0203 | 10/10 |
+| **New page**, other data, other language, not used to build the generator | **Simplicio 3.10.8** | 6 | **14.1 s** | **6** | **524** | **$0.0010** | **6/6** |
+| | Simplicio 3.9.2 | 6 | 110.9 s | 17.5 | 16,091 | $0.0153 | 6/6 |
+| **Python script**, no generator covers it | **Simplicio 3.10.8** | 6 | **30.7 s** | **10.5** | **1,796** | **$0.0031** | **6/6** |
+| | Simplicio 3.9.2 | 6 | 34.1 s | 11.5 | 2,485 | $0.0051 | 6/6 |
+| | No MCP | 6 | 22.7 s | 8 | 1,268 | $0.0024 | 6/6 |
 
-> **Audit Artifact:** `bench/llm_ab/results/2026-10-12-6dac8429-t1.json` · Model: `deepseek/deepseek-v4.1-flash` via OpenRouter.
+The gain comes from the generator: on the page tasks, `simplicio_map` routes the request and `simplicio_codegen` writes the file with 0 LLM tokens. On a task no generator covers, 3.10.8 beats 3.9.2 and costs about 8 s and $0.0007 more per session than no MCP at all.
+
+> **Setup:** OpenCode 2.1.4, DeepSeek V4.1 Flash on one fixed OpenRouter endpoint, the same for every run. Cost is computed at $0.15 input, $0.60 output and $0.003 cache read per million tokens. Measured on commit `6e232bb`; one real session per task repeated it on the release code. **Prompts, method and limits:** [`benchmarks/2026-10-31-map-codegen.md`](benchmarks/2026-10-31-map-codegen.md) · **Per-session data:** [`benchmarks/2026-10-31-map-codegen.json`](benchmarks/2026-10-31-map-codegen.json).
 
 ---
 

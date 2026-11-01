@@ -1,4 +1,4 @@
-# 🔥 Simplicio — Agen AI yang MENGHEMAT HINGGA 96% TOKEN ANDA
+# 🔥 Simplicio
 
 <p align="center">
   <img src="../assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="920" />
@@ -14,7 +14,7 @@
 <p align="center">
   <a href="#instalasi">Instalasi</a> ·
   <a href="#yang-dilakukan">Yang Dilakukan</a> ·
-  <a href="#penghematan-token--96-nyata">Penghematan Token — 96% Nyata</a> ·
+  <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">Situs Web</a>
 </p>
 
@@ -49,7 +49,6 @@ pengiriman PR berbasis bukti.
 **Berjalan di mesin Anda. Kode Anda tidak pernah meninggalkan kendali Anda. Model jarak jauh
 bersifat opsional, tidak wajib.**
 
-> **🔥 Hemat hingga 96% token dibandingkan agen tradisional — lebih dari Caveman (65%) atau RTK (80%).**
 > Setiap interaksi menunjukkan persis berapa banyak token yang Anda hemat. Biner Rust tunggal, tanpa dependensi.
 
 ## 🚀 Instalasi
@@ -120,86 +119,37 @@ Selesai. Satu perintah. Tanpa manajer paket, tanpa konfigurasi model.
 
 ---
 
-## 💰 Penghematan Token — 96% Nyata
+## 📊 Benchmark (2026-10-31)
 
-### Bukti terukur OpenRouter — pembuatan + penyuntingan CRUD (2026-09-01)
+Model sungguhan membuat file lalu mengeditnya dalam sesi yang sama. Hasilnya diperiksa di luar sesi: halaman di Chrome headless, skrip dengan menjalankannya. 60 sesi, nilai median.
 
-Kedua alur menggunakan OpenRouter dan `deepseek/deepseek-v4-flash-0731` dengan
-`seed=42`, `temperature=0`, dan penalaran dimatikan. Pembuatan adalah kontrol.
-Saat penyuntingan, alur normal mengirim dan membuat ulang seluruh HTML;
-Simplicio mengirim rencana ringkas lalu menerapkannya melalui MCP.
+| Tugas | Konfigurasi | n | Waktu | Permintaan model | Token keluaran | Biaya | Terkirim |
+|:---|:---|---:|---:|---:|---:|---:|---:|
+| **Halaman dari file JSON, dicakup generator** | **Simplicio 3.10.8** | 10 | **14.1 s** | **6** | **602** | **$0.0021** | **10/10** |
+|  | Simplicio 3.9.2 | 10 | 166.2 s | 24.5 | 19,944 | $0.0215 | 10/10 |
+|  | Tanpa MCP | 10 | 176.3 s | 32.5 | 17,929 | $0.0203 | 10/10 |
+| **Halaman baru, data dan bahasa lain, tidak dipakai untuk membangun generator** | **Simplicio 3.10.8** | 6 | **14.1 s** | **6** | **524** | **$0.0010** | **6/6** |
+|  | Simplicio 3.9.2 | 6 | 110.9 s | 17.5 | 16,091 | $0.0153 | 6/6 |
+| **Skrip Python, tidak dicakup generator mana pun** | **Simplicio 3.10.8** | 6 | **30.7 s** | **10.5** | **1,796** | **$0.0031** | **6/6** |
+|  | Simplicio 3.9.2 | 6 | 34.1 s | 11.5 | 2,485 | $0.0051 | 6/6 |
+|  | Tanpa MCP | 6 | 22.7 s | 8 | 1,268 | $0.0024 | 6/6 |
 
-| Tahap penyuntingan | Tanpa Simplicio | Dengan Simplicio MCP | Pengurangan |
-|---|---:|---:|---:|
-| Token input | 5,430 | 415 | 92.36% |
-| Token output | 5,144 | 58 | 98.87% |
-| Total token | 10,574 | 473 | **95.53%** |
-| Biaya OpenRouter | US$0.00078559 | US$0.00002654 | **96.62%** |
-| Latensi | 17,615.78 ms | 1,296.79 ms | 92.64% |
-| Pemeriksaan kualitas | Gagal | Lulus | — |
+Keuntungan datang dari generator: pada tugas halaman, `simplicio_map` merutekan permintaan dan `simplicio_codegen` menulis file dengan 0 token LLM. Jika tidak ada generator yang mencakup tugas, 3.10.8 mengungguli 3.9.2, tetapi menghabiskan sekitar 8 detik dan $0.0007 lebih banyak per sesi dibanding tanpa MCP.
 
-Pada kedua tahap, penggunaan turun dari 16,043 menjadi 6,175 token (**61.51%
-lebih sedikit**) dan biaya dari US$0.00132192 menjadi US$0.00058617 (**55.66%
-lebih sedikit**). Kontrol pembuatan memakai 4.26% lebih banyak token dengan
-Simplicio, sehingga bukti utama adalah penyuntingan, bukan kontrol. Ini satu
-pasangan alur kerja terukur, bukan jaminan universal atau perbandingan keluaran
-identik. Token cache dan penalaran bernilai nol. Ulangi pengujian sebelum klaim
-statistik. [Bukti terbaca mesin](../docs/evidence/openrouter-deepseek-v4-crud-2026-09-01.json).
-
-**Tanpa Simplicio:** setiap sesi AI menemukan ulang repositori Anda, memuat terlalu
-banyak konteks, mengulangi prompt, dan menghabiskan token berbayar.
-
-**Dengan Simplicio:**
-
-| Optimasi | Penghematan |
-|---|---|
-| 🗺️ **Peta Repo** — konteks terkompresi, bukan membaca file mentah | ~70% |
-| 🧠 **Memori Panggil Ulang** — fakta yang diketahui tidak diulang kembali | ~80% |
-| ✏️ **Pengeditan Deterministik** — perubahan tanpa menghabiskan token LLM | 100% (output) |
-| 🏠 **LLM Lokal** — klasifikasi, perangkuman, suntingan berisiko rendah | ~90% |
-| 📡 **LLM Jarak Jauh** — hanya untuk perencanaan dan keputusan kompleks | ~85% |
-| 🔀 **Fan-out Lokal** — 64→600 agen sebelum naik ke cloud | ~95% |
-| **💎 Gabungan: hingga 96% total penghematan** | **~96%** |
-
-**Setiap respons Simplicio menunjukkan penghematan nyata:** `Simplicio: ~X token digunakan · hemat ~Y (Z%)`
+> OpenCode 2.1.4 dan DeepSeek V4.1 Flash pada satu endpoint OpenRouter tetap, sama untuk setiap eksekusi. Biaya dihitung dengan $0.15 input, $0.60 output, dan $0.003 cache per sejuta token. Ini satu model pada tiga tugas kecil: tugas lain akan memberi angka lain. [Prompt, metode, batasan, dan data per sesi](../benchmarks/2026-10-31-map-codegen.md).
 
 ---
 
 ## 🎯 Yang Dilakukan
 
-| Perintah | Deskripsi | Token |
-|---|---|---|
-| `simplicio map --repo .` | Memetakan repositori untuk LLM | ~70% hemat |
-| `simplicio memory "query"` | Panggil ulang neural (FTS + vektor) | ~80% hemat |
-| `simplicio edit '{...}'` | Pengeditan file deterministik | **Nol token** |
-| `simplicio coding-loop "task"` | Mengulang hingga pengujian lulus | Perbaikan-otomatis |
-| `simplicio deliver certify` | 5 gerbang kualitas sebelum dikirim | Deterministik |
-| `simplicio run "task" --agents N` | Orkestrasi multi-agen | Lokal-pertama |
-
----
-
-## 🆚 Simplicio vs Caveman vs RTK
-
-| | 🪨 Caveman | 🔧 RTK | 🔥 **Simplicio** |
-|---|---|---|---|
-| **Pendekatan** | Kompresi gaya output | Proksi perintah shell | **Runtime agen penuh** |
-| **Hemat maksimal** | ~65% token output | ~80% pada perintah shell | **Hingga 96% total** |
-| **Kompresi input** | ❌ | ✅ (difilter) | ✅ **Peta repo + memori neural** |
-| **Kompresi output** | ✅ (caveman-speak) | ❌ | ✅ **Suntingan deterministik nol-token** |
-| **LLM Lokal** | ❌ | ❌ | ✅ **llama.cpp bawaan** |
-| **Multi-agen** | ❌ | ❌ | ✅ **64 → 600 agen lokal** |
-| **Memori antar sesi** | ❌ | ❌ | ✅ **FTS + panggil ulang vektor** |
-| **Rantai bukti** | ❌ | ❌ | ✅ **Tanda terima tersegel sha256** |
-| **Bahasa** | JS/Python (skill) | Rust (biner) | **Rust (biner tunggal)** |
-| **Lisensi** | MIT | Apache 2.0 | Kepemilikan |
-| **Bintang** | 72,5k | 62,2k | ⭐ **Anda pelopor** |
-
-**Intinya:** Caveman membuat AI *berbicara* lebih sedikit. RTK membuat perintah *mengeluarkan*
-lebih sedikit. Simplicio membuat AI *berpikir* lebih sedikit — dengan mengingat, memetakan,
-menyunting secara deterministik, dan berjalan secara lokal sebelum menyentuh LLM berbayar.
-
-| **Simplicio menghemat 96% di mana Caveman menghemat 65% dan RTK menghemat 80%.** |
-
+| Perintah | Deskripsi |
+|---|---|
+| `simplicio map --repo .` | Memetakan repositori untuk LLM |
+| `simplicio memory "query"` | Panggil ulang neural (FTS + vektor) |
+| `simplicio edit '{...}'` | Pengeditan file deterministik |
+| `simplicio coding-loop "task"` | Mengulang hingga pengujian lulus |
+| `simplicio deliver certify` | 5 gerbang kualitas sebelum dikirim |
+| `simplicio run "task" --agents N` | Orkestrasi multi-agen |
 ---
 
 ## 🏗️ Arsitektur
@@ -295,5 +245,5 @@ beta publik. Lihat [LICENSE](../plugins/simplicio/LICENSE).
 ---
 
 <p align="center">
-  <strong>🔥 Simplicio — Kode Anda, mesin Anda, 96% lebih murah. 🔥</strong>
+  <strong>🔥 Simplicio 🔥</strong>
 </p>

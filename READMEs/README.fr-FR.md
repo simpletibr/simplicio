@@ -1,4 +1,4 @@
-# 🔥 Simplicio — L'agent IA qui économise JUSQU'À 96 % DE VOS TOKENS
+# 🔥 Simplicio
 
 <p align="center">
   <img src="../assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="920" />
@@ -14,7 +14,7 @@
 <p align="center">
   <a href="#installation">Installation</a> ·
   <a href="#ce-quil-fait">Ce Qu'il Fait</a> ·
-  <a href="#économies-de-tokens--96-cest-réel">Économies de Tokens — 96 % C'est Réel</a> ·
+  <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">Site Web</a>
 </p>
 
@@ -49,7 +49,6 @@ et livraison de PR avec preuves à l'appui.
 **Tourne sur votre machine. Votre code ne quitte jamais votre contrôle. Les modèles distants
 sont facultatifs, pas obligatoires.**
 
-> **🔥 Économisez jusqu'à 96 % de tokens par rapport aux agents traditionnels — plus que Caveman (65 %) ou RTK (80 %).**
 > Chaque interaction montre exactement combien de tokens vous avez économisés. Binaire Rust unique, zéro dépendance.
 
 ## 🚀 Installation
@@ -120,87 +119,37 @@ Terminé. Une seule commande. Pas de gestionnaire de paquets, pas de configurati
 
 ---
 
-## 💰 Économies de Tokens — 96 % C'est Réel
+## 📊 Benchmark (2026-10-31)
 
-### Preuve mesurée sur OpenRouter — création + édition d'un CRUD (2026-09-01)
+Un vrai modèle crée un fichier puis le modifie dans la même session. Le résultat est vérifié hors de la session : les pages dans Chrome headless, les scripts en les exécutant. 60 sessions, médianes.
 
-Une exécution contrôlée en deux étapes a utilisé OpenRouter et
-`deepseek/deepseek-v4-flash-0731` dans les deux flux (`seed=42`,
-`temperature=0`, raisonnement désactivé). La création servait de contrôle. Pour
-l'édition, le flux normal a renvoyé et régénéré tout le HTML ; Simplicio a envoyé
-un plan compact puis l'a appliqué via MCP.
+| Tâche | Configuration | n | Temps | Requêtes au modèle | Tokens de sortie | Coût | Livraisons |
+|:---|:---|---:|---:|---:|---:|---:|---:|
+| **Page à partir d'un JSON, couverte par un générateur** | **Simplicio 3.10.8** | 10 | **14.1 s** | **6** | **602** | **$0.0021** | **10/10** |
+|  | Simplicio 3.9.2 | 10 | 166.2 s | 24.5 | 19,944 | $0.0215 | 10/10 |
+|  | Sans MCP | 10 | 176.3 s | 32.5 | 17,929 | $0.0203 | 10/10 |
+| **Nouvelle page, autres données et autre langue, non utilisée pour construire le générateur** | **Simplicio 3.10.8** | 6 | **14.1 s** | **6** | **524** | **$0.0010** | **6/6** |
+|  | Simplicio 3.9.2 | 6 | 110.9 s | 17.5 | 16,091 | $0.0153 | 6/6 |
+| **Script Python, aucun générateur ne le couvre** | **Simplicio 3.10.8** | 6 | **30.7 s** | **10.5** | **1,796** | **$0.0031** | **6/6** |
+|  | Simplicio 3.9.2 | 6 | 34.1 s | 11.5 | 2,485 | $0.0051 | 6/6 |
+|  | Sans MCP | 6 | 22.7 s | 8 | 1,268 | $0.0024 | 6/6 |
 
-| Étape d'édition | Sans Simplicio | Avec Simplicio MCP | Réduction |
-|---|---:|---:|---:|
-| Tokens d'entrée | 5 430 | 415 | 92,36 % |
-| Tokens de sortie | 5 144 | 58 | 98,87 % |
-| Total des tokens | 10 574 | 473 | **95,53 %** |
-| Coût OpenRouter | 0,00078559 $US | 0,00002654 $US | **96,62 %** |
-| Latence | 17 615,78 ms | 1 296,79 ms | 92,64 % |
-| Contrôles qualité | Échec | Réussite | — |
+Le gain vient du générateur : sur les tâches de page, `simplicio_map` route la demande et `simplicio_codegen` écrit le fichier avec 0 token LLM. Quand aucun générateur ne couvre la tâche, la 3.10.8 bat la 3.9.2 et coûte environ 8 s et 0,0007 $ de plus par session que sans MCP.
 
-Sur les deux étapes, le total passe de 16 043 à 6 175 tokens (**61,51 % de
-moins**) et de 0,00132192 $US à 0,00058617 $US (**55,66 % de moins**). Le
-contrôle de création a consommé 4,26 % de tokens en plus avec Simplicio ;
-l'édition, et non le contrôle, constitue donc la preuve principale. Il s'agit
-d'une seule paire de flux mesurée, sans garantie universelle ni sorties
-identiques. Cache et raisonnement étaient à zéro. Répétez le test avant toute
-conclusion statistique. [Preuve lisible par machine](../docs/evidence/openrouter-deepseek-v4-crud-2026-09-01.json).
-
-**Sans Simplicio :** chaque session IA redécouvre votre dépôt, charge trop de
-contexte, répète les invites, brûle des tokens payants.
-
-**Avec Simplicio :**
-
-| Optimisation | Économies |
-|---|---|
-| 🗺️ **Plan du dépôt** — contexte compressé au lieu de lire les fichiers bruts | ~70 % |
-| 🧠 **Rappel mémoire** — les faits connus ne sont pas redérivés | ~80 % |
-| ✏️ **Édition déterministe** — modifications sans dépenser de tokens LLM | 100 % (sortie) |
-| 🏠 **LLM local** — classification, résumé, modifications à faible risque | ~90 % |
-| 📡 **LLM distant** — uniquement pour la planification et les décisions complexes | ~85 % |
-| 🔀 **Fan-out local** — 64→600 agents avant de passer au cloud | ~95 % |
-| **💎 Combiné : jusqu'à 96 % d'économies totales** | **~96 %** |
-
-**Chaque réponse de Simplicio montre les économies réelles :** `Simplicio: ~X tokens dépensés · économisé ~Y (Z%)`
+> OpenCode 2.1.4 et DeepSeek V4.1 Flash sur un seul endpoint OpenRouter, identique pour chaque exécution. Coût calculé à 0,15 $ en entrée, 0,60 $ en sortie et 0,003 $ en cache par million de tokens. Un seul modèle sur trois petites tâches : d'autres tâches donneront d'autres chiffres. [Prompts, méthode, limites et données par session](../benchmarks/2026-10-31-map-codegen.md).
 
 ---
 
 ## 🎯 Ce Qu'il Fait
 
-| Commande | Description | Tokens |
-|---|---|---|
-| `simplicio map --repo .` | Cartographie le dépôt pour les LLMs | ~70 % d'économies |
-| `simplicio memory "query"` | Rappel neuronal (FTS + vecteurs) | ~80 % d'économies |
-| `simplicio edit '{...}'` | Édition déterministe de fichiers | **Zéro token** |
-| `simplicio coding-loop "task"` | Itère jusqu'à ce que les tests passent | Auto-réparation |
-| `simplicio deliver certify` | 5 portes qualité avant livraison | Déterministe |
-| `simplicio run "task" --agents N` | Orchestration multi-agent | Local d'abord |
-
----
-
-## 🆚 Simplicio vs Caveman vs RTK
-
-| | 🪨 Caveman | 🔧 RTK | 🔥 **Simplicio** |
-|---|---|---|---|
-| **Approche** | Compression du style de sortie | Proxy de commandes shell | **Runtime d'agent complet** |
-| **Économies max** | ~65 % tokens de sortie | ~80 % sur les commandes shell | **Jusqu'à 96 % du total** |
-| **Compression d'entrée** | ❌ | ✅ (filtrée) | ✅ **Plan du dépôt + mémoire neuronale** |
-| **Compression de sortie** | ✅ (caveman-speak) | ❌ | ✅ **Éditions déterministes zéro token** |
-| **LLM local** | ❌ | ❌ | ✅ **llama.cpp intégré** |
-| **Multi-agent** | ❌ | ❌ | ✅ **64 → 600 agents locaux** |
-| **Mémoire entre sessions** | ❌ | ❌ | ✅ **FTS + rappel vectoriel** |
-| **Chaîne de preuves** | ❌ | ❌ | ✅ **Reçus scellés sha256** |
-| **Langage** | JS/Python (skill) | Rust (binaire) | **Rust (binaire unique)** |
-| **Licence** | MIT | Apache 2.0 | Propriétaire |
-| **Étoiles** | 72,5k | 62,2k | ⭐ **Vous êtes en avance** |
-
-**En résumé :** Caveman fait en sorte que l'IA *parle* moins. RTK fait en sorte que les commandes *produisent* moins.
-Simplicio fait en sorte que l'IA *réfléchisse* moins — en se souvenant, en cartographiant, en éditant de manière déterministe,
-et en s'exécutant localement avant même de toucher un LLM payant.
-
-| **Simplicio économise 96 % là où Caveman économise 65 % et RTK 80 %.** |
-
+| Commande | Description |
+|---|---|
+| `simplicio map --repo .` | Cartographie le dépôt pour les LLMs |
+| `simplicio memory "query"` | Rappel neuronal (FTS + vecteurs) |
+| `simplicio edit '{...}'` | Édition déterministe de fichiers |
+| `simplicio coding-loop "task"` | Itère jusqu'à ce que les tests passent |
+| `simplicio deliver certify` | 5 portes qualité avant livraison |
+| `simplicio run "task" --agents N` | Orchestration multi-agent |
 ---
 
 ## 🏗️ Architecture
@@ -296,5 +245,5 @@ bêta publique. Voir [LICENSE](../plugins/simplicio/LICENSE).
 ---
 
 <p align="center">
-  <strong>🔥 Simplicio — Votre code, votre machine, 96 % moins cher. 🔥</strong>
+  <strong>🔥 Simplicio 🔥</strong>
 </p>
