@@ -81,7 +81,26 @@ run_case() {
   fi
 }
 
-# Core/full native-file-tool enforcement: the Runtime denies when a live MCP
+# Host reads stay native on every profile, so a full profile must stay silent.
+run_free_read_case() {
+  name="$1"
+  payload="$2"
+  errfile="$(mktemp)"
+  out="$(printf '%s' "$payload" | SIMPLICIO_BIN="$TEST_BIN" SIMPLICIO_MCP_PROFILE=full \
+    bash "$HOOK" 2>"$errfile")"
+  got=$?
+  err="$(cat "$errfile")"
+  rm -f "$errfile"
+  if [ "$got" -eq 0 ] && [ -z "$out" ]; then
+    printf 'PASS %s\n' "$name"
+    PASS=$((PASS + 1))
+  else
+    printf 'FAIL %s: exit=%s output=%s stderr=%s\n' "$name" "$got" "$out" "$err" >&2
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+# Core/full native write tool enforcement: the Runtime denies when a live MCP
 # server is observable, and otherwise prints an explicit UNVERIFIED advisory.
 # Both outcomes are enforcement; a silent allow is the failure.
 run_enforced_case() {
@@ -126,12 +145,11 @@ run_case "allow native read by default (no profile)" \
 run_case "allow native edit by default (no profile)" \
   '{"hook_event_name":"PreToolUse","tool_name":"write_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
-run_enforced_case "enforce native read on core/full" \
-  '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
-  'simplicio_file_read'
+run_free_read_case "native read stays free on core/full" \
+  '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}'
 run_enforced_case "enforce native edit on core/full" \
   '{"hook_event_name":"PreToolUse","tool_name":"search_replace","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
-  'simplicio_edit'
+  'host-native write tool'
 run_case "allow native read on mapper-only profile" \
   '{"hook_event_name":"PreToolUse","tool_name":"read_file","tool_input":{"file_path":"src/main.rs"},"cwd":"/tmp"}' \
   0 '__EMPTY__'
@@ -208,14 +226,11 @@ if command -v pwsh >/dev/null 2>&1; then
   ps_exit=$?
   ps_stderr="$(cat "$ps_err" 2>/dev/null || true)"
   rm -rf "$scratch"
-  if [ "$ps_exit" -eq 2 ] && printf '%s' "$ps_out" | grep -Fq 'simplicio_file_read'; then
-    printf 'PASS Windows native read enforced on core/full (denied)\n'
-    PASS=$((PASS + 1))
-  elif [ "$ps_exit" -eq 0 ] && printf '%s' "$ps_stderr" | grep -Fq 'mcp_unavailable'; then
-    printf 'PASS Windows native read enforced on core/full (advisory)\n'
+  if [ "$ps_exit" -eq 0 ] && [ -z "$ps_out" ]; then
+    printf 'PASS Windows native read stays free on core/full\n'
     PASS=$((PASS + 1))
   else
-    printf 'FAIL Windows native read enforced on core/full exit=%s output=%s stderr=%s\n' \
+    printf 'FAIL Windows native read stays free on core/full exit=%s output=%s stderr=%s\n' \
       "$ps_exit" "$ps_out" "$ps_stderr" >&2
     FAIL=$((FAIL + 1))
   fi
