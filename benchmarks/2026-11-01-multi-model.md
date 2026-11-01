@@ -61,3 +61,4 @@ Medians. Cost comes from the tokens used at each model's list price, so it does 
   - DeepSeek V4.1 Flash: 0.15 input, 0.6 output and reasoning, 0.003 cache read, 0.15 cache write.
 - Delivery is checked outside the session, as in the [2026-10-31 report](2026-10-31-map-codegen.md#method). Headless Chrome opens each page and tests rows, search, sort, filter and counter. `stats.py` is executed and its counts are compared with the data. The data file must stay unchanged.
 - The prompts are the ones in that report.
+- Harness: [harness-2026-11-01](harness-2026-11-01/).
