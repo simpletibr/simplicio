@@ -1,7 +1,7 @@
 # Simplicio MCP route — advisory Map cache for Windows hosts.
 # simplicio-hook-version: 4128-v1
 #
-# #6128: the Map-warming / mapper-only / native-write-tool-deny decision now
+# #6128: the Map-warming / native-write-tool-deny decision now
 # lives once, in Rust, as `simplicio hooks pre-tool` (src/hooks_command.rs).
 # This script is a thin, fail-soft wrapper: it reads the host's hook JSON on
 # stdin, hands it to the Runtime binary unchanged, and forwards the binary's
