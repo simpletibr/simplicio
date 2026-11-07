@@ -3,7 +3,7 @@
 # simplicio-hook-version: 4128-v1
 #
 # #6128: this used to be a ~640-line embedded Python heredoc. The whole
-# decision (Map warming, mapper-only context injection, the native-write-tool
+# decision (Map warming, context injection, the native-write-tool
 # deny path) now lives once, in Rust, as `simplicio hooks pre-tool`
 # (src/hooks_command.rs). This script is a thin, fail-soft wrapper: it reads
 # the host's hook JSON on stdin, hands it to the Runtime binary unchanged,
