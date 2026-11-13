@@ -2,10 +2,10 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "simplicio-3.11.0-linux-x64",
-  "documentNamespace": "https://simplicio.dev/sbom/5af24c01d0b616ee2b94028fdd3ca55877ee1b022082221f373e0477cc5f0d58",
+  "name": "simplicio-3.12.0-linux-x64",
+  "documentNamespace": "https://simplicio.dev/sbom/7dc7d4fc06c3b356c27ae1c48030fae2a548b6e3809c0b505cdfaa8ca8189d66",
   "creationInfo": {
-    "created": "2026-11-07T01:10:22.877281Z",
+    "created": "2026-11-13T00:53:20.746469Z",
     "creators": [
       "Tool: simplicio-runtime release evidence"
     ]
@@ -14,7 +14,7 @@
     {
       "SPDXID": "SPDXRef-Package-simplicio-runtime",
       "name": "simplicio-linux-x64",
-      "versionInfo": "3.11.0",
+      "versionInfo": "3.12.0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": true
     }
@@ -26,7 +26,7 @@
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "5af24c01d0b616ee2b94028fdd3ca55877ee1b022082221f373e0477cc5f0d58"
+          "checksumValue": "7dc7d4fc06c3b356c27ae1c48030fae2a548b6e3809c0b505cdfaa8ca8189d66"
         }
       ]
     }
