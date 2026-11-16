@@ -132,9 +132,10 @@ hook_repo="$session_repo"
 if command -v cygpath >/dev/null 2>&1; then
   hook_repo="$(cygpath -m "$session_repo")"
 fi
+# #8190 L1 (Runtime 3.12.1): the SessionStart context carries only the contract header and the Map handle.
 run_case "SessionStart without repository emits bounded bridge context" \
   "{\"hook_event_name\":\"SessionStart\",\"source\":\"startup\",\"cwd\":\"$hook_repo\"}" \
-  0 'Simplicio context bridge'
+  0 'Simplicio hook contract v1'
 rm -rf -- "$session_repo"
 run_case "allow Simplicio tool unchanged" \
   '{"hook_event_name":"PreToolUse","tool_name":"simplicio__simplicio_read","tool_input":{"path":"x"},"cwd":"/tmp"}' \
