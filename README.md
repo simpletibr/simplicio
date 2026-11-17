@@ -186,12 +186,16 @@ command = "/home/your-name/.simplicio/bin/simplicio"
 
 See [MCP-CONNECT.md](MCP-CONNECT.md) for complete platform examples.
 
-Exposed MCP Tools:
+Every host registers `SIMPLICIO_MCP_PROFILE=full`, the default since 3.13.0: `tools/list` advertises the whole Runtime catalogue (22 tools) plus the tools of the installed plugins (34 from the fifteen packaged plugins, 56 in total on a machine that has them all). `SIMPLICIO_MCP_PROFILE=exec` is the narrow option, with six tools. The retired `mapper-only` profile no longer exists.
+
+The project Map also arrives without a call: the `initialize` instructions carry a structural header, and a session-start hook appends the Map body once per session.
+
+Exposed MCP tools (full profile):
 - `simplicio_map`: Structural repository orientation without prompt bloating.
 - `simplicio_context`: Bounded token retrieval for exact code snippets.
 - `simplicio_edit`: Atomic mechanical modifications with SHA-256 receipts.
-- `simplicio_loop`: Concurrently orchestrated multi-stage waves.
-- `simplicio_parallel`: Real-time inspection of CPUExecutor and hardware headroom.
+- `simplicio_validate`: Deterministic pipeline, test and delivery-gate checks.
+- `simplicio_run`: Governed task execution with receipts.
 
 ---
 

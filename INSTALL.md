@@ -99,6 +99,11 @@ the single source of truth used by the local/manual publisher, both installers a
 | `linux-x64`    | Linux x86_64           | `simplicio-linux-x64`        |
 | `windows-x64`  | Windows x86_64         | `simplicio-windows-x64.exe`  |
 
+Each release publishes the four signed Runtime assets with a `.sig`, a
+`.provenance.json`, a `.spdx.json`, `SHA256SUMS` and
+`simplicio-update-manifest.json`; the PyPI installer wheel is published in the
+same run.
+
 Verify the SHA256 checksum against the `sha256` field for your target in
 `simplicio-update-manifest.json` (published alongside each release) before
 running the binary. The installer places it under `~/.simplicio/bin/simplicio`
@@ -199,6 +204,39 @@ simplicio runtime-profile use full
 # Low: 64 active agents, 128MB cache (constrained environments)
 simplicio runtime-profile use low
 ```
+
+### MCP profile (default: `full`)
+
+The `normal`/`full`/`low` profiles above are Runtime resource profiles; the MCP
+profile below is a separate setting.
+
+Every host registers `SIMPLICIO_MCP_PROFILE=full`, so `tools/list` advertises the
+whole Runtime catalogue (22 tools) plus the tools of the installed plugins (34
+from the fifteen packaged plugins, 56 in total on a machine that has them all).
+`SIMPLICIO_MCP_PROFILE=exec` is the way back to the six-tool list:
+`simplicio_context`, `simplicio_edit`, `simplicio_run`, `simplicio_exec`,
+`simplicio_codegen` and `simplicio_tools_unlock`.
+
+The retired `mapper-only` profile is gone from the installer, the Claude MCP
+bootstrap and the Hermes plugin; a host that still carries it resolves it as
+unset.
+
+### Runtime defaults
+
+| Setting | Shipped default | Switch |
+|---|---|---|
+| Resident daemon | on | `SIMPLICIO_TOKIO_DAEMON=0` disables |
+| Prefetch | on | `SIMPLICIO_PREFETCH=0` disables |
+| JEV classifier | off | `SIMPLICIO_JEV=1` enables |
+
+### Plugins
+
+Fifteen packaged plugins install with `simplicio plugin install --path <dir>`,
+where `<dir>` holds `plugin.json` and the plugin binary beside it. Two are
+registered stubs today: `simplicio-vision` answers `VISION_NOT_IMPLEMENTED` and
+`simplicio-computer-use` answers `COMPUTER_ACTION_UNAVAILABLE`. Plugin verbs
+share one flat namespace across plugins, so a new plugin must prefix a generic
+verb (`tinyfish-status`).
 
 ## Core Commands
 
@@ -305,6 +343,16 @@ Protected MCP operations still require an active Google session and entitlement.
 Restart open clients after installation. To inspect or repair the registration,
 run `simplicio mcp register --binary "$(command -v simplicio)" --json`. A
 registration failure terminates the installer instead of reporting success.
+
+`simplicio install` pre-approves `mcp__simplicio__*` in Claude Code's
+`permissions.allow` and sets `trust: true` on the Gemini entry, so a host in auto
+mode does not deny a Simplicio tool. Uninstall removes only the entry the
+installer wrote.
+
+The project Map arrives without a call: the MCP `initialize` instructions carry a
+structural header (manifests, entry files, two directory levels, the flow line
+and the registry categories), and a session-start hook appends the Map body once
+per session.
 
 ## Building from Source
 

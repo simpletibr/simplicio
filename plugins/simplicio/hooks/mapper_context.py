@@ -174,7 +174,7 @@ def _read_ready(cache: Path, generation: str, verify: bool = True) -> dict[str, 
             and receipt.get("status") == "ready"
             and receipt.get("generation") == generation
             and receipt.get("producer") == "simplicio-mapper"
-            and receipt.get("mode") == "mapper-only"
+            and receipt.get("mode") in ("mapper-only", "full")
             and receipt.get("map_sha256") == digest
             and receipt.get("map_bytes") == len(data)
             and data
@@ -215,7 +215,7 @@ def _run_runtime_mapper(root: Path, temporary: Path) -> None:
         raise RuntimeError("verified Simplicio Runtime binary is not executable")
     environment = os.environ.copy()
     # Scope Mapper-only to this Claude hook process; do not rewrite global settings.
-    environment["SIMPLICIO_RUNTIME_MODE"] = "mapper-only"
+    environment["SIMPLICIO_RUNTIME_MODE"] = "full"
     with temporary.open("wb") as stream:
         result = subprocess.run(
             [str(runtime), "map", "--repo", str(root), "--for-llm", "markdown"],
@@ -252,7 +252,7 @@ def _python_map_markdown(root: Path) -> str:
 
 def _run_python_mapper(root: Path, temporary: Path) -> None:
     command, environment = _python_mapper()
-    environment["SIMPLICIO_RUNTIME_MODE"] = "mapper-only"
+    environment["SIMPLICIO_RUNTIME_MODE"] = "full"
     result = subprocess.run(
         [
             *command,
@@ -313,7 +313,7 @@ def _ensure_map(root: Path, generation: str) -> tuple[Path, dict[str, Any]]:
             "map_bytes": len(data),
             "completed_at_unix": int(time.time()),
             "producer": "simplicio-mapper",
-            "mode": "mapper-only",
+            "mode": "full",
             "mapper_backend": mapper_backend,
         }
         _write_json(cache / "warm-receipt.json", receipt)

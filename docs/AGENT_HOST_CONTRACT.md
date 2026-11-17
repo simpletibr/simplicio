@@ -30,15 +30,17 @@ continue with an unmapped provider call.
 
 ## Host rules
 
-- An unset or unrecognized `SIMPLICIO_MCP_PROFILE` resolves to `mapper-only`.
-  Native host file tools pass through unless the host was registered with an
-  explicit `core` or `full` profile.
+- An unset or unrecognized `SIMPLICIO_MCP_PROFILE` resolves to `full`, the
+  profile the installer registers for every host. Native host file tools pass
+  through unless the host was registered with `exec`, which advertises the
+  six-tool list. `mapper-only` is retired and resolves as unset.
 - Claude Code uses the native `plugins/simplicio` hook package. Its supported
   lifecycle hooks are `SessionStart`, `UserPromptSubmit`, `PreToolUse`,
   `PostToolUse`, and `SubagentStart`; each one verifies or reuses the map.
 - Hermes uses `plugins/simplicio-hermes`. Its session warmup, pre-provider
-  preparation, request middleware, and receipts follow the same Mapper-only
-  contract. Native Hermes execution remains Hermes-owned.
+  preparation, request middleware, and receipts follow the same map-first
+  contract on the default `full` profile. Native Hermes execution remains
+  Hermes-owned.
 - Fast and other context accelerators are for explicit project consultation
   only. They must not be dependencies of Claude or Hermes lifecycle hooks.
 - Do not add a second context injector, raw repository dump, provider bypass,

@@ -47,11 +47,11 @@ The model edits one file per turn and pays for the context each time; the genera
 
 | layer | use it | do not use it |
 |---|---|---|
-| **JEV** (plugin, backend `typesafe`, gate p >= 0.8) | only when rules + task class abstain; `shape` reports `gate: accepted\|below_0.8` | as an always-on route: +3.2 pp lane+risk for 2x p50 and one network call per undecided task; use `--no-jev` for bulk runs |
+| **JEV** (plugin, backend `typesafe`, gate p >= 0.8, off by default: `SIMPLICIO_JEV=1` enables) | only when rules + task class abstain; `shape` reports `gate: accepted\|below_0.8` | as an always-on route: +3.2 pp lane+risk for 2x p50 and one network call per undecided task; use `--no-jev` for bulk runs |
 | **memory / database** (SQLite FTS5, 1,690 items; `memory-v2`, `precedent`) | after the task: store shape -> outcome, codegen target, drift verdict; retrieve precedents when a new task looks familiar | in the hot path: 0.1-0.2 s per call buys nothing while the task is still open |
 | **simplicio-bot** (reflex procedures) | repeated identical operations with a stored procedure and a proven record | codegen work: the generator is already deterministic, faster and free |
 | **levi** (gated external knowledge) | only after project memory and runtime knowledge miss **and** the gap is external and current (a library or API fact) | as a first step, or for anything the repo/contract already answers |
-| **daemon** | an interactive session with many context/tool calls: `context` 74 ms vs 196 ms | one-shot CLI batches: start costs 341-458 ms and the total flow is unchanged (-0.8%) |
+| **daemon** (on by default; `SIMPLICIO_TOKIO_DAEMON=0` disables) | an interactive session with many context/tool calls: `context` 74 ms vs 196 ms | one-shot CLI batches: start costs 341-458 ms and the total flow is unchanged (-0.8%) |
 | **CPU executor** | MCP/agent bulk: cold call p50 113.6 ms, resident 5-slot p50 343 us at 6,142 calls/s | a single CLI generate: in-process Rust, no executor round trip needed |
 
 ## What to do with what we learn

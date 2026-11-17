@@ -1,6 +1,6 @@
 # Fast path: the entry flow for any task
 
-The order below is the cheapest measured path to a delivered task. Every number is from the 2026-10-26 measurements (`benchmarks/2026-10-26-*`), median of 3-5 reps, daemon off, no network.
+The order below is the cheapest measured path to a delivered task. Every number is from the 2026-10-26 measurements (`benchmarks/2026-10-26-*`), median of 3-5 reps, daemon off, no network; the shipped default is daemon on (`SIMPLICIO_TOKIO_DAEMON=0` disables).
 
 ## One-screen decision
 
@@ -32,7 +32,7 @@ task arrives
 | 6 | **fan out** | CPU executor (`plan --agents N`, `benchmark mcp-cpu`) | **0.25-0.32 s** | >=2 independent units, no shared files |
 | 7 | **iterate** | loop (fast-path -> converge) | per-iteration = 0.4-0.6 s of tools | the evidence gate is not met on the first pass |
 | 8 | **prove** | video (hyperframes) | minutes (render) | only when the deliverable is visual |
-| 9 | **classify hard cases** | JEV (inside `shape`) | **215 ms** p50 vs 138 ms local; +3.2 pp lane+risk on TEST | only after rules + task_class abstain, gated at p >= 0.8 |
+| 9 | **classify hard cases** | JEV (inside `shape`; off by default, `SIMPLICIO_JEV=1` enables) | **215 ms** p50 vs 138 ms local; +3.2 pp lane+risk on TEST | only after rules + task_class abstain, gated at p >= 0.8 |
 
 ## Task -> entry -> cost
 
@@ -55,7 +55,7 @@ task arrives
 - **Do not write code by hand when a contract exists.** Codegen is 0.01 s and 0 LLM tokens.
 - **Do not fan out below 2 independent units.** The CPU executor costs 0.25-0.32 s to schedule; one unit is a loss.
 - **Do not loop a one-shot.** The loop pays the evidence gate per iteration.
-- **Do not call JEV** until it has a key and a measured p50; today it is unmeasured and not wired into `plan`.
+- **Do not call JEV** unless you enable it: it is off by default (`SIMPLICIO_JEV=1` enables), it needs a key, and `plan` carries no JEV field.
 - **Do not render video** unless the deliverable is visual; it is minutes, not milliseconds.
 
 ## The exact entry commands
@@ -96,7 +96,7 @@ The MCP twins are the same operations with the same contracts: `simplicio_contex
 1. **`plan` regressed**: 0.18 s (3.9.2) -> 0.48 s (3.10.2) -> 0.37 s (main). Step 0 is on every task, so this is the first thing to fix; target <=0.20 s.
 2. **Context grew 2x**: 13.7 KB -> 28.3 KB and 0.09 s -> 0.28 s. Step 2 is on every non-trivial task; target back to ~14 KB.
 3. **Auth lockout**: an expired token plus a fail-closed plugin left the host with zero working tools for ~2 h. The flow above assumes the tools answer; offline grace is a prerequisite, not a nicety.
-4. **JEV**: needs `OPENCODE_API_KEY` (or typesafe/openrouter), an install, and a measured p50/accuracy before it can be the last hop of step 0.
+4. **JEV**: wired as the last hop of step 0 behind the 0.8 gate, but off by default; it stays inert until `SIMPLICIO_JEV=1`, a key (`OPENCODE_API_KEY`, or typesafe/openrouter) and an install are present.
 5. **Flaky bin tests**: the verify step must be trustworthy without `--no-verify`.
 
 ## The fastest complete flow is the one with the fewest calls (measured)
@@ -117,7 +117,7 @@ The ceremony costs **2.7x** more than the minimal path and produces the same res
 - **Do not fold verification into `edit --check`**: it added 0.7-1.9 s on a trivial check, more than a separate shell call (0.02 s).
 - **Verify with the cheapest runner that proves the change** (a shell command, not the 0.42 s benchmark suite).
 
-The floor for a known-file edit is therefore two calls and ~0.6 s of tool time, not five and ~1.7 s. The remaining cost is process startup and the governed baseline per call; the resident daemon is the designed lever for that, but `simplicio daemon start --detached` hangs in a script on this host (filed as a bug), so the flow above assumes no daemon.
+The floor for a known-file edit is therefore two calls and ~0.6 s of tool time, not five and ~1.7 s. The remaining cost is process startup and the governed baseline per call; the resident daemon is the designed lever for that and is on by default (`SIMPLICIO_TOKIO_DAEMON=0` disables it), with `SIMPLICIO_PREFETCH` also on by default (`=0` disables). The numbers above are the daemon-off baseline: `simplicio daemon start --detached` hangs in a script on this host (filed as a bug), so the flow below records the cold path.
 
 ## Programming flows: codegen is mandatory (measured)
 
