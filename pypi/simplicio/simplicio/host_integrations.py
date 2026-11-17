@@ -101,8 +101,8 @@ HOSTS: Tuple[HostSpec, ...] = (
         ("~/.claude/settings.json", "~/.claude/.mcp.json"),
         "https://docs.anthropic.com/claude/docs/claude-code",
         mcp_environment=(
-            ("SIMPLICIO_RUNTIME_MODE", "mapper-only"),
-            ("SIMPLICIO_MCP_PROFILE", "mapper-only"),
+            ("SIMPLICIO_RUNTIME_MODE", "full"),
+            ("SIMPLICIO_MCP_PROFILE", "full"),
         ),
     ),
     _runtime_mcp(
@@ -259,8 +259,8 @@ INSTALLER_HOSTS = (
         (),
         "https://github.com/NousResearch/hermes-agent",
         mcp_environment=(
-            ("SIMPLICIO_RUNTIME_MODE", "mapper-only"),
-            ("SIMPLICIO_MCP_PROFILE", "mapper-only"),
+            ("SIMPLICIO_RUNTIME_MODE", "full"),
+            ("SIMPLICIO_MCP_PROFILE", "full"),
         ),
     ),
     _runtime_mcp("cline", "Cline", (), ("~/.cline/mcp_settings.json",), "https://docs.cline.bot/mcp/configuring-mcp-servers"),

@@ -44,8 +44,8 @@ def test_host_surface_fixture_matches_claude_and_full_mode_contracts() -> None:
         "simplicio run",
     ]
     assert claude.mcp_environment == (
-        ("SIMPLICIO_RUNTIME_MODE", "mapper-only"),
-        ("SIMPLICIO_MCP_PROFILE", "mapper-only"),
+        ("SIMPLICIO_RUNTIME_MODE", "full"),
+        ("SIMPLICIO_MCP_PROFILE", "full"),
     )
     assert cursor.mcp_environment == ()
     assert forbidden.isdisjoint(surface["modes"]["mapper-only"]["tools"])
@@ -79,20 +79,20 @@ def test_opencode_host_surface_is_native_plugin_with_full_mode() -> None:
     assert "opencode" not in set(surface["modes"]["mapper-only"]["hosts"])
 
 
-def test_claude_and_hermes_registrations_are_explicitly_mapper_only() -> None:
+def test_claude_and_hermes_registrations_are_explicitly_full() -> None:
     claude = next(spec for spec in HOSTS if spec.host_id == "claude-code")
     hermes = next(spec for spec in INSTALLER_HOSTS if spec.host_id == "hermes-agent")
 
     for spec in (claude, hermes):
         environment = dict(spec.mcp_environment)
-        assert environment["SIMPLICIO_RUNTIME_MODE"] == "mapper-only", spec.host_id
-        assert environment["SIMPLICIO_MCP_PROFILE"] == "mapper-only", spec.host_id
+        assert environment["SIMPLICIO_RUNTIME_MODE"] == "full", spec.host_id
+        assert environment["SIMPLICIO_MCP_PROFILE"] == "full", spec.host_id
 
     bootstrap = (
         ROOT / "plugins" / "simplicio" / "bin" / "simplicio-claude-mcp-bootstrap.js"
     ).read_text(encoding="utf-8")
-    assert 'process.env.SIMPLICIO_RUNTIME_MODE = "mapper-only"' in bootstrap
-    assert 'process.env.SIMPLICIO_MCP_PROFILE = "mapper-only"' in bootstrap
+    assert 'process.env.SIMPLICIO_RUNTIME_MODE = "full"' in bootstrap
+    assert 'process.env.SIMPLICIO_MCP_PROFILE = "full"' in bootstrap
 
     hermes_plugin = (
         ROOT / "plugins" / "simplicio-hermes" / "hermes_plugin.py"

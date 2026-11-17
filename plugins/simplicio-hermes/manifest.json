@@ -11,12 +11,12 @@
     "api_request_error"
   ],
   "modes": [
-    "mapper-only"
+    "full"
   ],
   "runtime": {
     "prepare": "prepare_model_call",
     "record": "record_model_result",
-    "mode": "mapper-only",
+    "mode": "full",
     "login_required": true,
     "mapper_fallback": {
       "producer": "simplicio-mapper",
