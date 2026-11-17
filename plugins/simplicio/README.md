@@ -5,9 +5,9 @@
 This multi-host package preserves the native Codex plugin and adds official
 portable Agent Plugins v1, Claude Code, and Gemini CLI manifests. Every package
 uses the verified Simplicio Runtime bootstrap, exposes its live MCP surface,
-and ships the same governed Simplicio skills. Claude Code has a host-specific
-launcher so its MCP process is authoritative Mapper-only while the portable,
-Codex, and Gemini launchers retain their host-selected Runtime mode.
+and ships the same governed Simplicio skills. The Claude Code launcher selects
+the `full` MCP profile, the default for every host, in its own process only; the
+portable, Codex and Gemini launchers retain their host-selected Runtime mode.
 
 ## Host packages
 
@@ -22,13 +22,13 @@ Codex, and Gemini launchers retain their host-selected Runtime mode.
 
 The package does not pretend every product has the same plugin API. The
 machine-readable `host-surfaces.json` records the supported surface for all 32
-Runtime host contracts. Claude Code owns its native Mapper-only hooks: each
+Runtime host contracts. Claude Code owns its native map hooks: each
 supported lifecycle event confirms or refreshes the current project map and
 reuses `.simplicio/hook-context/` for the same project generation. The Runtime
 still owns MCP bootstrap and authentication. Runtime mapping is preferred; if
 it fails, the hook uses the bundled Mapper fallback already maintained inside
 the Simplicio-managed `.simplicio` state, then stores the resulting map in the
-same cache and receipt format. Both paths are Mapper-only, and the hook never
+same cache and receipt format. Both paths are map-only, and the hook never
 starts Fast or another context pipeline. Hooks do not download or install
 packages during a lifecycle event. If both Mapper paths fail, the host request
 is denied instead of continuing without a verified map.
@@ -45,9 +45,9 @@ first activates the package:
    Ed25519 release checks.
 4. Start `simplicio serve --mcp --stdio --no-facade-mode` with stdout reserved
    exclusively for MCP JSON-RPC. Claude Code uses the adjacent
-   `simplicio-claude-mcp-bootstrap.js`, which sets `SIMPLICIO_RUNTIME_MODE` to
-   `mapper-only` in that process only; the shared launcher is unchanged for
-   other hosts.
+   `simplicio-claude-mcp-bootstrap.js`, which sets
+   `SIMPLICIO_RUNTIME_MODE` and `SIMPLICIO_MCP_PROFILE` to `full` in that process
+   only; the shared launcher is unchanged for other hosts.
 
 The managed binary is installed at `~/.simplicio/bin/simplicio`. Existing valid
 installs at `~/.local/bin/simplicio` are reused. Concurrent starts share an
@@ -81,8 +81,9 @@ Simplicio CLI subcommand; individual CLI commands are not duplicated as separate
 Semantic ownership is fixed: Mapper observes (`simplicio map` /
 `simplicio_map`), Fast projects or retrieves (`simplicio context` /
 `simplicio_context`), Dev CLI edits (`simplicio edit`), Runtime governs, and
-Loop converges (`simplicio run` / `simplicio loop` only on full-mode hosts).
-Claude's Mapper-only bootstrap does not advertise edit, run, loop, or exec.
+Loop converges (`simplicio run`). The Claude bootstrap advertises the same
+`full` catalogue as every other host, including edit, run and exec;
+`SIMPLICIO_MCP_PROFILE=exec` is the six-tool alternative.
 
 Included skills:
 

@@ -105,19 +105,35 @@ Common locations:
 
 Replace the placeholder with the installed binary's absolute path. Claude Code plugin-provided servers follow the plugin lifecycle; do not copy them into project configuration unless the host requires it. Reload the client after editing its configuration. STDIO does not require a manually copied bearer token, but the local Runtime still requires the Google login above.
 
+## The project Map arrives without a call
+
+The `initialize` instructions carry a structural header — manifests, entry
+files, two directory levels, the flow line and the registry categories — and a
+session-start hook appends the Map body once per session. A host is oriented
+before its first tool call; call `simplicio_map` when a specific question needs a
+fresh generation, not to establish the project at all.
+
 ## Tools
 
 The public CLI/MCP vocabulary is `simplicio map`, `simplicio context`,
 `simplicio memory`, `simplicio edit`, and `simplicio run`. Mapper observes,
 Fast projects or retrieves, Dev CLI edits, Runtime governs, and Loop
-converges. Claude and Hermes Mapper-only sessions advertise map/context
-(and memory when the host profile allows it) and never advertise
-`edit`/`run`/`loop`/`exec`. Full-mode hosts keep the broader Runtime surface.
+converges. Every host registers `SIMPLICIO_MCP_PROFILE=full`, so Claude and
+Hermes advertise the same full surface as every other host; the retired
+`mapper-only` profile no longer exists. `SIMPLICIO_MCP_PROFILE=exec` narrows the
+list to six tools: `simplicio_context`, `simplicio_edit`, `simplicio_run`,
+`simplicio_exec`, `simplicio_codegen` and `simplicio_tools_unlock`.
 Deprecated aliases (`mapper`, `index`, `code-graph`, `mapper-memory`) must
 not appear as a second MCP tool. A Runtime below the unified-surface
 minimum must not advertise the new names.
 
-`tools/list` is the live authority. A current full-mode Runtime may advertise:
+MCP calls run on the resident daemon, which is on by default
+(`SIMPLICIO_TOKIO_DAEMON=0` disables it).
+
+`tools/list` is the live authority. A full-profile Runtime lists the whole
+catalogue — 22 tools — plus the tools of the installed plugins (34 from the
+fifteen packaged plugins, 56 in total on a machine that has them all). The core
+of that list is:
 
 | Tool | Purpose |
 |---|---|
@@ -126,12 +142,13 @@ minimum must not advertise the new names.
 | `simplicio_memory` | Indexed project-memory recall (`simplicio memory`) |
 | `simplicio_edit` | Structured deterministic file edits (`simplicio edit`) |
 | `simplicio_run` | Governed task execution (`simplicio run`) |
-| `simplicio_gate` | Mission/effect safety gate |
-| `simplicio_validate` | Contract-oriented validation |
-| `simplicio_symbol` | Symbol/declaration navigation |
-| `simplicio_search` | Structural or semantic search |
-| `simplicio_read` | Compact file reads |
+| `simplicio_validate` | Deterministic pipeline, test and delivery-gate checks |
+| `simplicio_file` | Read-only bounded workspace reads: ls, grep, signatures, diff |
+| `simplicio_codegen` | Generator operations: build, generate, fill, sync, infer |
 | `simplicio_exec` | Supervised external commands |
+| `simplicio_plan` | Admitted work plans, Loop decisions and routing |
+| `simplicio_doctor` | Runtime health, readiness and opt-in repair |
+| `simplicio_report` | Execution reports, savings events and activity |
 
 Always discover the live schemas at startup instead of hard-coding arguments:
 
@@ -148,6 +165,10 @@ The official PyPI bootstrap verifies the binary checksum, Ed25519 signature,
 and release-manifest contract, then requires active login. Codex MCP registration
 and routing hooks are registered by the installer for supported hosts;
 review the JSON receipt and any requested consent before relying on the integration.
+The installer writes `SIMPLICIO_MCP_PROFILE=full` for every host and pre-approves
+`mcp__simplicio__*` in Claude Code's `permissions.allow`; the Gemini entry is
+written with `trust: true`. A host in auto mode therefore does not deny a
+Simplicio tool, and uninstall removes only the entry the installer wrote.
 Other MCP clients can use the local STDIO entry above without copying tokens.
 
 A quick PyPI bootstrap is:

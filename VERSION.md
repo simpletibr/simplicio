@@ -13,7 +13,7 @@ The Rust Runtime source lives in the private [`simplicio-runtime`](https://githu
 ## Current Version: v3.13.0
 
 - **Source:** `simplicio-runtime` main at commit
-  `094acb374df115d8cefb8632b141d62e39cd40de` (Runtime v3.8.40).
+  `094acb374df115d8cefb8632b141d62e39cd40de` (Runtime v3.13.0).
 - **Runtime targets:** macOS ARM64, macOS x64, Linux x64, and Windows x64.
   The canonical target table and release manifest define the asset, checksum,
   Ed25519 signature, SBOM, and provenance for each Runtime platform.
