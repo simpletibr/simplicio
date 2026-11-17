@@ -11,7 +11,7 @@
   "keywords": [
     "simplicio",
     "mcp",
-    "mapper-only",
+    "full",
     "project-map-cache",
     "local-first",
     "validation"

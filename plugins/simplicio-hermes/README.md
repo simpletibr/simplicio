@@ -1,4 +1,4 @@
-# Simplicio Hermes Mapper-only adapter
+# Simplicio Hermes adapter
 
 Version 0.4.0 keeps the adapter thin: Hermes owns provider execution and
 Simplicio owns authenticated Mapper context plus redacted usage receipts.

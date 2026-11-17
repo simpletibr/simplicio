@@ -119,7 +119,7 @@ def test_plugin_manifests_do_not_start_a_competing_mapper_engine() -> None:
     assert plugin["keywords"] == [
         "simplicio",
         "mcp",
-        "mapper-only",
+        "full",
         "project-map-cache",
         "local-first",
         "validation",

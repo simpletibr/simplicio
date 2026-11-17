@@ -328,7 +328,7 @@ printf '{"argv":"%s","mode":"%s"}' "$*" "$SIMPLICIO_RUNTIME_MODE" > "$SIMPLICIO_
     assert.equal(result.stdout, "");
     assert.deepEqual(JSON.parse(fs.readFileSync(launchFile, "utf8")), {
       argv: "serve --mcp --stdio --no-facade-mode",
-      mode: "mapper-only"
+      mode: "full"
     });
     assert.notEqual(process.env.SIMPLICIO_RUNTIME_MODE, "mapper-only");
   } finally {
