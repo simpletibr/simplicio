@@ -24,6 +24,7 @@ Simplicio writes nothing for agentes.chat. `simplicio integrations routes agente
 
 - Access: each agent gets read only, read-write, or ask-for-approval access.
 - Approvals: merge, deploy and rollback always need a person. The study says sensitive connector actions need approval too.
+- Write order: a write to a folder of more than 10 visible files is refused until the server has had a `simplicio_map` answer and then a `simplicio_context` answer. The server keeps that order for its process across connections, for one hour by default, and a refused write carries a `commit_call` that applies it afterwards.
 - Agent computers: agents run commands on a connected computer, where a runner is installed. The study names this as the documented local route. A Simplicio CLI could be given to an agent through a skill (`SKILL.md`) or through a shell on that computer. The study does not say that this works with Simplicio.
 - No hooks are documented, and no reading of AGENTS.md is documented.
 - The study states no result-size limit, no time-out and no rule for a new session on each call in agentes.chat. The timeouts, the client name and the tool-name prefix are UNVERIFIED.
