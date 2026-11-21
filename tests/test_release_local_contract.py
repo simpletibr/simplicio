@@ -8,6 +8,8 @@ import subprocess
 import zipfile
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).parents[1]
 INSTALLER = ROOT / "install.ps1"
@@ -249,14 +251,34 @@ def test_public_publisher_builds_wheel_from_clean_source(tmp_path, monkeypatch):
         assert archive.namelist() == ["simplicio/__init__.py"]
 
 
-def test_public_publisher_updates_all_release_version_consumers(tmp_path, monkeypatch):
+PUBLIC_METADATA_WRAPPERS = (
+    "npm/simplicio/package.json",
+    "npm/simplicio-installer/package.json",
+    "npm/simplicio-unscoped/package.json",
+)
+PUBLIC_METADATA_DESKTOP_FILES = (
+    "apps/desktop/package.json", "apps/desktop/package-lock.json",
+    "apps/desktop/src-tauri/tauri.conf.json", "apps/desktop/src-tauri/Cargo.toml",
+    "apps/desktop/src-tauri/Cargo.lock",
+)
+
+
+def _load_publisher(name, tmp_path, monkeypatch):
     script = ROOT / "scripts/publish_release_local.py"
-    spec = importlib.util.spec_from_file_location("publish_release_local_versions", script)
+    spec = importlib.util.spec_from_file_location(name, script)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
     monkeypatch.setattr(module, "ROOT", tmp_path)
+    return module
 
+
+def _write_public_metadata_tree(tmp_path):
+    """Everything update_public_metadata reads, at version 3.8.30.
+
+    The registry entry is a copy of the committed server.json, so a test can
+    prove what the publisher does to the real file.
+    """
     (tmp_path / "VERSION.md").write_text(
         "## Runtime snapshot: v3.8.30\n"
         "## Current Version: v3.8.30\n"
@@ -268,17 +290,13 @@ def test_public_publisher_updates_all_release_version_consumers(tmp_path, monkey
             "SIMPLICIO_CODEX_HOOK_REF=v3.8.30\n",
             encoding="utf-8",
         )
-    wrappers = (
-        "npm/simplicio/package.json",
-        "npm/simplicio-installer/package.json",
-        "npm/simplicio-unscoped/package.json",
-    )
-    for relative in wrappers:
+    for relative in PUBLIC_METADATA_WRAPPERS:
         path = tmp_path / relative
         path.parent.mkdir(parents=True, exist_ok=True)
+        name = "@simpletibr/simplicio" if relative == PUBLIC_METADATA_WRAPPERS[0] else relative
         path.write_text(
             json.dumps(
-                {"name": relative, "version": "3.8.30", "description": "fixture"},
+                {"name": name, "version": "3.8.30", "description": "fixture"},
                 indent=2,
             ) + "\n",
             encoding="utf-8",
@@ -288,22 +306,28 @@ def test_public_publisher_updates_all_release_version_consumers(tmp_path, monkey
         "O manifest atualmente publicado neste repositório é o `3.8.30`.\n",
         encoding="utf-8",
     )
-
-    desktop_files = (
-        "apps/desktop/package.json", "apps/desktop/package-lock.json",
-        "apps/desktop/src-tauri/tauri.conf.json", "apps/desktop/src-tauri/Cargo.toml",
-        "apps/desktop/src-tauri/Cargo.lock",
-    )
-    for relative in desktop_files:
+    for relative in PUBLIC_METADATA_DESKTOP_FILES:
         path = tmp_path / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, path)
+    shutil.copyfile(ROOT / "server.json", tmp_path / "server.json")
 
-    changed = module.update_public_metadata(
+
+def _update_public_metadata(module):
+    return module.update_public_metadata(
         "v3.8.31",
         "3.8.31",
         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     )
+
+
+def test_public_publisher_updates_all_release_version_consumers(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_versions", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    wrappers = PUBLIC_METADATA_WRAPPERS
+    desktop_files = PUBLIC_METADATA_DESKTOP_FILES
+
+    changed = _update_public_metadata(module)
     assert (tmp_path / "version.txt").read_text(encoding="utf-8") == "3.8.31\n"
     assert all(json.loads((tmp_path / path).read_text())["version"] == "3.8.31" for path in wrappers)
     ecosystem = (tmp_path / "SIMPLICIO_ECOSYSTEM.md").read_text(encoding="utf-8")
@@ -316,6 +340,158 @@ def test_public_publisher_updates_all_release_version_consumers(tmp_path, monkey
     assert json.loads((tmp_path / desktop_files[1]).read_text())["packages"][""]["version"] == "3.8.31"
     for relative in desktop_files[3:]:
         assert 'name = "simplicio-desktop"\nversion = "3.8.31"' in (tmp_path / relative).read_text()
+    # The official MCP registry entry is a release version consumer too, and it
+    # must be in the list the publisher stages for the release commit.
+    assert tmp_path / "server.json" in changed
+    server = json.loads((tmp_path / "server.json").read_text(encoding="utf-8"))
+    assert server["version"] == "3.8.31"
+    assert [package["version"] for package in server["packages"]] == ["3.8.31"]
+
+
+def test_public_publisher_rewrites_only_the_registry_entry_versions(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_server_json", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    committed = (ROOT / "server.json").read_text(encoding="utf-8")
+    current = json.loads(committed)["version"]
+
+    _update_public_metadata(module)
+
+    expected = committed.replace('"version": "%s"' % current, '"version": "3.8.31"')
+    assert expected.count('"version": "3.8.31"') == 2
+    assert (tmp_path / "server.json").read_bytes() == expected.encode("utf-8")
+
+
+def test_public_publisher_rewrites_every_entry_of_the_scoped_wrapper_and_no_other(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_server_json_entries", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    server = json.loads((ROOT / "server.json").read_text(encoding="utf-8"))
+    scoped = server["packages"][0]
+    other = {"registryType": "pypi", "identifier": "simplicio-installer", "version": "1.0.2",
+             "transport": {"type": "stdio"}}
+    mirror = dict(scoped, registryBaseUrl="https://registry.example.test", version="3.0.0")
+    server["packages"] = [scoped, other, mirror]
+    (tmp_path / "server.json").write_text(json.dumps(server, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    _update_public_metadata(module)
+
+    updated = json.loads((tmp_path / "server.json").read_text(encoding="utf-8"))
+    assert updated["version"] == "3.8.31"
+    assert [package["version"] for package in updated["packages"]] == ["3.8.31", "1.0.2", "3.8.31"]
+    assert updated["packages"][1] == other
+
+
+def _canonical(document):
+    return json.dumps(document, indent=2, ensure_ascii=False) + "\n"
+
+
+def _registry_entry():
+    return json.loads((ROOT / "server.json").read_text(encoding="utf-8"))
+
+
+def _entry_without_top_level_version():
+    entry = _registry_entry()
+    del entry["version"]
+    return _canonical(entry)
+
+
+def _entry_for_another_package():
+    entry = _registry_entry()
+    entry["packages"][0]["identifier"] = "@someone-else/simplicio"
+    return _canonical(entry)
+
+
+def _entry_without_packages():
+    entry = _registry_entry()
+    del entry["packages"]
+    return _canonical(entry)
+
+
+def _entry_with_empty_packages():
+    entry = _registry_entry()
+    entry["packages"] = []
+    return _canonical(entry)
+
+
+def _entry_with_non_object_package():
+    entry = _registry_entry()
+    entry["packages"] = ["@simpletibr/simplicio"]
+    return _canonical(entry)
+
+
+def _entry_that_is_not_an_object():
+    return "[]\n"
+
+
+def _entry_in_compact_form():
+    return json.dumps(_registry_entry())
+
+
+NO_ENTRY = "server.json has no package entry for @simpletibr/simplicio"
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        (None, "server.json is missing"),
+        ("{not json", "server.json is not valid JSON"),
+        (_entry_that_is_not_an_object(), "server.json has no top-level version"),
+        (_entry_without_top_level_version(), "server.json has no top-level version"),
+        (_entry_for_another_package(), NO_ENTRY),
+        (_entry_without_packages(), NO_ENTRY),
+        (_entry_with_empty_packages(), NO_ENTRY),
+        (_entry_with_non_object_package(), NO_ENTRY),
+        (_entry_in_compact_form(), "server.json must be two-space JSON"),
+    ],
+    ids=[
+        "missing-file",
+        "invalid-json",
+        "not-an-object",
+        "no-top-level-version",
+        "no-package-for-the-wrapper",
+        "no-packages-key",
+        "empty-packages",
+        "package-is-not-an-object",
+        "not-in-the-canonical-two-space-form",
+    ],
+)
+def test_public_publisher_fails_closed_on_a_registry_entry_it_cannot_rewrite(tmp_path, monkeypatch, body, message):
+    module = _load_publisher("publish_release_local_server_json_closed", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    path = tmp_path / "server.json"
+    if body is None:
+        path.unlink()
+    else:
+        path.write_text(body, encoding="utf-8")
+
+    with pytest.raises(module.PublishError, match=message):
+        _update_public_metadata(module)
+
+    # A refused rewrite must never leave a half-edited registry entry behind.
+    assert (path.read_text(encoding="utf-8") if path.exists() else None) == body
+
+
+@pytest.mark.parametrize(
+    ("wrapper_body", "message"),
+    [
+        ('{\n  "version": "3.8.30",\n  "description": "fixture"\n}\n', "has no name"),
+        ('{\n  "version": "3.8.30",\n  not json\n}\n', "is not valid JSON"),
+    ],
+    ids=["no-name", "invalid-json"],
+)
+def test_public_publisher_fails_closed_when_the_scoped_wrapper_cannot_name_the_registry_package(
+    tmp_path, monkeypatch, wrapper_body, message
+):
+    module = _load_publisher("publish_release_local_server_json_wrapper", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    # The version line stays valid for the publisher's own wrapper rewrite, so
+    # only the registry-entry step can notice the problem.
+    (tmp_path / "npm/simplicio/package.json").write_text(wrapper_body, encoding="utf-8")
+    before = (tmp_path / "server.json").read_bytes()
+
+    with pytest.raises(module.PublishError, match="npm/simplicio/package.json " + message):
+        _update_public_metadata(module)
+
+    assert (tmp_path / "server.json").read_bytes() == before
 
 
 def test_public_runbook_requires_manual_publication_without_actions():

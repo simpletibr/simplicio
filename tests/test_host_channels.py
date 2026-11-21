@@ -17,6 +17,26 @@ def test_official_mcp_registry_entry_is_publishable_and_matches_the_release():
     assert package["identifier"] == "@simpletibr/simplicio"
     assert package["version"] == version
     assert package["transport"]["type"] == "stdio"
+    # The registry runs `<bin> <packageArguments>`; with no arguments the
+    # launcher prints usage text instead of speaking MCP over stdio.
+    assert package["packageArguments"] == [
+        {"type": "positional", "value": "serve"},
+        {"type": "named", "name": "--mcp"},
+        {"type": "named", "name": "--stdio"},
+        {"type": "named", "name": "--no-facade-mode"},
+    ]
+    command_line = [
+        argument["value"] if argument["type"] == "positional" else argument["name"]
+        for argument in package["packageArguments"]
+    ]
+    assert command_line == ["serve", "--mcp", "--stdio", "--no-facade-mode"]
+    # The registry only accepts an npm entry whose package.json carries an
+    # mcpName equal to the entry's name, and the entry must point at that package.
+    wrapper = json.loads((ROOT / "npm/simplicio/package.json").read_text(encoding="utf-8"))
+    assert package["identifier"] == wrapper["name"]
+    assert wrapper["mcpName"] == server["name"]
+    # The registry rejects a description longer than 100 characters.
+    assert 1 <= len(server["description"]) <= 100
 
 
 def test_each_host_channel_documents_one_command_install():

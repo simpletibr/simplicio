@@ -450,6 +450,51 @@ def update_desktop_versions(version: str) -> list[Path]:
         path.write_text(body, encoding="utf-8")
     return list(prepared)
 
+
+def update_server_json(version: str) -> Path:
+    """Move the official MCP registry entry to the release version.
+
+    Only the top-level version and the version of each package entry for the
+    scoped npm wrapper change. This never publishes to npm or to the registry.
+    """
+    try:
+        manifest = json.loads((ROOT / "npm/simplicio/package.json").read_text(encoding="utf-8"))
+    except ValueError as exc:
+        raise PublishError("npm/simplicio/package.json is not valid JSON: " + str(exc)) from exc
+    wrapper = manifest.get("name")
+    if not isinstance(wrapper, str) or not wrapper:
+        raise PublishError("npm/simplicio/package.json has no name for the server.json package entry")
+    path = ROOT / "server.json"
+    if not path.is_file():
+        raise PublishError("server.json is missing")
+    try:
+        text = path.read_text(encoding="utf-8")
+        entry = json.loads(text)
+    except ValueError as exc:
+        raise PublishError("server.json is not valid JSON: " + str(exc)) from exc
+    if not isinstance(entry, dict) or not isinstance(entry.get("version"), str):
+        raise PublishError("server.json has no top-level version")
+    packages = entry.get("packages")
+    entries = [
+        package for package in (packages if isinstance(packages, list) else [])
+        if isinstance(package, dict) and package.get("identifier") == wrapper
+    ]
+    if not entries:
+        raise PublishError("server.json has no package entry for " + wrapper)
+
+    def serialize(document: dict) -> str:
+        return json.dumps(document, indent=2, ensure_ascii=False) + "\n"
+
+    if serialize(entry) != text:
+        # Rewriting such a file would change more than the version values.
+        raise PublishError("server.json must be two-space JSON ending in a newline so that only its versions change")
+    entry["version"] = version
+    for package in entries:
+        package["version"] = version
+    path.write_text(serialize(entry), encoding="utf-8")
+    return path
+
+
 def update_public_metadata(tag: str, version: str, source_commit: str) -> list[Path]:
     changed = update_desktop_versions(version)
     version_file = ROOT / "version.txt"
@@ -486,6 +531,7 @@ def update_public_metadata(tag: str, version: str, source_commit: str) -> list[P
             raise PublishError("could not update wrapper version: " + relative)
         path.write_text(body, encoding="utf-8")
         changed.append(path)
+    changed.append(update_server_json(version))
 
     ecosystem = ROOT / "SIMPLICIO_ECOSYSTEM.md"
     body = ecosystem.read_text(encoding="utf-8")

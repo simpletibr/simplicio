@@ -52,6 +52,7 @@ def test_happy_path_all_consistent_exits_zero(verify_module, repo, monkeypatch, 
     assert "all public install references use the canonical `master` branch" in out
     assert "release version sources agree on 3.5.2" in out
     assert "wrapper/package versions match the release manifest" in out
+    assert "MCP registry entry server.json agrees with the manifest" in out
 
 
 # ---------------------------------------------------------------------------
@@ -91,6 +92,160 @@ def test_version_txt_manifest_mismatch_is_error(verify_module, repo, monkeypatch
 
     assert exit_code == 1
     assert "version mismatch: version.txt=9.9.9 but manifest=3.5.2" in out
+
+
+# ---------------------------------------------------------------------------
+# ERROR cases: the official MCP registry entry (server.json)
+# ---------------------------------------------------------------------------
+
+
+def registry_findings(module, repo):
+    return [item for item in module.run_audit(repo.root) if "server.json" in item.message]
+
+
+def test_registry_entry_in_agreement_is_one_ok_finding(verify_module, repo):
+    findings = registry_findings(verify_module, repo)
+
+    assert [item.level for item in findings] == ["OK"]
+
+
+def test_registry_entry_with_a_stale_top_level_version_is_error(verify_module, repo, monkeypatch, capsys):
+    repo.with_server_json(version="3.5.1")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json version 3.5.1 differs from the manifest version 3.5.2" in out
+
+
+def test_registry_entry_with_a_stale_package_version_is_error(verify_module, repo, monkeypatch, capsys):
+    repo.with_server_json_package(version="3.5.1")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json package @simpletibr/simplicio version 3.5.1 differs from the manifest version 3.5.2" in out
+
+
+def test_registry_entry_name_that_differs_from_mcp_name_is_error(verify_module, repo, monkeypatch, capsys):
+    repo.with_server_json(name="io.github.someone-else/simplicio")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json name 'io.github.someone-else/simplicio' differs from the mcpName" in out
+
+
+@pytest.mark.parametrize("mcp_name", [None, ""])
+def test_wrapper_without_mcp_name_is_error(verify_module, repo, monkeypatch, capsys, mcp_name):
+    path = repo.root / "npm/simplicio/package.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data.pop("mcpName")
+    if mcp_name is not None:
+        data["mcpName"] = mcp_name
+    path.write_text(json.dumps(data), encoding="utf-8")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "npm/simplicio/package.json has no mcpName" in out
+
+
+def test_registry_entry_without_a_package_for_the_wrapper_is_error(verify_module, repo, monkeypatch, capsys):
+    repo.with_server_json_package(identifier="@someone-else/simplicio")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json has no package entry for the npm wrapper @simpletibr/simplicio" in out
+
+
+@pytest.mark.parametrize("packages", [None, [], ["@simpletibr/simplicio"]])
+def test_registry_entry_without_usable_packages_is_error(verify_module, repo, monkeypatch, capsys, packages):
+    repo.with_server_json(packages=packages)
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json has no package entry for the npm wrapper" in out
+
+
+def test_wrapper_without_a_name_is_error_instead_of_matching_a_nameless_entry(verify_module, repo, monkeypatch, capsys):
+    repo.with_npm_manifest(name=None)
+    repo.with_server_json_package(identifier=None)
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "npm/simplicio/package.json has no name" in out
+
+
+def test_registry_entry_without_a_version_is_error(verify_module, repo, monkeypatch, capsys):
+    repo.with_server_json(version=None)
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json version None differs from the manifest version 3.5.2" in out
+
+
+def test_missing_registry_entry_is_error(verify_module, repo, monkeypatch, capsys):
+    (repo.root / "server.json").unlink()
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json (official MCP registry entry) is missing" in out
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        ("{not json", "is not valid JSON"),
+        ("", "is not valid JSON"),
+        ("[]", "is not a JSON object"),
+        ("\"text\"", "is not a JSON object"),
+    ],
+)
+def test_registry_entry_that_is_not_a_json_object_is_error(verify_module, repo, monkeypatch, capsys, body, message):
+    (repo.root / "server.json").write_text(body, encoding="utf-8")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "server.json (official MCP registry entry) " + message in out
+
+
+def test_registry_entry_is_not_hidden_by_wrapper_version_lag_warning(verify_module, repo, monkeypatch, capsys):
+    repo.with_npm_version("simplicio", "1.0.0")
+    repo.with_server_json(version="1.0.0")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    # The registry entry follows the release manifest, not the lagging wrapper.
+    assert exit_code == 1
+    assert "server.json version 1.0.0 differs from the manifest version 3.5.2" in out
+
+
+def test_several_registry_problems_are_reported_in_one_finding(verify_module, repo):
+    repo.with_server_json(version="3.5.1", name="io.github.someone-else/simplicio")
+
+    findings = registry_findings(verify_module, repo)
+
+    assert [item.level for item in findings] == ["ERROR"]
+    assert "version 3.5.1 differs" in findings[0].message
+    assert "name 'io.github.someone-else/simplicio' differs" in findings[0].message
 
 
 # ---------------------------------------------------------------------------

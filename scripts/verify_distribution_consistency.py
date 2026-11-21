@@ -4,6 +4,8 @@
 Covers verifiable packaging/distribution drift:
 - canonical branch install URLs (`master` in this repo)
 - release/version source-of-truth mismatches
+- the official MCP registry entry (server.json) against the manifest and the
+  scoped npm wrapper's mcpName
 - stale or contradictory public-beta claims
 - the local publisher's ordered verification and immutable upload contract
 - target-triplet naming drift between distribution/targets.json (the
@@ -319,6 +321,63 @@ def check_target_triplet_consistency(root: Path, findings: list[Finding]) -> Non
         )
 
 
+def check_mcp_registry_entry(root: Path, manifest_version: str, findings: list[Finding]) -> None:
+    """server.json is the official MCP registry entry and must follow the release.
+
+    It has to carry the manifest version, point at the scoped npm wrapper at that
+    version, and be named exactly like the wrapper's `mcpName`.
+    """
+    path = root / "server.json"
+    if not path.is_file():
+        findings.append(Finding("ERROR", "server.json (official MCP registry entry) is missing."))
+        return
+    try:
+        entry = load_json(path)
+    except ValueError as exc:
+        findings.append(Finding("ERROR", f"server.json (official MCP registry entry) is not valid JSON: {exc}"))
+        return
+    if not isinstance(entry, dict):
+        findings.append(Finding("ERROR", "server.json (official MCP registry entry) is not a JSON object."))
+        return
+
+    wrapper = load_json(root / "npm/simplicio/package.json")
+    wrapper_name = wrapper.get("name")
+    mcp_name = wrapper.get("mcpName")
+    offenders: list[str] = []
+    if entry.get("version") != manifest_version:
+        offenders.append(f"server.json version {entry.get('version')} differs from the manifest version {manifest_version}")
+    if not isinstance(wrapper_name, str) or not wrapper_name:
+        offenders.append("npm/simplicio/package.json has no name, so server.json cannot name its package")
+    else:
+        packages = entry.get("packages")
+        matching = [
+            package
+            for package in (packages if isinstance(packages, list) else [])
+            if isinstance(package, dict) and package.get("identifier") == wrapper_name
+        ]
+        if not matching:
+            offenders.append(f"server.json has no package entry for the npm wrapper {wrapper_name}")
+        for package in matching:
+            if package.get("version") != manifest_version:
+                offenders.append(
+                    f"server.json package {wrapper_name} version {package.get('version')} "
+                    f"differs from the manifest version {manifest_version}"
+                )
+    if not isinstance(mcp_name, str) or not mcp_name:
+        offenders.append("npm/simplicio/package.json has no mcpName, which the registry requires for an npm package")
+    elif entry.get("name") != mcp_name:
+        offenders.append(
+            f"server.json name {entry.get('name')!r} differs from the mcpName {mcp_name!r} of npm/simplicio/package.json"
+        )
+
+    if offenders:
+        findings.append(Finding("ERROR", "MCP registry entry server.json drifted from the release: " + "; ".join(offenders)))
+    else:
+        findings.append(
+            Finding("OK", "MCP registry entry server.json agrees with the manifest, the npm wrapper and its mcpName.")
+        )
+
+
 def run_audit(root: Path = ROOT, *, today: date | None = None) -> list[Finding]:
     today = today or date.today()
     findings: list[Finding] = []
@@ -401,6 +460,8 @@ def run_audit(root: Path = ROOT, *, today: date | None = None) -> list[Finding]:
         findings.append(Finding("WARN", f"wrapper versions lag manifest {manifest_version}: {details}"))
     else:
         findings.append(Finding("OK", "wrapper/package versions match the release manifest."))
+
+    check_mcp_registry_entry(root, manifest_version, findings)
 
     release_errors = manual_release_errors(root)
     if release_errors:

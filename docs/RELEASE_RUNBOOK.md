@@ -25,7 +25,8 @@ For each release `vX.Y.Z`, publish:
   executables, in addition to its matching `.sig`;
 - `SHA256SUMS`;
 - `simplicio-update-manifest.json`;
-- matching `version.txt` and `VERSION.md`;
+- matching `version.txt`, `VERSION.md` and `server.json` (the official MCP
+  registry entry; see [MCP registry entry](#mcp-registry-entry-serverjson));
 - `codex/mcp-route.sh` and `codex/mcp-route.ps1`, copied from the same Runtime
   source commit and committed in the immutable tag;
 - `Simplicio-X.Y.Z-arm64.dmg` and `.zip` when the Desktop build is published;
@@ -196,11 +197,12 @@ only permitted for an explicitly selected unofficial channel.
    its `ready` result must not be reported as a verified release.
 5. Invoke the same local command with `--publish` in place of `--check-only`.
    This is the explicit mutating step: it verifies the signed bundle, stages
-   metadata/hooks, runs the local gates, builds and smoke-tests the wheel,
-   opens and merges the release PR into `master`, compares the merged files,
-   tags that commit, and creates the public release with `--verify-tag` and an
-   explicit list of assets. It then checks terminal installation, uploads the
-   wheel to PyPI, and verifies package installation and the downloaded release.
+   metadata/hooks (including `server.json`), runs the local gates, builds and
+   smoke-tests the wheel, opens and merges the release PR into `master`,
+   compares the merged files, tags that commit, and creates the public release
+   with `--verify-tag` and an explicit list of assets. It then checks terminal
+   installation, uploads the wheel to PyPI, and verifies package installation
+   and the downloaded release.
    Do not separately create the tag or upload assets before this command.
 
    The publisher also stages the plugin bootstrap target, its immutable public
@@ -245,6 +247,64 @@ The installer target ID and the build target in provenance are separate
 namespaces. Their approved aliases are maintained in
 `distribution/targets.json`; the smoke test accepts only those explicit
 aliases, never an arbitrary target string.
+
+## MCP registry entry (`server.json`)
+
+`server.json` is this project's entry for the official MCP registry. It names
+the npm package `@simpletibr/simplicio` and the command line that starts the
+MCP server: `serve --mcp --stdio --no-facade-mode`. The launcher passes its
+arguments to the managed binary. With no arguments it prints usage text, so the
+entry must carry them.
+
+What the pipeline does:
+
+- `scripts/publish_release_local.py` writes the release version into
+  `server.json`: the top-level `version` and the `version` of every package
+  entry for `@simpletibr/simplicio`. Nothing else in the file changes. The file
+  is part of the release commit.
+- The publisher stops when `server.json` is missing, is not valid JSON, has no
+  top-level version, has no package entry for `@simpletibr/simplicio`, or is not
+  two-space JSON ending in a newline (it will not reformat the file).
+- `scripts/verify_distribution_consistency.py` reports an `ERROR` and blocks the
+  release when `server.json` is missing or not JSON, when its `version` is not
+  the manifest version, when it has no package entry for the scoped npm wrapper,
+  when that entry's `version` is not the manifest version, or when its `name`
+  differs from the `mcpName` of `npm/simplicio/package.json`.
+
+What the pipeline does not do:
+
+- It does not publish `@simpletibr/simplicio` to npm.
+- It does not publish the entry to the registry.
+
+Measured on 2026-11-21:
+
+- `https://registry.npmjs.org/@simpletibr/simplicio` answers 404. The package
+  was never published. The npm packages `simplicio` and `simplicio-installer`
+  are at 1.0.2, published 2026-06-30.
+- The official registry returns zero servers for the search `simplicio`.
+- With the released 3.14.0 binary over stdio, no arguments print the usage text
+  (exit 0, no MCP message). `serve --mcp --stdio --no-facade-mode` answers
+  `initialize` and lists 22 tools. `serve --mcp --stdio` gives the same output.
+- `server.json` validates against the schema named by its `$schema` (a copy
+  fetched on 2026-11-21, JSON Schema draft-07). Its description is 95
+  characters; the registry limit is 100.
+
+The registry documentation requires the npm package to be published before the
+entry, and an `mcpName` in `package.json` equal to the `name` in `server.json`.
+`npm/simplicio/package.json` carries `"mcpName": "io.github.simpletibr/simplicio"`.
+
+Manual steps for the owner, in this order. None of them has been executed.
+
+1. `npm publish --access public` in `npm/simplicio`. Not executed.
+2. `mcp-publisher validate`. Not executed.
+3. `mcp-publisher login github`. Not executed.
+4. `mcp-publisher publish`. Not executed.
+
+Limit of the launcher on a first launch, read in the code and not run: when the
+managed binary is absent, `npm/simplicio/install.js` runs the installer with
+inherited stdout. Installer text would then come before the first JSON message
+of the server. The entry does not change this. Install the Runtime before a host
+starts the server from the registry entry.
 
 ## Installer smoke for every release
 

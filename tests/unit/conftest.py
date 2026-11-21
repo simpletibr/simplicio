@@ -19,6 +19,8 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 DEFAULT_VERSION = "3.5.2"
+SCOPED_NPM_NAME = "@simpletibr/simplicio"
+MCP_REGISTRY_NAME = "io.github.simpletibr/simplicio"
 ARTIFACTS = {
     "macos-arm64": "simplicio-macos-arm64",
     "macos-x64": "simplicio-macos-x64",
@@ -107,12 +109,32 @@ class RepoBuilder:
             },
         )
 
-        _write_json(root / "npm/simplicio/package.json", {"version": v})
+        _write_json(
+            root / "npm/simplicio/package.json",
+            {"name": SCOPED_NPM_NAME, "mcpName": MCP_REGISTRY_NAME, "version": v},
+        )
         _write_json(root / "npm/simplicio-installer/package.json", {"version": v})
         _write_json(root / "npm/simplicio-unscoped/package.json", {"version": v})
         _write(root / "pypi/simplicio/pyproject.toml", f'[project]\nname = "simplicio"\nversion = "{v}"\n')
 
         _write(root / "SIMPLICIO_ECOSYSTEM.md", f"## Versão atual\n{v} (manifest)\n")
+
+        _write_json(
+            root / "server.json",
+            {
+                "name": MCP_REGISTRY_NAME,
+                "description": "Fixture entry for the official MCP registry.",
+                "version": v,
+                "packages": [
+                    {
+                        "registryType": "npm",
+                        "identifier": SCOPED_NPM_NAME,
+                        "version": v,
+                        "transport": {"type": "stdio"},
+                    }
+                ],
+            },
+        )
 
         return self
 
@@ -148,7 +170,42 @@ class RepoBuilder:
         return self
 
     def with_npm_version(self, package: str, value: str) -> "RepoBuilder":
-        _write_json(self.root / f"npm/{package}/package.json", {"version": value})
+        path = self.root / f"npm/{package}/package.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["version"] = value
+        _write_json(path, data)
+        return self
+
+    def with_npm_manifest(self, **overrides: Any) -> "RepoBuilder":
+        """Change keys of npm/simplicio/package.json; a None value deletes the key."""
+        path = self.root / "npm/simplicio/package.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in overrides.items():
+            if value is None:
+                data.pop(key, None)
+            else:
+                data[key] = value
+        _write_json(path, data)
+        return self
+
+    def with_server_json(self, **overrides: Any) -> "RepoBuilder":
+        """Change top-level keys of server.json; a None value deletes the key."""
+        path = self.root / "server.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in overrides.items():
+            if value is None:
+                data.pop(key, None)
+            else:
+                data[key] = value
+        _write_json(path, data)
+        return self
+
+    def with_server_json_package(self, **overrides: Any) -> "RepoBuilder":
+        """Change keys of the first server.json package entry."""
+        path = self.root / "server.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["packages"][0].update(overrides)
+        _write_json(path, data)
         return self
 
     def with_pyproject_version(self, value: str) -> "RepoBuilder":
