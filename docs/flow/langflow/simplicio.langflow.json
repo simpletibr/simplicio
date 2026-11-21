@@ -1352,7 +1352,7 @@
         }
       },
       {
-        "id": "step-symbol",
+        "id": "step-file",
         "type": "genericNode",
         "position": {
           "x": 2740,
@@ -1365,7 +1365,7 @@
           "height": 96
         },
         "data": {
-          "id": "step-symbol",
+          "id": "step-file",
           "type": "SimplicioStep",
           "node": {
             "base_classes": [
@@ -1374,181 +1374,9 @@
             "beta": false,
             "conditional_paths": [],
             "custom_fields": {},
-            "description": "step · apps/desktop/src/capability_registry.ts",
-            "display_name": "Navegação de símbolos e declarações",
-            "documentation": "apps/desktop/src/capability_registry.ts",
-            "edited": false,
-            "field_order": [
-              "input"
-            ],
-            "frozen": false,
-            "icon": "Workflow",
-            "legacy": false,
-            "lf_version": "1.12.0",
-            "metadata": {
-              "component_class_name": "SimplicioStep",
-              "module": "simplicio.flow"
-            },
-            "output_types": [
-              "Message"
-            ],
-            "outputs": [
-              {
-                "allows_loop": false,
-                "cache": true,
-                "display_name": "Output",
-                "group_outputs": false,
-                "method": "output_response",
-                "name": "output",
-                "selected": "Message",
-                "tool_mode": false,
-                "types": [
-                  "Message"
-                ],
-                "value": "__UNDEFINED__"
-              }
-            ],
-            "pinned": false,
-            "template": {
-              "input": {
-                "advanced": false,
-                "display_name": "Input",
-                "dynamic": false,
-                "fileTypes": [],
-                "info": "",
-                "input_types": [
-                  "Message"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "input",
-                "password": false,
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "title_case": false,
-                "trace_as_input": true,
-                "type": "str",
-                "value": ""
-              }
-            },
-            "tool_mode": false
-          }
-        }
-      },
-      {
-        "id": "step-search",
-        "type": "genericNode",
-        "position": {
-          "x": 2740,
-          "y": 530
-        },
-        "selected": false,
-        "dragging": false,
-        "measured": {
-          "width": 320,
-          "height": 96
-        },
-        "data": {
-          "id": "step-search",
-          "type": "SimplicioStep",
-          "node": {
-            "base_classes": [
-              "Message"
-            ],
-            "beta": false,
-            "conditional_paths": [],
-            "custom_fields": {},
-            "description": "step · apps/desktop/src/omnisearch_projection.ts",
-            "display_name": "Busca estrutural e semântica",
-            "documentation": "apps/desktop/src/omnisearch_projection.ts",
-            "edited": false,
-            "field_order": [
-              "input"
-            ],
-            "frozen": false,
-            "icon": "Workflow",
-            "legacy": false,
-            "lf_version": "1.12.0",
-            "metadata": {
-              "component_class_name": "SimplicioStep",
-              "module": "simplicio.flow"
-            },
-            "output_types": [
-              "Message"
-            ],
-            "outputs": [
-              {
-                "allows_loop": false,
-                "cache": true,
-                "display_name": "Output",
-                "group_outputs": false,
-                "method": "output_response",
-                "name": "output",
-                "selected": "Message",
-                "tool_mode": false,
-                "types": [
-                  "Message"
-                ],
-                "value": "__UNDEFINED__"
-              }
-            ],
-            "pinned": false,
-            "template": {
-              "input": {
-                "advanced": false,
-                "display_name": "Input",
-                "dynamic": false,
-                "fileTypes": [],
-                "info": "",
-                "input_types": [
-                  "Message"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "input",
-                "password": false,
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "title_case": false,
-                "trace_as_input": true,
-                "type": "str",
-                "value": ""
-              }
-            },
-            "tool_mode": false
-          }
-        }
-      },
-      {
-        "id": "step-read",
-        "type": "genericNode",
-        "position": {
-          "x": 2740,
-          "y": 680
-        },
-        "selected": false,
-        "dragging": false,
-        "measured": {
-          "width": 320,
-          "height": 96
-        },
-        "data": {
-          "id": "step-read",
-          "type": "SimplicioStep",
-          "node": {
-            "base_classes": [
-              "Message"
-            ],
-            "beta": false,
-            "conditional_paths": [],
-            "custom_fields": {},
-            "description": "step · apps/desktop/src/library_projection.ts",
-            "display_name": "Leitura compacta de arquivos",
-            "documentation": "apps/desktop/src/library_projection.ts",
+            "description": "step · MCP-CONNECT.md",
+            "display_name": "Leituras limitadas do workspace: ls, grep, assinaturas, diff",
+            "documentation": "MCP-CONNECT.md",
             "edited": false,
             "field_order": [
               "input"
@@ -1614,7 +1442,7 @@
         "type": "genericNode",
         "position": {
           "x": 2740,
-          "y": 830
+          "y": 530
         },
         "selected": false,
         "dragging": false,
@@ -1782,11 +1610,97 @@
         }
       },
       {
-        "id": "step-edit",
+        "id": "step-codegen",
         "type": "genericNode",
         "position": {
           "x": 3500,
           "y": 80
+        },
+        "selected": false,
+        "dragging": false,
+        "measured": {
+          "width": 320,
+          "height": 96
+        },
+        "data": {
+          "id": "step-codegen",
+          "type": "SimplicioStep",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "step · MCP-CONNECT.md",
+            "display_name": "Geradores: build, generate, fill, sync, infer",
+            "documentation": "MCP-CONNECT.md",
+            "edited": false,
+            "field_order": [
+              "input"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "legacy": false,
+            "lf_version": "1.12.0",
+            "metadata": {
+              "component_class_name": "SimplicioStep",
+              "module": "simplicio.flow"
+            },
+            "output_types": [
+              "Message"
+            ],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Output",
+                "group_outputs": false,
+                "method": "output_response",
+                "name": "output",
+                "selected": "Message",
+                "tool_mode": false,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "input": {
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "fileTypes": [],
+                "info": "",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input",
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_input": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          }
+        }
+      },
+      {
+        "id": "step-edit",
+        "type": "genericNode",
+        "position": {
+          "x": 3500,
+          "y": 230
         },
         "selected": false,
         "dragging": false,
@@ -1958,7 +1872,7 @@
         "type": "genericNode",
         "position": {
           "x": 3500,
-          "y": 230
+          "y": 380
         },
         "selected": false,
         "dragging": false,
@@ -2126,6 +2040,92 @@
         }
       },
       {
+        "id": "step-plan",
+        "type": "genericNode",
+        "position": {
+          "x": 2740,
+          "y": 680
+        },
+        "selected": false,
+        "dragging": false,
+        "measured": {
+          "width": 320,
+          "height": 96
+        },
+        "data": {
+          "id": "step-plan",
+          "type": "SimplicioStep",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "step · MCP-CONNECT.md",
+            "display_name": "Planos admitidos, decisões do Loop e roteamento",
+            "documentation": "MCP-CONNECT.md",
+            "edited": false,
+            "field_order": [
+              "input"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "legacy": false,
+            "lf_version": "1.12.0",
+            "metadata": {
+              "component_class_name": "SimplicioStep",
+              "module": "simplicio.flow"
+            },
+            "output_types": [
+              "Message"
+            ],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Output",
+                "group_outputs": false,
+                "method": "output_response",
+                "name": "output",
+                "selected": "Message",
+                "tool_mode": false,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "input": {
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "fileTypes": [],
+                "info": "",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input",
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_input": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          }
+        }
+      },
+      {
         "id": "step-loop",
         "type": "genericNode",
         "position": {
@@ -2151,6 +2151,264 @@
             "description": "step · plugin/hooks/loop_stop.py",
             "display_name": "Loop e waves DAG com concorrência governada",
             "documentation": "plugin/hooks/loop_stop.py",
+            "edited": false,
+            "field_order": [
+              "input"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "legacy": false,
+            "lf_version": "1.12.0",
+            "metadata": {
+              "component_class_name": "SimplicioStep",
+              "module": "simplicio.flow"
+            },
+            "output_types": [
+              "Message"
+            ],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Output",
+                "group_outputs": false,
+                "method": "output_response",
+                "name": "output",
+                "selected": "Message",
+                "tool_mode": false,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "input": {
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "fileTypes": [],
+                "info": "",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input",
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_input": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          }
+        }
+      },
+      {
+        "id": "step-doctor",
+        "type": "genericNode",
+        "position": {
+          "x": 2740,
+          "y": 830
+        },
+        "selected": false,
+        "dragging": false,
+        "measured": {
+          "width": 320,
+          "height": 96
+        },
+        "data": {
+          "id": "step-doctor",
+          "type": "SimplicioStep",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "step · MCP-CONNECT.md",
+            "display_name": "Saúde, prontidão e reparo opt-in do Runtime",
+            "documentation": "MCP-CONNECT.md",
+            "edited": false,
+            "field_order": [
+              "input"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "legacy": false,
+            "lf_version": "1.12.0",
+            "metadata": {
+              "component_class_name": "SimplicioStep",
+              "module": "simplicio.flow"
+            },
+            "output_types": [
+              "Message"
+            ],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Output",
+                "group_outputs": false,
+                "method": "output_response",
+                "name": "output",
+                "selected": "Message",
+                "tool_mode": false,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "input": {
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "fileTypes": [],
+                "info": "",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input",
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_input": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          }
+        }
+      },
+      {
+        "id": "step-report",
+        "type": "genericNode",
+        "position": {
+          "x": 2740,
+          "y": 980
+        },
+        "selected": false,
+        "dragging": false,
+        "measured": {
+          "width": 320,
+          "height": 96
+        },
+        "data": {
+          "id": "step-report",
+          "type": "SimplicioStep",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "step · MCP-CONNECT.md",
+            "display_name": "Relatórios de execução, economia e atividade",
+            "documentation": "MCP-CONNECT.md",
+            "edited": false,
+            "field_order": [
+              "input"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "legacy": false,
+            "lf_version": "1.12.0",
+            "metadata": {
+              "component_class_name": "SimplicioStep",
+              "module": "simplicio.flow"
+            },
+            "output_types": [
+              "Message"
+            ],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Output",
+                "group_outputs": false,
+                "method": "output_response",
+                "name": "output",
+                "selected": "Message",
+                "tool_mode": false,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "input": {
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "fileTypes": [],
+                "info": "",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input",
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_input": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          }
+        }
+      },
+      {
+        "id": "step-tools-unlock",
+        "type": "genericNode",
+        "position": {
+          "x": 2740,
+          "y": 1130
+        },
+        "selected": false,
+        "dragging": false,
+        "measured": {
+          "width": 320,
+          "height": 96
+        },
+        "data": {
+          "id": "step-tools-unlock",
+          "type": "SimplicioStep",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "step · MCP-CONNECT.md",
+            "display_name": "Libera o catálogo completo no perfil exec",
+            "documentation": "MCP-CONNECT.md",
             "edited": false,
             "field_order": [
               "input"
@@ -2731,8 +2989,8 @@
         "id": "out-mcp-surface",
         "type": "genericNode",
         "position": {
-          "x": 2740,
-          "y": 980
+          "x": 3120,
+          "y": 230
         },
         "selected": false,
         "dragging": false,
@@ -2989,8 +3247,8 @@
         "id": "out-tokens",
         "type": "genericNode",
         "position": {
-          "x": 1600,
-          "y": 230
+          "x": 3120,
+          "y": 380
         },
         "selected": false,
         "dragging": false,
@@ -3832,11 +4090,11 @@
         }
       },
       {
-        "id": "reactflow__edge-step-serve-step-symbol",
+        "id": "reactflow__edge-step-serve-step-file",
         "source": "step-serve",
-        "target": "step-symbol",
+        "target": "step-file",
         "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-serveœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
-        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-symbolœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-fileœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
         "animated": false,
         "selected": false,
         "className": "",
@@ -3851,63 +4109,7 @@
           },
           "targetHandle": {
             "fieldName": "input",
-            "id": "step-symbol",
-            "inputTypes": [
-              "Message"
-            ],
-            "type": "str"
-          }
-        }
-      },
-      {
-        "id": "reactflow__edge-step-serve-step-search",
-        "source": "step-serve",
-        "target": "step-search",
-        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-serveœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
-        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-searchœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
-        "animated": false,
-        "selected": false,
-        "className": "",
-        "data": {
-          "sourceHandle": {
-            "dataType": "SimplicioStep",
-            "id": "step-serve",
-            "name": "output",
-            "output_types": [
-              "Message"
-            ]
-          },
-          "targetHandle": {
-            "fieldName": "input",
-            "id": "step-search",
-            "inputTypes": [
-              "Message"
-            ],
-            "type": "str"
-          }
-        }
-      },
-      {
-        "id": "reactflow__edge-step-serve-step-read",
-        "source": "step-serve",
-        "target": "step-read",
-        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-serveœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
-        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-readœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
-        "animated": false,
-        "selected": false,
-        "className": "",
-        "data": {
-          "sourceHandle": {
-            "dataType": "SimplicioStep",
-            "id": "step-serve",
-            "name": "output",
-            "output_types": [
-              "Message"
-            ]
-          },
-          "targetHandle": {
-            "fieldName": "input",
-            "id": "step-read",
+            "id": "step-file",
             "inputTypes": [
               "Message"
             ],
@@ -3964,6 +4166,118 @@
           "targetHandle": {
             "fieldName": "input",
             "id": "step-context",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-serve-step-plan",
+        "source": "step-serve",
+        "target": "step-plan",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-serveœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-planœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-serve",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-plan",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-serve-step-doctor",
+        "source": "step-serve",
+        "target": "step-doctor",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-serveœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-doctorœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-serve",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-doctor",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-serve-step-report",
+        "source": "step-serve",
+        "target": "step-report",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-serveœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-reportœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-serve",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-report",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-serve-step-tools-unlock",
+        "source": "step-serve",
+        "target": "step-tools-unlock",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-serveœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-tools-unlockœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-serve",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-tools-unlock",
             "inputTypes": [
               "Message"
             ],
@@ -4112,10 +4426,10 @@
         }
       },
       {
-        "id": "reactflow__edge-step-symbol-step-context",
-        "source": "step-symbol",
+        "id": "reactflow__edge-step-file-step-context",
+        "source": "step-file",
         "target": "step-context",
-        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-symbolœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-fileœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
         "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-contextœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
         "animated": false,
         "selected": false,
@@ -4123,63 +4437,7 @@
         "data": {
           "sourceHandle": {
             "dataType": "SimplicioStep",
-            "id": "step-symbol",
-            "name": "output",
-            "output_types": [
-              "Message"
-            ]
-          },
-          "targetHandle": {
-            "fieldName": "input",
-            "id": "step-context",
-            "inputTypes": [
-              "Message"
-            ],
-            "type": "str"
-          }
-        }
-      },
-      {
-        "id": "reactflow__edge-step-search-step-context",
-        "source": "step-search",
-        "target": "step-context",
-        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-searchœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
-        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-contextœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
-        "animated": false,
-        "selected": false,
-        "className": "",
-        "data": {
-          "sourceHandle": {
-            "dataType": "SimplicioStep",
-            "id": "step-search",
-            "name": "output",
-            "output_types": [
-              "Message"
-            ]
-          },
-          "targetHandle": {
-            "fieldName": "input",
-            "id": "step-context",
-            "inputTypes": [
-              "Message"
-            ],
-            "type": "str"
-          }
-        }
-      },
-      {
-        "id": "reactflow__edge-step-read-step-context",
-        "source": "step-read",
-        "target": "step-context",
-        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-readœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
-        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-contextœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
-        "animated": false,
-        "selected": false,
-        "className": "",
-        "data": {
-          "sourceHandle": {
-            "dataType": "SimplicioStep",
-            "id": "step-read",
+            "id": "step-file",
             "name": "output",
             "output_types": [
               "Message"
@@ -4216,6 +4474,118 @@
           "targetHandle": {
             "fieldName": "input",
             "id": "step-context",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-context-step-codegen",
+        "source": "step-context",
+        "target": "step-codegen",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-contextœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-codegenœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-context",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-codegen",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-gate-step-codegen",
+        "source": "step-gate",
+        "target": "step-codegen",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-gateœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-codegenœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-gate",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-codegen",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-codegen-step-validate",
+        "source": "step-codegen",
+        "target": "step-validate",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-codegenœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-validateœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-codegen",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-validate",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-codegen-out-receipts",
+        "source": "step-codegen",
+        "target": "out-receipts",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-codegenœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œout-receiptsœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-codegen",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "out-receipts",
             "inputTypes": [
               "Message"
             ],
@@ -4476,6 +4846,62 @@
         }
       },
       {
+        "id": "reactflow__edge-step-loop-step-plan",
+        "source": "step-loop",
+        "target": "step-plan",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-loopœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-planœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-loop",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-plan",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-plan-step-run",
+        "source": "step-plan",
+        "target": "step-run",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-planœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œstep-runœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-plan",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "step-run",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
         "id": "reactflow__edge-step-loop-step-run",
         "source": "step-loop",
         "target": "step-run",
@@ -4496,6 +4922,118 @@
           "targetHandle": {
             "fieldName": "input",
             "id": "step-run",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-doctor-out-receipts",
+        "source": "step-doctor",
+        "target": "out-receipts",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-doctorœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œout-receiptsœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-doctor",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "out-receipts",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-report-out-tokens",
+        "source": "step-report",
+        "target": "out-tokens",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-reportœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œout-tokensœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-report",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "out-tokens",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-report-out-receipts",
+        "source": "step-report",
+        "target": "out-receipts",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-reportœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œout-receiptsœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-report",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "out-receipts",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        }
+      },
+      {
+        "id": "reactflow__edge-step-tools-unlock-out-mcp-surface",
+        "source": "step-tools-unlock",
+        "target": "out-mcp-surface",
+        "sourceHandle": "{œdataTypeœ:œSimplicioStepœ,œidœ:œstep-tools-unlockœ,œnameœ:œoutputœ,œoutput_typesœ:[œMessageœ]}",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œout-mcp-surfaceœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "animated": false,
+        "selected": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "SimplicioStep",
+            "id": "step-tools-unlock",
+            "name": "output",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "out-mcp-surface",
             "inputTypes": [
               "Message"
             ],
