@@ -10,6 +10,8 @@ from pathlib import Path
 
 from scripts import verify_distribution_consistency as audit
 
+SCOPED_NPM_NAME = "@simpletibr/simplicio"
+MCP_REGISTRY_NAME = "io.github.simpletibr/simplicio"
 ARTIFACTS = {
     "macos-arm64": "simplicio-macos-arm64",
     "macos-x64": "simplicio-macos-x64",
@@ -28,6 +30,10 @@ class DistributionFixture:
         path = self.root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(value, encoding="utf-8")
+
+    def put_scoped_wrapper_version(self, version: str) -> None:
+        scoped = {"name": SCOPED_NPM_NAME, "mcpName": MCP_REGISTRY_NAME, "version": version}
+        self.put("npm/simplicio/package.json", json.dumps(scoped))
 
     def write(self) -> None:
         self.put("VERSION.md", f"## Current Version: v{self.version}\nUse `master` branch only\n")
@@ -68,12 +74,27 @@ class DistributionFixture:
                 }
             ),
         )
-        for relative in (
-            "npm/simplicio/package.json",
-            "npm/simplicio-installer/package.json",
-            "npm/simplicio-unscoped/package.json",
-        ):
+        self.put_scoped_wrapper_version(self.version)
+        for relative in ("npm/simplicio-installer/package.json", "npm/simplicio-unscoped/package.json"):
             self.put(relative, json.dumps({"version": self.version}))
+        self.put(
+            "server.json",
+            json.dumps(
+                {
+                    "name": MCP_REGISTRY_NAME,
+                    "description": "Fixture entry for the official MCP registry.",
+                    "version": self.version,
+                    "packages": [
+                        {
+                            "registryType": "npm",
+                            "identifier": SCOPED_NPM_NAME,
+                            "version": self.version,
+                            "transport": {"type": "stdio"},
+                        }
+                    ],
+                }
+            ),
+        )
         self.put("pypi/simplicio/pyproject.toml", f'version = "{self.version}"\n')
         self.put("SIMPLICIO_ECOSYSTEM.md", f"## Versão atual\n{self.version} (manifest)\n")
         self.put(
@@ -107,7 +128,25 @@ class DistributionConsistencyTests(unittest.TestCase):
         return [item.level for item in audit.run_audit(self.root, today=date(2026, 7, 14))]
 
     def test_clean_distribution_has_no_blocking_findings(self):
-        self.assertEqual(self.levels(), ["OK"] * 8)
+        self.assertEqual(self.levels(), ["OK"] * 9)
+
+    def registry_errors(self):
+        return [
+            item.message
+            for item in audit.run_audit(self.root, today=date(2026, 7, 14))
+            if item.level == "ERROR" and "server.json" in item.message
+        ]
+
+    def test_stale_registry_entry_blocks_the_release(self):
+        self.fixture.put("server.json", (self.root / "server.json").read_text().replace("3.5.2", "3.5.1"))
+        (errors,) = self.registry_errors()
+        self.assertIn("server.json version 3.5.1 differs from the manifest version 3.5.2", errors)
+        self.assertIn("server.json package @simpletibr/simplicio version 3.5.1 differs", errors)
+
+    def test_missing_registry_entry_blocks_the_release(self):
+        (self.root / "server.json").unlink()
+        self.assertEqual(len(self.registry_errors()), 1)
+        self.assertEqual(audit.main(["--root", str(self.root)]), 1)
 
     def test_regression_wrong_branch_and_version_fail(self):
         self.fixture.put("README.md", "https://raw.githubusercontent.com/simpletibr/simplicio/main/install.sh\n")
@@ -118,7 +157,7 @@ class DistributionConsistencyTests(unittest.TestCase):
         self.assertTrue(any("version mismatch" in item.message for item in findings))
 
     def test_regression_wrapper_and_ecosystem_drift_warn(self):
-        self.fixture.put("npm/simplicio/package.json", json.dumps({"version": "3.0.2"}))
+        self.fixture.put_scoped_wrapper_version("3.0.2")
         self.fixture.put("SIMPLICIO_ECOSYSTEM.md", "## Versão atual\n1.2.0\n")
         warnings = [item.message for item in audit.run_audit(self.root) if item.level == "WARN"]
         self.assertEqual(len(warnings), 2)
@@ -288,10 +327,10 @@ class DistributionConsistencyTests(unittest.TestCase):
             result = audit.main(["--root", str(self.root), "--strict", "--junit", str(junit), "--json"])
         self.assertEqual(result, 0)
         self.assertTrue(junit.exists())
-        self.assertEqual(len(json.loads(output.getvalue())), 8)
+        self.assertEqual(len(json.loads(output.getvalue())), 9)
 
     def test_strict_mode_fails_warning_while_default_does_not(self):
-        self.fixture.put("npm/simplicio/package.json", json.dumps({"version": "3.0.2"}))
+        self.fixture.put_scoped_wrapper_version("3.0.2")
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(audit.main(["--root", str(self.root)]), 0)
             self.assertEqual(audit.main(["--root", str(self.root), "--strict"]), 1)

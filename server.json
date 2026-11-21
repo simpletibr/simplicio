@@ -6,15 +6,33 @@
     "url": "https://github.com/simpletibr/simplicio",
     "source": "github"
   },
-  "version": "3.10.0",
+  "version": "3.14.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@simpletibr/simplicio",
-      "version": "3.10.0",
+      "version": "3.14.0",
       "transport": {
         "type": "stdio"
       },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "serve"
+        },
+        {
+          "type": "named",
+          "name": "--mcp"
+        },
+        {
+          "type": "named",
+          "name": "--stdio"
+        },
+        {
+          "type": "named",
+          "name": "--no-facade-mode"
+        }
+      ],
       "environmentVariables": [
         {
           "name": "SIMPLICIO_MCP_URL",
