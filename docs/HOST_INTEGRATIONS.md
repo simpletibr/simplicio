@@ -37,6 +37,31 @@ a project/SDK bridge. Neither is reported as automatically configured by a local
 user registry. DeepSeek Harness remains unverified; a model name alone does
 not identify a compatible host executable.
 
+## Harnesses of the Runtime bot study
+
+Twelve more ids come from the Runtime bot study of 2026-11-21: `grok` (xAI Grok
+Build, corrected: an earlier row described another product), `muse-code`,
+`openmausbot`, `openmuse`, `t3-code`, `opendots`, `openbot`, `agentes-chat`,
+`dots`, `grok-bot`, `muse` and `cue`. Each needs a Simplicio Runtime that lists
+its id in `simplicio integrate list`; an older Runtime download does not gain
+them because this metadata changed. Nothing was run against a real installation
+of any of these products.
+
+- For `grok`, `muse-code`, `openmausbot` and `openmuse` the Runtime writes the
+  file (`simplicio integrate install --host <id>`, and `simplicio mcp register`
+  when it detects the product). The receipt counts them as `registered` like any
+  other host when a `writes` entry reports `done` or `skipped`.
+- For the other eight the Runtime writes nothing. `simplicio integrations routes
+  <id>` prints the steps, or the documented way and what is not verified, and
+  `simplicio integrate verify --host t3-code` reports the agents T3 Code runs.
+  The launcher reports these eight as `unsupported` and never as `registered`.
+- The Python helpers of the launcher write none of these files; the formats
+  differ from the generic JSON entry.
+
+Each product has a page in [`hosts/`](hosts/); the
+[installer paths](INSTALLER_HOSTS.md#harnesses-of-the-runtime-bot-study) list
+the files.
+
 ## Opt-out
 
 ```text

@@ -17,7 +17,7 @@ have no guessed executable and no automatic configuration writer.
 | oh-my-pi | runtime-mcp | delegated-to-runtime | `omp` |
 | OrcaDev / Orca ADE | portable-cli | documented-cli | `orca status --json` |
 | Command Code | unsupported | unverified | — |
-| Grok | unsupported | unverified | — |
+| xAI Grok Build | runtime-mcp | delegated-to-runtime | `grok` |
 | GitHub Copilot | unsupported | unverified | — |
 | MiMo Code | unsupported | unverified | — |
 | Amp | unsupported | unverified | — |
@@ -37,6 +37,34 @@ have no guessed executable and no automatic configuration writer.
 | Mistral Vibe | unsupported | unverified | — |
 | Qwen Code | unsupported | unverified | — |
 | Rovo Dev | unsupported | unverified | — |
+| Meta Muse Code | runtime-mcp | delegated-to-runtime | `muse` |
+| OpenMausBot | runtime-mcp | delegated-to-runtime | `openmausbot` |
+| OpenMuse (Python) | runtime-mcp | delegated-to-runtime | `openmuse` |
+| T3 Code | unsupported | unverified | — |
+| CopilotKit OpenDots | unsupported | unverified | — |
+| CopilotKit OpenBot | unsupported | unverified | — |
+| agentes.chat | unsupported | unverified | — |
+| OpenAI dots | unsupported | unverified | — |
+| xAI Grok Bot | unsupported | unverified | — |
+| Meta Muse app | unsupported | unverified | — |
+| Cue by Manus | unsupported | unverified | — |
+
+xAI Grok Build and the eleven rows after Rovo Dev are the harnesses of the Runtime
+bot study of 2026-11-21. Each needs a Simplicio Runtime that lists its id in
+`simplicio integrate list`, and none was verified against a real installation
+of its product.
+
+- The Runtime writes a file for Grok Build, Muse Code, OpenMausBot and OpenMuse:
+  see [Grok Build](grok.md), [Muse Code](muse-code.md),
+  [OpenMausBot](openmausbot.md) and [OpenMuse](openmuse.md).
+- For the other eight the Runtime writes nothing, so they stay `unsupported`
+  here. `simplicio integrations routes <id>` prints the steps of
+  [OpenDots](opendots.md), [OpenBot](openbot.md), [agentes.chat](agentes-chat.md),
+  [dots](dots.md), [Grok Bot](grok-bot.md), the [Muse app](muse.md) and
+  [Cue](cue.md). `simplicio integrate verify --host t3-code` reports the agents
+  that [T3 Code](t3-code.md) runs.
+- Earlier public text described the id `grok` as another product, the
+  Superagent CLI. It is xAI Grok Build.
 
 The returned matrix contains only public contract metadata. It never includes
 credentials, prompt bodies, configuration bodies, or host process output.
