@@ -17,16 +17,19 @@ flowchart LR
   step-bootstrap["Bootstrap e preparação do Runtime"]
   step-gate["Gate de missão e efeito"]
   step-map["Map estrutural do repositório"]
-  step-symbol["Navegação de símbolos e declarações"]
-  step-search["Busca estrutural e semântica"]
-  step-read["Leitura compacta de arquivos"]
+  step-file["Leituras limitadas do workspace: ls, grep, assinaturas, diff"]
   step-memory["Memória indexada do projeto"]
   step-context["Contexto limitado por orçamento de tokens"]
+  step-codegen["Geradores: build, generate, fill, sync, infer"]
   step-edit["Edição determinística com pré-imagem SHA-256"]
   step-validate["Validação orientada a contrato"]
   step-run["Execução governada de tarefa"]
   step-exec["Comandos externos supervisionados"]
+  step-plan["Planos admitidos, decisões do Loop e roteamento"]
   step-loop["Loop e waves DAG com concorrência governada"]
+  step-doctor["Saúde, prontidão e reparo opt-in do Runtime"]
+  step-report["Relatórios de execução, economia e atividade"]
+  step-tools-unlock["Libera o catálogo completo no perfil exec"]
   step-session["Sessão: idle, uso e limites"]
   step-meter["Cache meter medido"]
   step-flowgen["Geração determinística do fluxo"]
@@ -62,20 +65,24 @@ flowchart LR
   step-bootstrap --> step-session
   step-serve --> step-gate
   step-serve --> step-map
-  step-serve --> step-symbol
-  step-serve --> step-search
-  step-serve --> step-read
+  step-serve --> step-file
   step-serve --> step-memory
   step-serve --> step-context
+  step-serve --> step-plan
+  step-serve --> step-doctor
+  step-serve --> step-report
+  step-serve --> step-tools-unlock
   step-serve --> out-mcp-surface
   step-gate --> step-edit
   step-gate --> step-run
   step-gate --> step-exec
   step-map --> step-context
-  step-symbol --> step-context
-  step-search --> step-context
-  step-read --> step-context
+  step-file --> step-context
   step-memory --> step-context
+  step-context --> step-codegen
+  step-gate --> step-codegen
+  step-codegen --> step-validate
+  step-codegen --> out-receipts
   step-context --> step-edit
   step-context --> step-run
   step-edit --> step-validate
@@ -85,7 +92,13 @@ flowchart LR
   step-exec --> step-validate
   step-validate --> out-desktop
   step-validate --> out-receipts
+  step-loop --> step-plan
+  step-plan --> step-run
   step-loop --> step-run
+  step-doctor --> out-receipts
+  step-report --> out-tokens
+  step-report --> out-receipts
+  step-tools-unlock --> out-mcp-surface
   step-session --> step-meter
   step-meter --> out-tokens
   step-flowgen --> step-flowverify
@@ -94,6 +107,6 @@ flowchart LR
   classDef input fill:#e8f1ff,stroke:#3b6fb6,stroke-width:1px;
   class in-installer,in-pypi,in-npm,in-cli,in-mcp,in-desktop,in-host-hook,in-repo input;
   classDef step fill:#fff7d6,stroke:#b38b00,stroke-width:1px;
-  class step-install,step-release,step-version,step-onboard,step-auth,step-register-hosts,step-serve,step-bootstrap,step-gate,step-map,step-symbol,step-search,step-read,step-memory,step-context,step-edit,step-validate,step-run,step-exec,step-loop,step-session,step-meter,step-flowgen,step-flowverify step;
+  class step-install,step-release,step-version,step-onboard,step-auth,step-register-hosts,step-serve,step-bootstrap,step-gate,step-map,step-file,step-memory,step-context,step-codegen,step-edit,step-validate,step-run,step-exec,step-plan,step-loop,step-doctor,step-report,step-tools-unlock,step-session,step-meter,step-flowgen,step-flowverify step;
   classDef output fill:#e8f7ea,stroke:#2f7d32,stroke-width:1px;
   class out-manifest,out-release,out-mcp-surface,out-desktop,out-receipts,out-tokens,out-flow output;
