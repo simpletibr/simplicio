@@ -6,12 +6,12 @@
     "url": "https://github.com/simpletibr/simplicio",
     "source": "github"
   },
-  "version": "3.14.0",
+  "version": "3.15.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@simpletibr/simplicio",
-      "version": "3.14.0",
+      "version": "3.15.0",
       "transport": {
         "type": "stdio"
       },
