@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1620" height="1070" viewBox="0 0 1620 1070">
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1070" viewBox="0 0 1920 1070">
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#555"/></marker></defs>
 <rect width="100%" height="100%" fill="#ffffff"/>
 <text x="40" y="40" font-family="sans-serif" font-size="20" font-weight="700">Simplicio — entrada → passos → saídas</text>
-<text x="40" y="66" font-family="sans-serif" font-size="12" fill="#666">39 nós · 53 arestas · gerado por scripts/generate_flow.py</text>
+<text x="40" y="66" font-family="sans-serif" font-size="12" fill="#666">42 nós · 63 arestas · gerado por scripts/generate_flow.py</text>
 <path d="M300,126 C340,126 320,126 360,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M300,246 C340,246 320,126 360,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M300,366 C340,366 320,126 360,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
@@ -14,9 +14,9 @@
 <path d="M300,966 C340,966 320,246 360,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M300,966 C340,966 320,606 360,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M620,126 C750,126 230,726 360,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M620,126 C950,126 950,126 1280,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M620,246 C950,246 950,246 1280,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M620,246 C950,246 950,126 1280,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M620,126 C1100,126 1100,126 1580,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M620,246 C1100,246 1100,246 1580,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M620,246 C1100,246 1100,126 1580,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M620,726 C660,726 620,126 660,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M920,126 C1050,126 530,366 660,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M920,126 C1050,126 530,606 660,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
@@ -29,33 +29,43 @@
 <path d="M920,606 C1050,606 530,846 660,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M920,606 C1050,606 530,966 660,966" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M920,606 C960,606 920,126 960,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,606 C960,606 920,726 960,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M920,606 C960,606 920,246 960,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M920,606 C960,606 920,366 960,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M920,606 C960,606 920,486 960,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M920,606 C1100,606 1100,606 1280,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M920,726 C960,726 920,606 960,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M920,726 C960,726 920,726 960,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M920,726 C960,726 920,846 960,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M920,846 C960,846 920,486 960,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M920,966 C960,966 920,486 960,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,126 C1350,126 830,486 960,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,246 C1350,246 830,486 960,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,366 C1350,366 830,486 960,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,486 C1350,486 830,606 960,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,486 C1350,486 830,726 960,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,606 C1350,606 830,966 960,966" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,606 C1260,606 1240,726 1280,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,606 C1260,606 1240,846 1280,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,606 C960,606 920,606 960,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,606 C1250,606 1250,486 1580,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,726 C960,726 920,966 960,966" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,726 C1090,726 1090,126 1260,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,726 C1090,726 1090,246 1260,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,846 C960,846 920,726 960,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,966 C960,966 920,726 960,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,126 C1350,126 830,726 960,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M1220,726 C1350,726 830,846 960,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,846 C1350,846 830,966 960,966" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,966 C1260,966 1240,726 1280,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M1220,966 C1260,966 1240,846 1280,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M620,486 C790,486 790,726 960,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,726 C960,726 920,846 960,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,846 C1260,846 1220,366 1260,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,846 C1400,846 1400,846 1580,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,726 C1350,726 830,966 960,966" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,726 C1260,726 1220,126 1260,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,966 C1260,966 1220,366 1260,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,966 C1400,966 1400,726 1580,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,966 C1400,966 1400,846 1580,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1520,126 C1650,126 1130,246 1260,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1520,246 C1650,246 1130,366 1260,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1520,366 C1560,366 1540,726 1580,726" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1520,366 C1560,366 1540,846 1580,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M620,486 C790,486 790,246 960,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,246 C1260,246 1220,126 1260,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M620,486 C940,486 940,126 1260,126" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,366 C1400,366 1400,846 1580,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,486 C1400,486 1400,606 1580,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,486 C1400,486 1400,846 1580,846" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M1220,606 C1400,606 1400,486 1580,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M620,846 C660,846 620,246 660,246" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M920,246 C1100,246 1100,486 1280,486" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M920,246 C1250,246 1250,606 1580,606" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <path d="M620,606 C750,606 230,966 360,966" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M620,606 C950,606 950,366 1280,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
-<path d="M620,966 C950,966 950,366 1280,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M620,606 C1100,606 1100,366 1580,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M620,966 C1100,966 1100,366 1580,366" fill="none" stroke="#555" stroke-width="1.4" marker-end="url(#arrow)"/>
 <rect x="40" y="90" width="260" height="72" rx="10" fill="#e8f1ff" stroke="#3b6fb6" stroke-width="1.5"/>
 <text x="52" y="114" font-family="sans-serif" font-size="12" font-weight="700">in-installer</text>
 <text x="52" y="132" font-family="sans-serif" font-size="11" fill="#333">Instalador assinado (sh/ps1)</text>
@@ -113,38 +123,53 @@
 <text x="672" y="834" font-family="sans-serif" font-size="12" font-weight="700">step-map</text>
 <text x="672" y="852" font-family="sans-serif" font-size="11" fill="#333">Map estrutural do repositório</text>
 <rect x="660" y="930" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="672" y="954" font-family="sans-serif" font-size="12" font-weight="700">step-symbol</text>
-<text x="672" y="972" font-family="sans-serif" font-size="11" fill="#333">Navegação de símbolos e declarações</text>
+<text x="672" y="954" font-family="sans-serif" font-size="12" font-weight="700">step-file</text>
+<text x="672" y="972" font-family="sans-serif" font-size="11" fill="#333">Leituras limitadas do workspace: ls,</text>
+<text x="672" y="986" font-family="sans-serif" font-size="11" fill="#333">grep, assinaturas, diff</text>
 <rect x="960" y="90" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="114" font-family="sans-serif" font-size="12" font-weight="700">step-search</text>
-<text x="972" y="132" font-family="sans-serif" font-size="11" fill="#333">Busca estrutural e semântica</text>
-<rect x="960" y="210" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="234" font-family="sans-serif" font-size="12" font-weight="700">step-read</text>
-<text x="972" y="252" font-family="sans-serif" font-size="11" fill="#333">Leitura compacta de arquivos</text>
-<rect x="960" y="330" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="354" font-family="sans-serif" font-size="12" font-weight="700">step-memory</text>
-<text x="972" y="372" font-family="sans-serif" font-size="11" fill="#333">Memória indexada do projeto</text>
-<rect x="960" y="450" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="474" font-family="sans-serif" font-size="12" font-weight="700">step-context</text>
-<text x="972" y="492" font-family="sans-serif" font-size="11" fill="#333">Contexto limitado por orçamento de</text>
-<text x="972" y="506" font-family="sans-serif" font-size="11" fill="#333">tokens</text>
-<rect x="960" y="570" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="594" font-family="sans-serif" font-size="12" font-weight="700">step-edit</text>
-<text x="972" y="612" font-family="sans-serif" font-size="11" fill="#333">Edição determinística com pré-imagem</text>
-<text x="972" y="626" font-family="sans-serif" font-size="11" fill="#333">SHA-256</text>
-<rect x="960" y="930" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="954" font-family="sans-serif" font-size="12" font-weight="700">step-validate</text>
-<text x="972" y="972" font-family="sans-serif" font-size="11" fill="#333">Validação orientada a contrato</text>
+<text x="972" y="114" font-family="sans-serif" font-size="12" font-weight="700">step-memory</text>
+<text x="972" y="132" font-family="sans-serif" font-size="11" fill="#333">Memória indexada do projeto</text>
 <rect x="960" y="690" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="714" font-family="sans-serif" font-size="12" font-weight="700">step-run</text>
-<text x="972" y="732" font-family="sans-serif" font-size="11" fill="#333">Execução governada de tarefa</text>
+<text x="972" y="714" font-family="sans-serif" font-size="12" font-weight="700">step-context</text>
+<text x="972" y="732" font-family="sans-serif" font-size="11" fill="#333">Contexto limitado por orçamento de</text>
+<text x="972" y="746" font-family="sans-serif" font-size="11" fill="#333">tokens</text>
 <rect x="960" y="810" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
-<text x="972" y="834" font-family="sans-serif" font-size="12" font-weight="700">step-exec</text>
-<text x="972" y="852" font-family="sans-serif" font-size="11" fill="#333">Comandos externos supervisionados</text>
+<text x="972" y="834" font-family="sans-serif" font-size="12" font-weight="700">step-codegen</text>
+<text x="972" y="852" font-family="sans-serif" font-size="11" fill="#333">Geradores: build, generate, fill,</text>
+<text x="972" y="866" font-family="sans-serif" font-size="11" fill="#333">sync, infer</text>
+<rect x="960" y="930" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="972" y="954" font-family="sans-serif" font-size="12" font-weight="700">step-edit</text>
+<text x="972" y="972" font-family="sans-serif" font-size="11" fill="#333">Edição determinística com pré-imagem</text>
+<text x="972" y="986" font-family="sans-serif" font-size="11" fill="#333">SHA-256</text>
+<rect x="1260" y="330" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="1272" y="354" font-family="sans-serif" font-size="12" font-weight="700">step-validate</text>
+<text x="1272" y="372" font-family="sans-serif" font-size="11" fill="#333">Validação orientada a contrato</text>
+<rect x="1260" y="90" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="1272" y="114" font-family="sans-serif" font-size="12" font-weight="700">step-run</text>
+<text x="1272" y="132" font-family="sans-serif" font-size="11" fill="#333">Execução governada de tarefa</text>
+<rect x="1260" y="210" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="1272" y="234" font-family="sans-serif" font-size="12" font-weight="700">step-exec</text>
+<text x="1272" y="252" font-family="sans-serif" font-size="11" fill="#333">Comandos externos supervisionados</text>
+<rect x="960" y="210" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="972" y="234" font-family="sans-serif" font-size="12" font-weight="700">step-plan</text>
+<text x="972" y="252" font-family="sans-serif" font-size="11" fill="#333">Planos admitidos, decisões do Loop e</text>
+<text x="972" y="266" font-family="sans-serif" font-size="11" fill="#333">roteamento</text>
 <rect x="360" y="450" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
 <text x="372" y="474" font-family="sans-serif" font-size="12" font-weight="700">step-loop</text>
 <text x="372" y="492" font-family="sans-serif" font-size="11" fill="#333">Loop e waves DAG com concorrência</text>
 <text x="372" y="506" font-family="sans-serif" font-size="11" fill="#333">governada</text>
+<rect x="960" y="330" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="972" y="354" font-family="sans-serif" font-size="12" font-weight="700">step-doctor</text>
+<text x="972" y="372" font-family="sans-serif" font-size="11" fill="#333">Saúde, prontidão e reparo opt-in do</text>
+<text x="972" y="386" font-family="sans-serif" font-size="11" fill="#333">Runtime</text>
+<rect x="960" y="450" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="972" y="474" font-family="sans-serif" font-size="12" font-weight="700">step-report</text>
+<text x="972" y="492" font-family="sans-serif" font-size="11" fill="#333">Relatórios de execução, economia e</text>
+<text x="972" y="506" font-family="sans-serif" font-size="11" fill="#333">atividade</text>
+<rect x="960" y="570" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
+<text x="972" y="594" font-family="sans-serif" font-size="12" font-weight="700">step-tools-unlock</text>
+<text x="972" y="612" font-family="sans-serif" font-size="11" fill="#333">Libera o catálogo completo no perfil</text>
+<text x="972" y="626" font-family="sans-serif" font-size="11" fill="#333">exec</text>
 <rect x="360" y="810" width="260" height="72" rx="10" fill="#fff7d6" stroke="#b38b00" stroke-width="1.5"/>
 <text x="372" y="834" font-family="sans-serif" font-size="12" font-weight="700">step-session</text>
 <text x="372" y="852" font-family="sans-serif" font-size="11" fill="#333">Sessão: idle, uso e limites</text>
@@ -158,26 +183,26 @@
 <text x="372" y="954" font-family="sans-serif" font-size="12" font-weight="700">step-flowverify</text>
 <text x="372" y="972" font-family="sans-serif" font-size="11" fill="#333">Gate de drift e verificação do</text>
 <text x="372" y="986" font-family="sans-serif" font-size="11" fill="#333">Langflow</text>
-<rect x="1280" y="90" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
-<text x="1292" y="114" font-family="sans-serif" font-size="12" font-weight="700">out-manifest</text>
-<text x="1292" y="132" font-family="sans-serif" font-size="11" fill="#333">Manifesto e checksums de atualização</text>
-<rect x="1280" y="210" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
-<text x="1292" y="234" font-family="sans-serif" font-size="12" font-weight="700">out-release</text>
-<text x="1292" y="252" font-family="sans-serif" font-size="11" fill="#333">Binários assinados e SHA256SUMS</text>
-<rect x="1280" y="570" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
-<text x="1292" y="594" font-family="sans-serif" font-size="12" font-weight="700">out-mcp-surface</text>
-<text x="1292" y="612" font-family="sans-serif" font-size="11" fill="#333">Superfície MCP anunciada (tools/list)</text>
-<rect x="1280" y="690" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
-<text x="1292" y="714" font-family="sans-serif" font-size="12" font-weight="700">out-desktop</text>
-<text x="1292" y="732" font-family="sans-serif" font-size="11" fill="#333">Snapshots e projeções do Desktop</text>
-<rect x="1280" y="810" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
-<text x="1292" y="834" font-family="sans-serif" font-size="12" font-weight="700">out-receipts</text>
-<text x="1292" y="852" font-family="sans-serif" font-size="11" fill="#333">Recibos de execução e auditoria</text>
-<rect x="1280" y="450" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
-<text x="1292" y="474" font-family="sans-serif" font-size="12" font-weight="700">out-tokens</text>
-<text x="1292" y="492" font-family="sans-serif" font-size="11" fill="#333">Relatório de tokens e economia</text>
-<rect x="1280" y="330" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
-<text x="1292" y="354" font-family="sans-serif" font-size="12" font-weight="700">out-flow</text>
-<text x="1292" y="372" font-family="sans-serif" font-size="11" fill="#333">Diagramas Mermaid/SVG/Langflow do</text>
-<text x="1292" y="386" font-family="sans-serif" font-size="11" fill="#333">fluxo</text>
+<rect x="1580" y="90" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="1592" y="114" font-family="sans-serif" font-size="12" font-weight="700">out-manifest</text>
+<text x="1592" y="132" font-family="sans-serif" font-size="11" fill="#333">Manifesto e checksums de atualização</text>
+<rect x="1580" y="210" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="1592" y="234" font-family="sans-serif" font-size="12" font-weight="700">out-release</text>
+<text x="1592" y="252" font-family="sans-serif" font-size="11" fill="#333">Binários assinados e SHA256SUMS</text>
+<rect x="1580" y="450" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="1592" y="474" font-family="sans-serif" font-size="12" font-weight="700">out-mcp-surface</text>
+<text x="1592" y="492" font-family="sans-serif" font-size="11" fill="#333">Superfície MCP anunciada (tools/list)</text>
+<rect x="1580" y="690" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="1592" y="714" font-family="sans-serif" font-size="12" font-weight="700">out-desktop</text>
+<text x="1592" y="732" font-family="sans-serif" font-size="11" fill="#333">Snapshots e projeções do Desktop</text>
+<rect x="1580" y="810" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="1592" y="834" font-family="sans-serif" font-size="12" font-weight="700">out-receipts</text>
+<text x="1592" y="852" font-family="sans-serif" font-size="11" fill="#333">Recibos de execução e auditoria</text>
+<rect x="1580" y="570" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="1592" y="594" font-family="sans-serif" font-size="12" font-weight="700">out-tokens</text>
+<text x="1592" y="612" font-family="sans-serif" font-size="11" fill="#333">Relatório de tokens e economia</text>
+<rect x="1580" y="330" width="260" height="72" rx="10" fill="#e8f7ea" stroke="#2f7d32" stroke-width="1.5"/>
+<text x="1592" y="354" font-family="sans-serif" font-size="12" font-weight="700">out-flow</text>
+<text x="1592" y="372" font-family="sans-serif" font-size="11" fill="#333">Diagramas Mermaid/SVG/Langflow do</text>
+<text x="1592" y="386" font-family="sans-serif" font-size="11" fill="#333">fluxo</text>
 </svg>

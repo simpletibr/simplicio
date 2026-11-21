@@ -6,6 +6,7 @@ Covers verifiable packaging/distribution drift:
 - release/version source-of-truth mismatches
 - the official MCP registry entry (server.json) against the manifest and the
   scoped npm wrapper's mcpName
+- the flow source (docs/flow/simplicio.flow.json) version against the manifest
 - stale or contradictory public-beta claims
 - the local publisher's ordered verification and immutable upload contract
 - target-triplet naming drift between distribution/targets.json (the
@@ -33,6 +34,7 @@ from typing import Iterable, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL_PUBLISHER = "scripts/publish_release_local.py"
+FLOW_SOURCE = "docs/flow/simplicio.flow.json"
 PUBLIC_REPOSITORY = "simpletibr/simplicio"
 CANONICAL_BRANCH = "master"
 MAIN_INSTALL_RE = re.compile(
@@ -378,6 +380,37 @@ def check_mcp_registry_entry(root: Path, manifest_version: str, findings: list[F
         )
 
 
+def check_flow_version(root: Path, manifest_version: str, findings: list[Finding]) -> None:
+    """The flow source (docs/flow/simplicio.flow.json) must carry the release version.
+
+    Appends exactly one finding: an ERROR when the file is missing, is not valid
+    JSON, is not a JSON object or carries a version other than the manifest's,
+    otherwise an OK.
+    """
+    path = root / FLOW_SOURCE
+    if not path.is_file():
+        findings.append(Finding("ERROR", f"{FLOW_SOURCE} (flow source) is missing."))
+        return
+    try:
+        document = load_json(path)
+    except ValueError as exc:
+        findings.append(Finding("ERROR", f"{FLOW_SOURCE} (flow source) is not valid JSON: {exc}"))
+        return
+    if not isinstance(document, dict):
+        findings.append(Finding("ERROR", f"{FLOW_SOURCE} (flow source) is not a JSON object."))
+        return
+    if document.get("version") != manifest_version:
+        findings.append(
+            Finding(
+                "ERROR",
+                f"flow source {FLOW_SOURCE} version {document.get('version')} "
+                f"differs from the manifest version {manifest_version}",
+            )
+        )
+    else:
+        findings.append(Finding("OK", f"flow source {FLOW_SOURCE} carries the manifest version {manifest_version}."))
+
+
 def run_audit(root: Path = ROOT, *, today: date | None = None) -> list[Finding]:
     today = today or date.today()
     findings: list[Finding] = []
@@ -462,6 +495,7 @@ def run_audit(root: Path = ROOT, *, today: date | None = None) -> list[Finding]:
         findings.append(Finding("OK", "wrapper/package versions match the release manifest."))
 
     check_mcp_registry_entry(root, manifest_version, findings)
+    check_flow_version(root, manifest_version, findings)
 
     release_errors = manual_release_errors(root)
     if release_errors:

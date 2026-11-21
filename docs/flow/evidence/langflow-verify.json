@@ -2,12 +2,12 @@
   "checks": {
     "availability_http_status": 200,
     "edge_pairs_match": true,
-    "expected_edges": 53,
-    "expected_nodes": 39,
+    "expected_edges": 63,
+    "expected_nodes": 42,
     "fetch_http_status": 200,
     "import_http_status": 201,
-    "imported_edges": 53,
-    "imported_nodes": 39,
+    "imported_edges": 63,
+    "imported_nodes": 42,
     "node_ids_match": true,
     "node_labels_match": true
   },
@@ -22,12 +22,12 @@
     "scheme": "http"
   },
   "flow": {
-    "edges": 53,
-    "nodes": 39,
+    "edges": 63,
+    "nodes": 42,
     "path": "docs/flow/langflow/simplicio.langflow.json",
-    "sha256": "897954600e6b88051fc9a5fb9ebb338c823519239e05d16302c2bce818948fb5"
+    "sha256": "73cedd7631b50929fcc35b232cccfce29c11c5343f849afe2e9aed7bf3efd7ac"
   },
-  "flow_id": "7c6d9aaf-fc4f-439b-a7db-74f3ee7ec041",
+  "flow_id": "a10a5b5f-57ac-4f64-83a1-8a640111fda2",
   "langflow": {
     "version": "1.12.0"
   },

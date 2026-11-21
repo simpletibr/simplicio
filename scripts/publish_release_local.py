@@ -39,6 +39,8 @@ FORCE_TRACKED_RELEASE_PREFIXES = (
     "npm/simplicio-unscoped/",
     "pypi/simplicio/",
 )
+FLOW_SOURCE = "docs/flow/simplicio.flow.json"
+FLOW_GENERATOR = "scripts/generate_flow.py"
 
 
 class PublishError(RuntimeError):
@@ -495,6 +497,77 @@ def update_server_json(version: str) -> Path:
     return path
 
 
+def restore_directory(directory: Path, files: dict[Path, bytes], folders: set[Path]) -> None:
+    """Put a directory back to the files and folders captured before a write."""
+    for item in sorted(directory.rglob("*")):
+        # Parents sort before their children, so one removal covers a new tree.
+        if item.is_dir() and item not in folders:
+            shutil.rmtree(item)
+    for item in sorted(directory.rglob("*")):
+        if item.is_file() and item not in files:
+            item.unlink()
+    for item, body in files.items():
+        if not item.is_file() or item.read_bytes() != body:
+            item.parent.mkdir(parents=True, exist_ok=True)
+            item.write_bytes(body)
+
+
+def update_flow_version(version: str) -> list[Path]:
+    """Move the flow source to the release version and regenerate its derived files.
+
+    Only the top-level version line of the source changes, so its hand
+    formatting survives, and a refused update leaves the flow directory as it
+    was. The generator writes inside the repository only. This never publishes.
+    """
+    path = ROOT / FLOW_SOURCE
+    if not path.is_file():
+        raise PublishError(FLOW_SOURCE + " is missing")
+    try:
+        text = path.read_bytes().decode("utf-8")
+        document = json.loads(text)
+    except ValueError as exc:
+        raise PublishError(FLOW_SOURCE + " is not valid JSON: " + str(exc)) from exc
+    if (
+        not isinstance(document, dict)
+        or document.get("schema") != "simplicio.flow/v1"
+        or not isinstance(document.get("version"), str)
+    ):
+        raise PublishError(FLOW_SOURCE + " has no simplicio.flow/v1 version")
+    updated, replacements = re.subn(
+        r'(?m)^(  "version": ")[^"\n]*(",?)$',
+        lambda match: match[1] + version + match[2],
+        text,
+    )
+    try:
+        only_the_version = replacements == 1 and json.loads(updated) == {**document, "version": version}
+    except ValueError:
+        only_the_version = False
+    if not only_the_version:
+        # Re-serializing the document would reflow every node and edge.
+        raise PublishError(
+            FLOW_SOURCE + ' must carry its version on one two-space "version" line so that only the version changes'
+        )
+    generator = ROOT / FLOW_GENERATOR
+    if not generator.is_file():
+        raise PublishError(FLOW_GENERATOR + " is missing, so the flow artifacts cannot be regenerated")
+
+    directory = path.parent
+    files = {item: item.read_bytes() for item in directory.rglob("*") if item.is_file()}
+    folders = {item for item in directory.rglob("*") if item.is_dir()}
+    path.write_bytes(updated.encode("utf-8"))
+    try:
+        run([sys.executable, str(generator)], cwd=ROOT)
+        run([sys.executable, str(generator), "--check"], cwd=ROOT)
+    except PublishError as exc:
+        restore_directory(directory, files, folders)
+        raise PublishError("flow artifacts could not be regenerated: " + str(exc)) from exc
+    regenerated = [
+        item for item in sorted(directory.rglob("*"))
+        if item.is_file() and item != path and files.get(item) != item.read_bytes()
+    ]
+    return [path, *regenerated]
+
+
 def update_public_metadata(tag: str, version: str, source_commit: str) -> list[Path]:
     changed = update_desktop_versions(version)
     version_file = ROOT / "version.txt"
@@ -532,6 +605,7 @@ def update_public_metadata(tag: str, version: str, source_commit: str) -> list[P
         path.write_text(body, encoding="utf-8")
         changed.append(path)
     changed.append(update_server_json(version))
+    changed.extend(update_flow_version(version))
 
     ecosystem = ROOT / "SIMPLICIO_ECOSYSTEM.md"
     body = ecosystem.read_text(encoding="utf-8")

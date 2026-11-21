@@ -273,12 +273,77 @@ def _load_publisher(name, tmp_path, monkeypatch):
     return module
 
 
+FLOW_SOURCE = "docs/flow/simplicio.flow.json"
+FLOW_GENERATOR = "scripts/generate_flow.py"
+FLOW_MERMAID = "docs/flow/simplicio.mmd"
+FLOW_SVG = "docs/flow/simplicio.svg"
+FLOW_LANGFLOW = "docs/flow/langflow/simplicio.langflow.json"
+
+
+def _committed_flow_text():
+    return (ROOT / FLOW_SOURCE).read_bytes().decode("utf-8")
+
+
+def _committed_flow():
+    return json.loads(_committed_flow_text())
+
+
+def _flow_node_paths(document):
+    """Every path a node of the flow names as its source or artifact."""
+    paths = []
+    for node in document["nodes"]:
+        for key in ("source", "artifact"):
+            value = node.get(key)
+            if value and value not in paths:
+                paths.append(value)
+    return paths
+
+
+def _copy_flow_tree(tmp_path):
+    """The flow source, its generator, its generated files and what its nodes name.
+
+    The generator derives its repository root from its own location and fails
+    when a node names a path that is absent, so the fixture needs the real tree.
+    """
+    relatives = [
+        FLOW_GENERATOR, FLOW_SOURCE, FLOW_MERMAID, FLOW_SVG, FLOW_LANGFLOW,
+        *_flow_node_paths(_committed_flow()),
+    ]
+    for relative in relatives:
+        source = ROOT / relative
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.is_dir():
+            shutil.copytree(source, target, dirs_exist_ok=True)
+        else:
+            shutil.copyfile(source, target)
+
+
+def _flow_tree(tmp_path):
+    """Relative path -> bytes for every file under docs/flow of the fixture tree."""
+    base = tmp_path / "docs/flow"
+    return {
+        path.relative_to(tmp_path).as_posix(): path.read_bytes()
+        for path in sorted(base.rglob("*")) if path.is_file()
+    }
+
+
+def _relative_flow_paths(tmp_path, changed):
+    return [
+        path.relative_to(tmp_path).as_posix() for path in changed
+        if path.relative_to(tmp_path).as_posix().startswith("docs/flow/")
+    ]
+
+
 def _write_public_metadata_tree(tmp_path):
     """Everything update_public_metadata reads, at version 3.8.30.
 
     The registry entry is a copy of the committed server.json, so a test can
-    prove what the publisher does to the real file.
+    prove what the publisher does to the real file. The flow tree is a copy of
+    the committed one and is written first, so that the fixture's own
+    README.md, MCP-CONNECT.md and VERSION.md replace the copied node sources.
     """
+    _copy_flow_tree(tmp_path)
     (tmp_path / "VERSION.md").write_text(
         "## Runtime snapshot: v3.8.30\n"
         "## Current Version: v3.8.30\n"
@@ -492,6 +557,189 @@ def test_public_publisher_fails_closed_when_the_scoped_wrapper_cannot_name_the_r
         _update_public_metadata(module)
 
     assert (tmp_path / "server.json").read_bytes() == before
+
+
+def test_public_publisher_moves_the_flow_to_the_release_version(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_flow_version", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    committed = _committed_flow_text()
+    current = json.loads(committed)["version"]
+    old_line = '  "version": "%s",' % current
+    assert current != "3.8.31"
+    assert committed.count(old_line) == 1
+
+    changed = _update_public_metadata(module)
+
+    path = tmp_path / FLOW_SOURCE
+    assert path in changed
+    assert json.loads(path.read_text(encoding="utf-8"))["version"] == "3.8.31"
+    # Only the version value changes: the hand formatting of the nodes and the
+    # edges survives, so the source stays reviewable as a diff.
+    expected = committed.replace(old_line, '  "version": "3.8.31",')
+    assert path.read_bytes() == expected.encode("utf-8")
+
+
+def test_public_publisher_stages_only_the_flow_files_that_changed(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_flow_staging", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+
+    changed = _update_public_metadata(module)
+
+    # The generated files are already up to date on a fresh tree, so none of
+    # them belongs in the release commit.
+    assert _relative_flow_paths(tmp_path, changed) == [FLOW_SOURCE]
+    assert len(set(changed)) == len(changed)
+
+
+def test_public_publisher_regenerates_stale_flow_artifacts(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_flow_regeneration", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    spec = importlib.util.spec_from_file_location("generate_flow_for_contract", ROOT / FLOW_GENERATOR)
+    generator = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(generator)
+    (tmp_path / FLOW_MERMAID).write_text("stale\n", encoding="utf-8")
+
+    changed = _update_public_metadata(module)
+
+    document = json.loads((tmp_path / FLOW_SOURCE).read_text(encoding="utf-8"))
+    assert document["version"] == "3.8.31"
+    assert (tmp_path / FLOW_MERMAID).read_bytes() == generator.mermaid(document).encode("utf-8")
+    staged = _relative_flow_paths(tmp_path, changed)
+    assert FLOW_MERMAID in staged
+    assert FLOW_SVG not in staged
+    assert FLOW_LANGFLOW not in staged
+    # The source comes first and every other flow file follows in sorted order.
+    assert staged == [FLOW_SOURCE, FLOW_MERMAID]
+
+
+def _flow_without_a_version():
+    return {key: value for key, value in _committed_flow().items() if key != "version"}
+
+
+def _flow_text(document, **options):
+    return json.dumps(document, ensure_ascii=False, **options) + "\n"
+
+
+FLOW_NO_VERSION = "docs/flow/simplicio.flow.json has no simplicio.flow/v1 version"
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        (None, "docs/flow/simplicio.flow.json is missing"),
+        ("{not json", "docs/flow/simplicio.flow.json is not valid JSON: "),
+        ("[]\n", FLOW_NO_VERSION),
+        (_flow_text({**_committed_flow(), "schema": "simplicio.flow/v0"}, indent=2), FLOW_NO_VERSION),
+        (_flow_text(_flow_without_a_version(), indent=2), FLOW_NO_VERSION),
+        (_flow_text({**_committed_flow(), "version": 3}, indent=2), FLOW_NO_VERSION),
+        (
+            _flow_text(_committed_flow()),
+            'docs/flow/simplicio.flow.json must carry its version on one two-space "version" line '
+            "so that only the version changes",
+        ),
+    ],
+    ids=[
+        "missing-file",
+        "invalid-json",
+        "not-an-object",
+        "wrong-schema",
+        "no-version-key",
+        "version-is-not-a-string",
+        "version-not-on-its-own-two-space-line",
+    ],
+)
+def test_public_publisher_fails_closed_on_a_flow_source_it_cannot_rewrite(tmp_path, monkeypatch, body, message):
+    module = _load_publisher("publish_release_local_flow_closed", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    path = tmp_path / FLOW_SOURCE
+    if body is None:
+        path.unlink()
+    else:
+        path.write_bytes(body.encode("utf-8"))
+    before = _flow_tree(tmp_path)
+
+    with pytest.raises(module.PublishError, match=re.escape(message)):
+        _update_public_metadata(module)
+
+    # A refused update must neither edit the source nor regenerate anything.
+    assert _flow_tree(tmp_path) == before
+    assert path.exists() is (body is not None)
+
+
+def test_public_publisher_fails_closed_when_the_flow_generator_is_missing(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_flow_no_generator", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    (tmp_path / FLOW_GENERATOR).unlink()
+    before = _flow_tree(tmp_path)
+
+    with pytest.raises(
+        module.PublishError,
+        match=re.escape("scripts/generate_flow.py is missing, so the flow artifacts cannot be regenerated"),
+    ):
+        _update_public_metadata(module)
+
+    assert _flow_tree(tmp_path) == before
+
+
+def _flow_node_path_the_publisher_does_not_touch():
+    owned = {
+        "README.md", "MCP-CONNECT.md", "VERSION.md", "SIMPLICIO_ECOSYSTEM.md", "server.json",
+        "version.txt", FLOW_GENERATOR, *PUBLIC_METADATA_WRAPPERS, *PUBLIC_METADATA_DESKTOP_FILES,
+    }
+    candidates = [
+        path for path in _flow_node_paths(_committed_flow())
+        if path not in owned and not path.startswith("docs/flow/")
+    ]
+    assert candidates, "the committed flow names no source that the publisher leaves alone"
+    return candidates[0]
+
+
+def test_public_publisher_restores_the_flow_when_the_generator_refuses_it(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_flow_refused", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    missing = _flow_node_path_the_publisher_does_not_touch()
+    (tmp_path / missing).unlink()
+    before = _flow_tree(tmp_path)
+
+    with pytest.raises(module.PublishError, match="flow artifacts could not be regenerated") as refused:
+        _update_public_metadata(module)
+
+    # The generator names the missing path, and the source is back at its old
+    # version although it was already rewritten when the generator ran.
+    assert "flow: missing source " + missing in str(refused.value)
+    assert _flow_tree(tmp_path) == before
+    assert json.loads((tmp_path / FLOW_SOURCE).read_text(encoding="utf-8"))["version"] == _committed_flow()["version"]
+
+
+def test_public_publisher_restores_regenerated_flow_files_when_the_final_check_fails(tmp_path, monkeypatch):
+    module = _load_publisher("publish_release_local_flow_drift", tmp_path, monkeypatch)
+    _write_public_metadata_tree(tmp_path)
+    (tmp_path / FLOW_MERMAID).write_text("stale\n", encoding="utf-8")
+    shutil.rmtree(tmp_path / "docs/flow/langflow")
+    before = _flow_tree(tmp_path)
+    real_run = module.run
+    commands = []
+
+    def run_with_a_failing_check(command, **options):
+        commands.append(list(command))
+        if "--check" in command:
+            raise module.PublishError("flow drift: simulated")
+        return real_run(command, **options)
+
+    monkeypatch.setattr(module, "run", run_with_a_failing_check)
+
+    with pytest.raises(
+        module.PublishError,
+        match=re.escape("flow artifacts could not be regenerated: flow drift: simulated"),
+    ):
+        _update_public_metadata(module)
+
+    # The generator ran for real and rewrote the stale file and created the
+    # Langflow document before the check refused; all of it is rolled back.
+    assert [command[-1] for command in commands] == [str(tmp_path / FLOW_GENERATOR), "--check"]
+    assert _flow_tree(tmp_path) == before
+    assert not (tmp_path / "docs/flow/langflow").exists()
 
 
 def test_public_runbook_requires_manual_publication_without_actions():
