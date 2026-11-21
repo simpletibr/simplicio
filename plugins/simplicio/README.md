@@ -21,8 +21,13 @@ portable, Codex and Gemini launchers retain their host-selected Runtime mode.
 | Other CLI/IDE/agent harnesses | Runtime `mcp register` | MCP/config or guided integration |
 
 The package does not pretend every product has the same plugin API. The
-machine-readable `host-surfaces.json` records the supported surface for all 32
-Runtime host contracts. Claude Code owns its native map hooks: each
+machine-readable `host-surfaces.json` records the surface of each of the 43 host
+ids it lists. Eleven of them come from the Runtime bot study (`muse-code`,
+`openmausbot`, `openmuse`, `t3-code`, `opendots`, `openbot`, `agentes-chat`,
+`dots`, `grok-bot`, `muse` and `cue`), and the study also corrects `grok`. Each
+of the twelve needs a Simplicio Runtime that lists its id in
+`simplicio integrate list`, and none was verified against a real installation
+of its product (see `docs/hosts/`). Claude Code owns its native map hooks: each
 supported lifecycle event confirms or refreshes the current project map and
 reuses `.simplicio/hook-context/` for the same project generation. The Runtime
 still owns MCP bootstrap and authentication. Runtime mapping is preferred; if

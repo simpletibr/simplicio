@@ -19,6 +19,12 @@ from simplicio.host_integrations import (
 )
 
 
+BOT_STUDY_WRITTEN = frozenset({"grok", "muse-code", "openmausbot", "openmuse"})
+BOT_STUDY_ROUTE_ONLY = frozenset(
+    {"t3-code", "opendots", "openbot", "agentes-chat", "dots", "grok-bot", "muse", "cue"}
+)
+
+
 def _command(path: Path) -> None:
     path.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
     path.chmod(0o755)
@@ -146,7 +152,8 @@ def test_orca_uses_portable_cli_verification_without_worktree_mutation() -> None
 def test_compatibility_matrix_covers_every_requested_remaining_host() -> None:
     by_id = {spec.host_id: spec for spec in HOSTS}
     assert COMPATIBILITY_MATRIX_HOST_IDS <= set(by_id)
-    assert len(COMPATIBILITY_MATRIX_HOST_IDS) == 22
+    assert len(COMPATIBILITY_MATRIX_HOST_IDS) == 33
+    assert BOT_STUDY_WRITTEN | BOT_STUDY_ROUTE_ONLY <= COMPATIBILITY_MATRIX_HOST_IDS
     for host_id in COMPATIBILITY_MATRIX_HOST_IDS - {spec.host_id for spec in INSTALLER_HOSTS}:
         spec = by_id[host_id]
         assert spec.contract == "unverified"
@@ -233,3 +240,82 @@ def test_windows_executable_suffix_is_recognized(tmp_path, monkeypatch):
     hosts = detect_hosts(home=tmp_path, env={"PATH": ""})
     assert next(h for h in hosts if h["id"] == "codex")["status"] == "detected"
 
+
+def test_bot_study_hosts_the_runtime_writes_are_runtime_mcp_rows() -> None:
+    by_id = {spec.host_id: spec for spec in HOSTS}
+    installer = {spec.host_id for spec in INSTALLER_HOSTS}
+    expected = {
+        "grok": ("grok", "~/.grok/config.toml"),
+        "muse-code": ("muse", "~/.config/muse/settings.json"),
+        "openmausbot": ("openmausbot", "~/.openmausbot/config.json"),
+        "openmuse": ("openmuse", "~/.openmuse/config.toml"),
+    }
+    assert set(expected) == BOT_STUDY_WRITTEN
+    assert BOT_STUDY_WRITTEN <= installer
+    for host_id, (executable, config) in expected.items():
+        spec = by_id[host_id]
+        assert spec.executable_names == (executable,), host_id
+        assert spec.config_paths == (config,), host_id
+        assert spec.capability == "runtime-mcp", host_id
+        assert spec.contract == "delegated-to-runtime", host_id
+        assert spec.verification_command[:3] == ("simplicio", "mcp", "register"), host_id
+        assert spec.documentation.startswith("https://"), host_id
+        # Written from documentation or from reading the package: nothing was run.
+        assert "not verified against a real" in spec.reason.lower(), host_id
+    # The id `grok` is xAI Grok Build, not the Superagent CLI an earlier row named.
+    grok = by_id["grok"]
+    assert "Grok Build" in grok.name
+    assert "superagent" not in (grok.name + grok.documentation + grok.reason).lower()
+    assert "settings.json" not in " ".join(grok.config_paths)
+
+
+def test_bot_study_hosts_without_a_file_are_unverified_and_never_probed() -> None:
+    by_id = {spec.host_id: spec for spec in HOSTS}
+    installer = {spec.host_id for spec in INSTALLER_HOSTS}
+    assert not BOT_STUDY_ROUTE_ONLY & installer
+    for host_id in BOT_STUDY_ROUTE_ONLY:
+        spec = by_id[host_id]
+        assert spec.contract == "unverified", host_id
+        assert spec.capability == "unsupported", host_id
+        assert spec.executable_names == () and spec.config_paths == (), host_id
+        assert spec.verification_command == (), host_id
+        assert spec.documentation.startswith("https://"), host_id
+        assert "not verified against a real installation" in spec.reason.lower(), host_id
+        assert "writes nothing" in spec.reason, host_id
+        # The reason names the command that tells the user what to do.
+        command = (
+            "simplicio integrate verify --host t3-code"
+            if host_id == "t3-code"
+            else f"simplicio integrations routes {host_id}"
+        )
+        assert command in spec.reason, host_id
+
+
+def test_bot_study_hosts_are_detected_or_reported_without_a_guess(tmp_path: Path) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    # Commands of the four hosts the Runtime writes for, and names a guess could take.
+    for name in ("grok", "muse", "openmausbot", "openmuse", "t3", "t3code", "dots", "cue", "openbot"):
+        _command(bin_dir / name)
+    snapshot = {
+        item["id"]: item
+        for item in detect_hosts(home=tmp_path / "home", env={"PATH": str(bin_dir)})
+    }
+    for host_id in BOT_STUDY_WRITTEN:
+        assert snapshot[host_id]["status"] == "detected", host_id
+        assert snapshot[host_id]["executable"], host_id
+    for host_id in BOT_STUDY_ROUTE_ONLY:
+        assert snapshot[host_id]["status"] == "unsupported", host_id
+        assert snapshot[host_id]["executable"] is None, host_id
+    assert not (tmp_path / "home").exists()
+
+
+def test_bot_study_hosts_are_in_the_compatibility_matrix_with_their_contract() -> None:
+    rows = {row["id"]: row for row in compatibility_matrix()}
+    for host_id in BOT_STUDY_WRITTEN:
+        assert rows[host_id]["capability"] == "runtime-mcp", host_id
+        assert rows[host_id]["contract"] == "delegated-to-runtime", host_id
+    for host_id in BOT_STUDY_ROUTE_ONLY:
+        assert rows[host_id]["capability"] == "unsupported", host_id
+        assert rows[host_id]["contract"] == "unverified", host_id
+        assert rows[host_id]["executable_names"] == [], host_id

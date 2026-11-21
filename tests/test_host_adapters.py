@@ -306,3 +306,47 @@ def test_command_code_contract_requires_an_official_contract(tmp_path: Path) -> 
     assert result["results"][0]["status"] == "requires-runtime-registration"
     assert result["results"][0]["reason_code"] == "run_simplicio_mcp_register"
     assert not home.exists()
+
+
+def test_generic_writer_never_writes_a_file_for_a_bot_study_host(tmp_path: Path) -> None:
+    # The Runtime writes the files of these hosts (their formats are not the generic
+    # JSON one: a marked TOML table, a strict schema, a schema_version); for the other
+    # eight it writes nothing. Whatever is on PATH or on disk, this module writes nothing.
+    written = ("grok", "muse-code", "openmausbot", "openmuse")
+    route_only = ("t3-code", "opendots", "openbot", "agentes-chat", "dots", "grok-bot", "muse", "cue")
+    specs = tuple(item for item in HOSTS if item.host_id in written + route_only)
+    assert len(specs) == 12
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    for name in ("grok", "muse", "openmausbot", "openmuse", "t3", "dots", "cue", "openbot"):
+        _command(bin_dir / name)
+    home = tmp_path / "home"
+    existing = {
+        ".grok/config.toml": "model = 'x'\n",
+        ".config/muse/settings.json": "not json",
+        ".openmausbot/config.json": "{}\n",
+        ".openmuse/config.toml": "[llm]\n",
+    }
+    for relative, text in existing.items():
+        target = home / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
+    before = sorted(str(path.relative_to(home)) for path in home.rglob("*"))
+
+    for dry_run in (True, False):
+        result = install_detected_hosts(
+            "/opt/simplicio/bin/simplicio", home=home, cwd=tmp_path,
+            env={"PATH": str(bin_dir)}, specs=specs, dry_run=dry_run,
+        )
+        by_id = {item["host_id"]: item for item in result["results"]}
+        assert result["failed_hosts"] == []
+        for host_id in written:
+            assert by_id[host_id]["status"] == "requires-runtime-registration", host_id
+            assert by_id[host_id]["reason_code"] == "run_simplicio_mcp_register", host_id
+        for host_id in route_only:
+            assert by_id[host_id]["status"] == "unsupported", host_id
+            assert by_id[host_id]["config"] is None, host_id
+
+    assert sorted(str(path.relative_to(home)) for path in home.rglob("*")) == before
+    for relative, text in existing.items():
+        assert (home / relative).read_text(encoding="utf-8") == text
