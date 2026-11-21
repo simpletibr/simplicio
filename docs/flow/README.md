@@ -14,9 +14,9 @@ source of truth plus three generated artifacts:
 | `docs/flow/evidence/langflow-verify.json` | Fail-closed Langflow import receipt |
 | `docs/flow/evidence/langflow-readback.json` | Summary of `GET /api/v1/flows/{id}` |
 
-The current graph has 39 nodes (8 inputs, 24 steps, 7 outputs) and 53 edges.
+The current graph has 42 nodes (8 inputs, 27 steps, 7 outputs) and 63 edges.
 It covers every public CLI command and every MCP tool documented in
-`README.md` and `MCP-CONNECT.md`; see [Coverage](#coverage) for the gate that
+`README.md` and `MCP-CONNECT.md` (13 MCP tools); see [Coverage](#coverage) for the gate that
 enforces it.
 
 ## Regenerate
@@ -43,14 +43,15 @@ python3 scripts/generate_flow.py --out-dir /tmp/flow-b
 shasum -a 256 /tmp/flow-a/* /tmp/flow-b/*
 ```
 
-Measured on 2026-10-23 (both runs byte-identical, and identical to the
-committed artifacts):
+Measured on 2026-11-21 with `PYTHONHASHSEED=0` and `PYTHONHASHSEED=424242`
+(both runs byte-identical, and identical to the committed artifacts; the source
+file is not written by `--out-dir`, so its hash is that of the committed file):
 
 ```
-8668129935dd23928fad224bdeae863678be33e888e8c9647a54441e3479a854  simplicio.flow.json
-6abdc271987201578700be1c483f043ed02bea9bbab0ffa51e06535b80d769f2  simplicio.mmd
-fd69eabba0271a514aaf57a3b16ada457ef281a7809dcfefd0133ce0f45d1eaa  simplicio.svg
-897954600e6b88051fc9a5fb9ebb338c823519239e05d16302c2bce818948fb5  langflow/simplicio.langflow.json
+7b64ca9a2f3b4125f0a11447a17460f5cd0fd6c0132c3d38bcf402420d60738f  simplicio.flow.json
+b50b315fffd99fef4ab54fd20622c2843de6e4d2cdf74499b02174d55f63e342  simplicio.mmd
+72c850ae8955c9baf0244a4433031e8957072752b5ddc7962a1596b3cb9b78d8  simplicio.svg
+73cedd7631b50929fcc35b232cccfce29c11c5343f849afe2e9aed7bf3efd7ac  langflow/simplicio.langflow.json
 ```
 
 ## Coverage
@@ -70,6 +71,8 @@ surface:
 - every step must be reachable from an input and must reach an output;
 - `version` must match `version.txt`.
 
+The release publisher's `update_flow_version` (`scripts/publish_release_local.py`) writes the release version into the source and regenerates the three generated files, and `scripts/verify_distribution_consistency.py` reports an ERROR when the flow version differs from the manifest version.
+
 ## Mermaid CLI (`mmdc`)
 
 The committed `simplicio.svg` comes from the deterministic generator, not from
@@ -81,13 +84,19 @@ npx -y @mermaid-js/mermaid-cli -i docs/flow/simplicio.mmd \
   -o docs/flow/render/simplicio.mermaid.png -s 2
 ```
 
-**Status in this environment: VERIFIED.** Measured 2026-10-23 with
-`@mermaid-js/mermaid-cli` 12.0.0 on Node v26.8.2:
+**Status in this environment: VERIFIED.** Measured 2026-11-21 with
+`@mermaid-js/mermaid-cli` 12.0.0 on Node v22.23.5, using the system Chromium
+(`/opt/pw-browsers/chromium`, Google Chrome for Testing 153.0.8010.12) through a
+Puppeteer config of `{"executablePath": "/opt/pw-browsers/chromium", "args":
+["--no-sandbox", "--headless"]}` (`PUPPETEER_SKIP_DOWNLOAD=1`, no browser
+download):
 
 ```
+PUPPETEER_SKIP_DOWNLOAD=1 npx -y @mermaid-js/mermaid-cli@12.0.0 -i docs/flow/simplicio.mmd \
+  -o docs/flow/render/simplicio.mermaid.png -s 2 -p puppeteer.json
 Generating single mermaid chart
 exit=0
-docs/flow/render/simplicio.mermaid.png  1568x606
+docs/flow/render/simplicio.mermaid.png  1568x636
 ```
 
 The renderer, exact command, input hash and output hash live in
@@ -124,24 +133,31 @@ It always prints one machine-readable JSON receipt
 artifact SHA-256, node/edge counts and the boolean checks. It never stores
 credentials.
 
-**Status in this environment: VERIFIED.** Measured 2026-10-23 against a local
+**Status in this environment: VERIFIED.** Measured 2026-11-21 against a local
 Langflow 1.12.0 server (isolated `python3.12` venv, `LANGFLOW_AUTO_LOGIN=true`,
-port 7861):
+`LANGFLOW_DO_NOT_TRACK=true`, `langflow run --backend-only`, port 7861; the
+server rejected the unauthenticated run with `langflow_auth_required`, so the
+verifier ran with a key issued by that local server and passed through
+`LANGFLOW_API_KEY`) on the current 42-node artifact, SHA-256
+`73cedd7631b50929fcc35b232cccfce29c11c5343f849afe2e9aed7bf3efd7ac`:
 
 ```
 import_http_status=201  fetch_http_status=200
-expected_nodes=39       imported_nodes=39   node_ids_match=true
-expected_edges=53       imported_edges=53   edge_pairs_match=true
+expected_nodes=42       imported_nodes=42   node_ids_match=true
+expected_edges=63       imported_edges=63   edge_pairs_match=true
 node_labels_match=true  cleaned_up=true
-status=verified         flow_id=7c6d9aaf-fc4f-439b-a7db-74f3ee7ec041
+status=verified         flow_id=a10a5b5f-57ac-4f64-83a1-8a640111fda2
 ```
 
 Receipt: `docs/flow/evidence/langflow-verify.json` (`flow_id`
-`7c6d9aaf-fc4f-439b-a7db-74f3ee7ec041`, removed afterwards by `--cleanup`).
-`GET /api/v1/flows/{id}` summary (39 nodes, 53 edges, name, ids and edge pairs,
+`a10a5b5f-57ac-4f64-83a1-8a640111fda2`, removed afterwards by `--cleanup`).
+`GET /api/v1/flows/{id}` summary (42 nodes, 63 edges, name, ids and edge pairs,
 plus the SHA-256 of the raw response): `docs/flow/evidence/langflow-readback.json`,
 captured from a separate import of the same artifact
-(`flow_id=d43ce742-eab6-4bc0-a0e3-9d9d10971e91`).
+(`flow_id=504fcac8-6b47-436c-ae38-32faf514249a`, HTTP 200, 86666 bytes; its nodes
+and edges equal the artifact's in order, and the flow was deleted afterwards).
+The 2026-10-23 receipts that described the earlier 39-node, 53-edge artifact
+were replaced by these.
 
 The headless check used the API plus the returned JSON, not a GUI screenshot:
 the UI needs an authenticated browser session, which this environment does not
