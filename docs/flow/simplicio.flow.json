@@ -2,7 +2,7 @@
   "schema": "simplicio.flow/v1",
   "id": "simplicio",
   "title": "Simplicio — entrada → passos → saídas",
-  "version": "3.14.0",
+  "version": "3.15.0",
   "nodes": [
     { "id": "in-installer", "kind": "input", "label": "Instalador assinado (sh/ps1)", "source": "install.sh" },
     { "id": "in-pypi", "kind": "input", "label": "Bootstrap PyPI (simplicio-installer)", "source": "pypi/simplicio/pyproject.toml" },
