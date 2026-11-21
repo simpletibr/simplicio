@@ -2,7 +2,7 @@
 
 The bilingual evidence report is published with the Simplicio distribution:
 
-- [Download the PDF report](https://github.com/simpletibr/simplicio/releases/latest/download/Simplicio_MCP_Token_Reuse_Evidence_Report_PT_EN.pdf)
+- [Download the PDF report](Simplicio_MCP_Token_Reuse_Evidence_Report_PT_EN.pdf)
 - [Read the evidence page](https://simpleti.com.br/simplicio/evidence/)
 
 Report SHA-256:
