@@ -133,18 +133,59 @@ def test_public_install_docs_do_not_expose_fallback_provisioning() -> None:
         assert "simplicio_mapper_root" not in text
 
 
+SURFACES = {
+    "native-plugin", "agent-plugin-v1", "native-extension", "runtime-mcp",
+    "guided-runtime", "delegated-cli",
+}
+
+# The twelve harnesses of the Runtime bot study: id -> (name, surface, preHooks).
+# The Runtime writes a file for the first four (`runtime-mcp`, as for every other
+# host it registers); for the other eight it writes nothing, so they take the
+# categories the registry already has for a host the installer does not write:
+# `guided-runtime` for the URL bots and the cloud bots, `delegated-cli` for the
+# harness that runs other agents. The Runtime installs no pre-hook for those
+# eight, so whatever the product has is host-managed.
+BOT_STUDY_ROWS = {
+    "grok": ("xAI Grok Build", "runtime-mcp", "runtime-managed"),
+    "muse-code": ("Meta Muse Code", "runtime-mcp", "runtime-managed"),
+    "openmausbot": ("OpenMausBot", "runtime-mcp", "runtime-managed"),
+    "openmuse": ("OpenMuse (Python)", "runtime-mcp", "runtime-managed"),
+    "t3-code": ("T3 Code", "delegated-cli", "host-managed"),
+    "opendots": ("CopilotKit OpenDots", "guided-runtime", "host-managed"),
+    "openbot": ("CopilotKit OpenBot", "guided-runtime", "host-managed"),
+    "agentes-chat": ("agentes.chat", "guided-runtime", "host-managed"),
+    "dots": ("OpenAI dots", "guided-runtime", "host-managed"),
+    "grok-bot": ("xAI Grok Bot", "guided-runtime", "host-managed"),
+    "muse": ("Meta Muse app", "guided-runtime", "host-managed"),
+    "cue": ("Cue by Manus", "guided-runtime", "host-managed"),
+}
+
+
 def test_host_surface_registry_is_complete_and_honest() -> None:
     registry = _load_json("plugins/simplicio/host-surfaces.json")
     hosts = registry["hosts"]
     ids = {host["id"] for host in hosts}
 
-    assert len(hosts) == len(ids) == 32
+    assert len(hosts) == len(ids) == 43
     assert {"claude-code", "codex", "cursor", "github-copilot", "kiro",
             "qwen-code", "gemini", "opencode", "pi", "orca-dev"} <= ids
+    assert set(BOT_STUDY_ROWS) <= ids
     for host in hosts:
         assert host["preHooks"] in {"runtime-managed", "host-managed"}
+        assert host["surface"] in SURFACES
         if "manifest" in host:
             assert (ROOT / "plugins/simplicio" / host["manifest"]).is_file()
+
+
+def test_bot_study_hosts_have_the_surface_of_their_kind() -> None:
+    hosts = {host["id"]: host for host in _load_json("plugins/simplicio/host-surfaces.json")["hosts"]}
+    for host_id, (name, surface, pre_hooks) in BOT_STUDY_ROWS.items():
+        row = hosts[host_id]
+        assert (row["name"], row["surface"], row["preHooks"]) == (name, surface, pre_hooks), host_id
+        # Nothing is bundled for these hosts: the Runtime writes their file or prints a route.
+        assert "manifest" not in row, host_id
+    # `grok` is xAI Grok Build; an earlier row described another product.
+    assert "superagent" not in json.dumps(hosts["grok"]).lower()
 
 
 def test_published_adapters_point_to_their_canonical_commands() -> None:

@@ -5,7 +5,7 @@
   "hosts": [
     {"id":"claude-code","name":"Claude Code","surface":"native-plugin","manifest":".claude-plugin/plugin.json","preHooks":"host-managed"},
     {"id":"codex","name":"Codex","surface":"native-plugin","manifest":".codex-plugin/plugin.json","preHooks":"runtime-managed"},
-    {"id":"grok","name":"Grok","surface":"runtime-mcp","preHooks":"runtime-managed"},
+    {"id":"grok","name":"xAI Grok Build","surface":"runtime-mcp","preHooks":"runtime-managed"},
     {"id":"cursor","name":"Cursor","surface":"agent-plugin-v1","manifest":"plugin.json","preHooks":"runtime-managed"},
     {"id":"github-copilot","name":"GitHub Copilot","surface":"agent-plugin-v1","manifest":"plugin.json","preHooks":"runtime-managed"},
     {"id":"opencode","name":"OpenCode","surface":"native-plugin","manifest":"opencode.json","preHooks":"runtime-managed"},
@@ -34,6 +34,17 @@
     {"id":"rovo-dev","name":"Rovo Dev","surface":"runtime-mcp","preHooks":"runtime-managed"},
     {"id":"gemini","name":"Gemini CLI","surface":"native-extension","manifest":"gemini-extension.json","preHooks":"runtime-managed"},
     {"id":"vscode","name":"Visual Studio Code","surface":"runtime-mcp","preHooks":"runtime-managed"},
-    {"id":"orca-dev","name":"OrcaDev / Orca ADE","surface":"delegated-cli","preHooks":"host-managed"}
+    {"id":"orca-dev","name":"OrcaDev / Orca ADE","surface":"delegated-cli","preHooks":"host-managed"},
+    {"id":"muse-code","name":"Meta Muse Code","surface":"runtime-mcp","preHooks":"runtime-managed"},
+    {"id":"openmausbot","name":"OpenMausBot","surface":"runtime-mcp","preHooks":"runtime-managed"},
+    {"id":"openmuse","name":"OpenMuse (Python)","surface":"runtime-mcp","preHooks":"runtime-managed"},
+    {"id":"t3-code","name":"T3 Code","surface":"delegated-cli","preHooks":"host-managed"},
+    {"id":"opendots","name":"CopilotKit OpenDots","surface":"guided-runtime","preHooks":"host-managed"},
+    {"id":"openbot","name":"CopilotKit OpenBot","surface":"guided-runtime","preHooks":"host-managed"},
+    {"id":"agentes-chat","name":"agentes.chat","surface":"guided-runtime","preHooks":"host-managed"},
+    {"id":"dots","name":"OpenAI dots","surface":"guided-runtime","preHooks":"host-managed"},
+    {"id":"grok-bot","name":"xAI Grok Bot","surface":"guided-runtime","preHooks":"host-managed"},
+    {"id":"muse","name":"Meta Muse app","surface":"guided-runtime","preHooks":"host-managed"},
+    {"id":"cue","name":"Cue by Manus","surface":"guided-runtime","preHooks":"host-managed"}
   ]
 }

@@ -53,6 +53,7 @@ def _runtime_mcp(
     default_scope: str = "user",
     mcp_environment: Sequence[Tuple[str, str]] = (),
     capability: str = "runtime-mcp",
+    reason: str = "The Runtime owns the atomic MCP/native-hook registration.",
 ) -> HostSpec:
     return HostSpec(
         host_id=host_id,
@@ -74,7 +75,7 @@ def _runtime_mcp(
         default_scope=default_scope,
         mcp_environment=tuple(mcp_environment),
         documentation=documentation,
-        reason="The Runtime owns the atomic MCP/native-hook registration.",
+        reason=reason,
     )
 
 
@@ -189,7 +190,7 @@ HOSTS: Tuple[HostSpec, ...] = (
 
 
 REMAINING_HOSTS: Tuple[Tuple[str, str, str], ...] = (
-    ("grok", "Grok", "https://github.com/simpletibr/simplicio"),
+    ("grok", "xAI Grok Build", "https://docs.x.ai/build/features/mcp-servers"),
     ("github-copilot", "GitHub Copilot", "https://github.com/features/copilot"),
     ("mimo-code", "MiMo Code", "https://github.com/simpletibr/simplicio"),
     ("amp", "Amp", "https://github.com/simpletibr/simplicio"),
@@ -209,9 +210,55 @@ REMAINING_HOSTS: Tuple[Tuple[str, str, str], ...] = (
     ("mistral-vibe", "Mistral Vibe", "https://github.com/mistralai"),
     ("qwen-code", "Qwen Code", "https://github.com/QwenLM/Qwen-Code"),
     ("rovo-dev", "Rovo Dev", "https://www.atlassian.com/software/rovo"),
+    # Harnesses of the Runtime bot study that no file is written for (see
+    # BOT_STUDY_REASONS): a Simplicio Runtime that lists the id in
+    # `simplicio integrate list` prints the steps or reports the agents.
+    ("t3-code", "T3 Code", "https://github.com/pingdotgg/t3code/"),
+    ("opendots", "CopilotKit OpenDots", "https://github.com/CopilotKit/OpenDots/blob/main/docs/CONNECTIONS.md"),
+    ("openbot", "CopilotKit OpenBot", "https://raw.githubusercontent.com/CopilotKit/OpenBot/main/docs/plugins/mcp-by-url.md"),
+    ("agentes-chat", "agentes.chat", "https://agentes.chat/docs"),
+    ("dots", "OpenAI dots", "https://learn.chatgpt.com/docs/dots"),
+    ("grok-bot", "xAI Grok Bot", "https://x.ai/news/introducing-grok-bot"),
+    ("muse", "Meta Muse app", "https://www.meta.com/help/artificial-intelligence/1687253048996149/"),
+    ("cue", "Cue by Manus", "https://cue.im"),
 )
 
-# Names requested by the compatibility-matrix issue.  Entries that already
+_NOT_VERIFIED = "Not verified against a real installation."
+BOT_STUDY_REASONS: Dict[str, str] = {
+    "t3-code": (
+        "T3 Code has no MCP settings of its own: it runs other agents that read theirs. "
+        "The Runtime writes nothing for it; `simplicio integrate verify --host t3-code` "
+        "reports those agents. " + _NOT_VERIFIED
+    ),
+    **{
+        host_id: (
+            f"{product} takes a streamable-HTTP address in its own screen. The Runtime writes "
+            f"nothing for it; `simplicio integrations routes {host_id}` prints the steps. "
+            + _NOT_VERIFIED
+        )
+        for host_id, product in (
+            ("opendots", "CopilotKit OpenDots"),
+            ("openbot", "CopilotKit OpenBot"),
+            ("agentes-chat", "agentes.chat"),
+        )
+    },
+    **{
+        host_id: (
+            f"{product} reaches only remote servers. The Runtime writes nothing for it; "
+            f"`simplicio integrations routes {host_id}` prints the documented way and what "
+            "is not verified. " + _NOT_VERIFIED
+        )
+        for host_id, product in (
+            ("dots", "OpenAI dots"),
+            ("grok-bot", "xAI Grok Bot"),
+            ("muse", "Meta Muse app"),
+            ("cue", "Cue by Manus"),
+        )
+    },
+}
+
+# Names requested by the compatibility-matrix issue, then the eleven harnesses
+# added with the Runtime bot study (the last block).  Entries that already
 # have a dedicated adapter (currently oh-my-pi) remain represented by that
 # adapter; every other row is explicit and fail-closed until verified.
 COMPATIBILITY_MATRIX_HOST_IDS = frozenset(
@@ -238,11 +285,29 @@ COMPATIBILITY_MATRIX_HOST_IDS = frozenset(
         "mistral-vibe",
         "qwen-code",
         "rovo-dev",
+        "muse-code",
+        "openmausbot",
+        "openmuse",
+        "t3-code",
+        "opendots",
+        "openbot",
+        "agentes-chat",
+        "dots",
+        "grok-bot",
+        "muse",
+        "cue",
     }
 )
 
 HOSTS = HOSTS + tuple(
-    _unverified(host_id, name, docs, "The public contract is not verified; automatic detection is disabled.")
+    _unverified(
+        host_id,
+        name,
+        docs,
+        BOT_STUDY_REASONS.get(
+            host_id, "The public contract is not verified; automatic detection is disabled."
+        ),
+    )
     for host_id, name, docs in REMAINING_HOSTS
 )
 
@@ -266,7 +331,21 @@ INSTALLER_HOSTS = (
     _runtime_mcp("cline", "Cline", (), ("~/.cline/mcp_settings.json",), "https://docs.cline.bot/mcp/configuring-mcp-servers"),
     _runtime_mcp("github-copilot", "GitHub Copilot in VS Code", (), (), "https://code.visualstudio.com/docs/copilot/chat/mcp-servers"),
     _runtime_mcp("command-code", "Command Code", ("commandcode",), ("~/.commandcode/mcp.json",), "https://commandcode.ai/docs/settings"),
-    _runtime_mcp("grok", "Grok CLI (Superagent)", ("grok",), ("~/.grok/settings.json",), "https://github.com/superagent-ai/grok-cli"),
+    # xAI Grok Build.  Not the Superagent grok-cli an earlier row named, whose
+    # `~/.grok/settings.json` is not in Grok Build's documentation, so it is not
+    # a detection signal here (the Runtime keeps the entry it wrote there before).
+    _runtime_mcp(
+        "grok",
+        "xAI Grok Build",
+        ("grok",),
+        ("~/.grok/config.toml",),
+        "https://docs.x.ai/build/features/mcp-servers",
+        reason=(
+            "The Runtime writes a marked [mcp_servers.simplicio] table in ~/.grok/config.toml "
+            "and keeps the .grok/settings.json entry it wrote before. Written from the vendor's "
+            "documentation; not verified against a real Grok Build."
+        ),
+    ),
     _runtime_mcp("mimo-code", "MiMo Code", ("mimo",), ("~/.config/mimocode/mimocode.json",), "https://github.com/XiaomiMiMo/MiMo-Code"),
     _runtime_mcp("amp", "Amp", ("amp",), ("~/.config/amp/settings.json",), "https://ampcode.com/docs/customize/mcp"),
     _runtime_mcp("openclaude", "OpenClaude", ("openclaude",), ("~/.openclaude.json",), "https://github.com/Gitlawb/openclaude"),
@@ -284,6 +363,43 @@ INSTALLER_HOSTS = (
     _runtime_mcp("rovo-dev", "Rovo Dev CLI", ("acli",), ("~/.rovodev/mcp.json",), "https://support.atlassian.com/rovo/docs/connect-to-an-mcp-server-in-rovo-dev-cli/"),
     _runtime_mcp("pi", "Pi", ("pi",), ("~/.pi/agent/extensions/simplicio.ts",), "https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md"),
     _runtime_mcp("codex", "Codex", ("codex",), ("~/.codex/config.toml",), "https://developers.openai.com/codex/mcp/"),
+    # Harnesses of the Runtime bot study that the Runtime writes a file for.  Each
+    # needs a Runtime that lists the id in `simplicio integrate list`.
+    _runtime_mcp(
+        "muse-code",
+        "Meta Muse Code",
+        ("muse",),
+        ("~/.config/muse/settings.json",),
+        "https://dev.meta.ai/docs/muse-code/extending",
+        reason=(
+            'The Runtime writes mcpServers.simplicio in ~/.config/muse/settings.json ("schema_version": 1 '
+            "only in a file it creates). Written from the vendor's documentation; not verified against "
+            "a real Muse Code."
+        ),
+    ),
+    _runtime_mcp(
+        "openmausbot",
+        "OpenMausBot",
+        ("openmausbot",),
+        ("~/.openmausbot/config.json",),
+        "https://raw.githubusercontent.com/milind-soni/OpenMausBot/main/docs/custom-mcp-servers.md",
+        reason=(
+            "The Runtime writes mcpServers.simplicio (command, args, env and resultBudget 0) in "
+            "~/.openmausbot/config.json. Derived from reading the package; not verified against a "
+            "real OpenMausBot."
+        ),
+    ),
+    _runtime_mcp(
+        "openmuse",
+        "OpenMuse (Python)",
+        ("openmuse",),
+        ("~/.openmuse/config.toml",),
+        "https://github.com/OpenMuseAgent/OpenMuse/",
+        reason=(
+            "The Runtime writes a marked [[mcp.servers]] entry in ~/.openmuse/config.toml. Derived from "
+            "reading the package; not verified against a real OpenMuse."
+        ),
+    ),
 )
 _INSTALLER_IDS = frozenset(spec.host_id for spec in INSTALLER_HOSTS)
 HOSTS = tuple(spec for spec in HOSTS if spec.host_id not in _INSTALLER_IDS) + INSTALLER_HOSTS
