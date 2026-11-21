@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#instalasi">Instalasi</a> ·
-  <a href="#yang-dilakukan">Yang Dilakukan</a> ·
+  <a href="#-instalasi">Instalasi</a> ·
+  <a href="#-yang-dilakukan">Yang Dilakukan</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">Situs Web</a>
 </p>

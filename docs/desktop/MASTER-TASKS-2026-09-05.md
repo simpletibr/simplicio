@@ -5,7 +5,7 @@
 Authoritative implementation repository: `simpletibr/simplicio`, under
 `apps/desktop`. Runtime remains in `simpletibr/simplicio-runtime`.
 Product reference: Orca macOS behavior and `stablyai/orca` source. Visual
-references also include `/Users/simpletibr/Desktop/prints_sistemas`.
+references also include `/Users/<user>/Desktop/prints_sistemas`.
 
 ## Implemented and locally verified
 
@@ -75,7 +75,7 @@ references also include `/Users/simpletibr/Desktop/prints_sistemas`.
   recorded Usage, update/skills, accounts, telemetry, permissions and
   diagnostics; the newest debug macOS build was inspected live while Orca was
   open, with signed installed-copy identity still pending.
-- **Repository scope:** all Desktop work is scoped to `/Users/simpletibr/Projetos/ai/simplicio`; Runtime remains a separate backend repository. No second executable Desktop UI was found in `simplicio-runtime`; its `desktop/` directory is retained as backend-contract documentation only.
+- **Repository scope:** all Desktop work is scoped to `/Users/<user>/Projetos/ai/simplicio`; Runtime remains a separate backend repository. No second executable Desktop UI was found in `simplicio-runtime`; its `desktop/` directory is retained as backend-contract documentation only.
 - **Full-bleed brand icon:** replaced the framed asset with a full-bleed Simplicio logo and propagated it to web/native icon assets.
 - **Usage, MCPs and providers:** added liveness-backed MCP reconciliation plus observed/unavailable states for Codex, Grok and provider usage; bounded generic JSON/JSONL probes now cover the remaining named hosts without inventing metrics; real installed-app/provider acceptance remains open.
 - **Token-savings reports:** project-scoped `savings report` now feeds Home and the status bar; gross/net context savings remain separate from provider token/cost telemetry, and missing provider events stay blocked rather than zero.

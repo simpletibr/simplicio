@@ -57,7 +57,7 @@ The model edits one file per turn and pays for the context each time; the genera
 ## What to do with what we learn
 
 1. **Store the verdict, not the transcript**: task shape, chosen path, files landed, drift result, test result. That is what makes the next `shape` cheap and the next precedent reusable.
-2. **Keep the learning out of the hot path**: 0.1-0.2 s per memory call is 100x the cost of the `shape` call it would inform.
+2. **Keep the learning out of the hot path**: 0.1-0.2 s per memory call is about the cost of the `shape` call it would inform (138 ms p50, see `FAST-PATH.md`), so a memory call on every step would roughly double the router cost.
 3. **Never learn from an unverified run**: a red test or an unmerged branch is not a precedent.
 
 ## Known gaps (measured)

@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#התקנה">התקנה</a> ·
-  <a href="#מה-זה-עושה">מה זה עושה</a> ·
+  <a href="#-התקנה">התקנה</a> ·
+  <a href="#-מה-זה-עושה">מה זה עושה</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">אתר אינטרנט</a>
 </p>

@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#설치">설치</a> ·
-  <a href="#기능">기능</a> ·
+  <a href="#-설치">설치</a> ·
+  <a href="#-기능">기능</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">웹사이트</a>
 </p>

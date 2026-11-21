@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#इंस्टॉलेशन">इंस्टॉलेशन</a> ·
-  <a href="#यह-क्या-करता-है">यह क्या करता है</a> ·
+  <a href="#-इंस्टॉलेशन">इंस्टॉलेशन</a> ·
+  <a href="#-यह-क्या-करता-है">यह क्या करता है</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">वेबसाइट</a>
 </p>

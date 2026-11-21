@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#التثبيت">التثبيت</a> ·
-  <a href="#ما-يفعله">ما يفعله</a> ·
+  <a href="#-التثبيت">التثبيت</a> ·
+  <a href="#-ما-يفعله">ما يفعله</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">الموقع الإلكتروني</a>
 </p>
