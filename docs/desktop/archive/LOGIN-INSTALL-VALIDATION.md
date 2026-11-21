@@ -33,7 +33,7 @@ This corrects the initial audit's overly broad no-host-effects statement.
 
 ## Remaining acceptance blockers
 
-1. **Compatible published Runtime:** the exact previously published Runtime commit `d91aa04b39ab33c252c628fab6806bf8ea2c39a8` calls `bootstrap_apply::after_authentication` after Google. It has no supported bootstrap opt-out, including through `desktop login` or `auth login`. Isolating the login file alone does not isolate the bootstrap. See [AUTH.md](AUTH.md). A new compatible signed Runtime is required before claiming no installation effects before the Desktop consent screen.
+1. **Compatible published Runtime:** the exact previously published Runtime commit `d91aa04b39ab33c252c628fab6806bf8ea2c39a8` calls `bootstrap_apply::after_authentication` after Google. It has no supported bootstrap opt-out, including through `desktop login` or `auth login`. Isolating the login file alone does not isolate the bootstrap. See [AUTH.md](../AUTH.md). A new compatible signed Runtime is required before claiming no installation effects before the Desktop consent screen.
 2. **Plugin parity:** the current native installer does not install all host marketplace plugins. `simplicio plugin install` targets the Runtime's internal registry, not Codex/Claude/Gemini/Hermes host managers. The safe next implementation is Runtime-owned per-host plan/apply/verify with immutable payload digests, detected executable/version, reviewed destinations, backups and bounded per-host receipts. The Desktop and terminal wrappers should consume that same contract.
 3. **Real platform acceptance:** new Google authorization, remote revocation, full clean installation and live handshakes were not performed. Windows/Linux/macOS Intel installed acceptance remains separate; local macOS ad-hoc signing is not notarization.
 
@@ -59,7 +59,7 @@ Prism/Loop skills guided survey, independent slots, regression/fix and review. T
 
 - The Desktop now negotiates authentication-only capability with one selected
   Runtime before Google, validates the terminal receipt, and refuses legacy
-  Runtime login before account effects. See [AUTH.md](AUTH.md).
+  Runtime login before account effects. See [AUTH.md](../AUTH.md).
 - The companion Runtime change skips bootstrap for new and existing sessions
   only under an explicit validated flag. The auth harness passed 74 tests,
   including a regression shown to fail on the original source.

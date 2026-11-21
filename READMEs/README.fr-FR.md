@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#installation">Installation</a> ·
-  <a href="#ce-quil-fait">Ce Qu'il Fait</a> ·
+  <a href="#-installation">Installation</a> ·
+  <a href="#-ce-quil-fait">Ce Qu'il Fait</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">Site Web</a>
 </p>

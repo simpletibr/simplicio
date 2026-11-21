@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#установка">Установка</a> ·
-  <a href="#что-он-делает">Что он делает</a> ·
+  <a href="#-установка">Установка</a> ·
+  <a href="#-что-он-делает">Что он делает</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">Сайт</a>
 </p>

@@ -8,7 +8,7 @@ simplicio mcp register --binary <absolute-path> --json
 
 Runtime owns the transactional configuration changes. The PyPI launcher records
 the redacted result beside the binary in `simplicio-host-integrations.json`.
-The [29-host README matrix](../README.md#host-integrations) and
+The [host compatibility matrix](hosts/compatibility-matrix.md) and
 [installer paths and upstream contracts](INSTALLER_HOSTS.md) describe the
 expanded adapters released in [v3.8.50](https://github.com/simpletibr/simplicio/releases/tag/v3.8.50).
 Upgrade the Runtime to use them; older immutable downloads do not gain adapters

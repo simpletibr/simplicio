@@ -40,7 +40,7 @@ Requisitos e repro: [docs/flow/README.md](docs/flow/README.md).
   <a href="#-measured-benchmark-simplicio-3108-vs-392-vs-no-mcp">Benchmarks</a> •
   <a href="#-first-60-seconds">First 60 Seconds</a> •
   <a href="#-mcp--ide-integration">MCP & IDEs</a> •
-  <a href="#-core-architecture">Architecture</a> •
+  <a href="#core-architecture">Architecture</a> •
   <a href="https://simpleti.com.br/simplicio/docs">Full Documentation</a>
 </p>
 
@@ -198,6 +198,8 @@ Exposed MCP tools (full profile):
 - `simplicio_run`: Governed task execution with receipts.
 
 ---
+
+<a id="core-architecture"></a>
 
 ## ⚙️ Core Architecture Highlights
 

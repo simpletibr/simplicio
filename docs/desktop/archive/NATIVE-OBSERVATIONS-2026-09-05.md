@@ -158,7 +158,7 @@ Latest local verification: frontend unit suite 398 passed across 62 files, full 
 
 ## Live native audit after unlock — 2026-09-06
 
-The Mac was unlocked and the newest public-repository debug bundle was built and opened at /Users/simpletibr/Projetos/ai/simplicio/apps/desktop/src-tauri/target/debug/bundle/macos/Simplicio.app. The entry surface showed only the full-bleed Simplicio mark and **Install Now**; preparation then completed through the packaged Runtime and opened Runtime 3.8.47. The ad-hoc bundle was closed and removed after review.
+The Mac was unlocked and the newest public-repository debug bundle was built and opened at /Users/<user>/Projetos/ai/simplicio/apps/desktop/src-tauri/target/debug/bundle/macos/Simplicio.app. The entry surface showed only the full-bleed Simplicio mark and **Install Now**; preparation then completed through the packaged Runtime and opened Runtime 3.8.47. The ad-hoc bundle was closed and removed after review.
 
 With the authenticated snapshot loaded, the live UI reported 9 installed clients, 8 MCP registrations and 1 confirmed handshake. The Orca reference was open during the comparison: its Usage popover showed Codex weekly quota and Grok refresh-required behavior. Simplicio's Usage footer/popover matched the observed Codex quota, Codex account query confirmed quota without importing identity, and Grok returned an explicit expired-session message. MCP filters (all/installed/available/attention), provider detail expansion, refresh, guided-plan review, and receipt reconciliation were exercised without applying a new host-plugin plan.
 

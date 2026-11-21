@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#インストール">インストール</a> ·
-  <a href="#機能一覧">機能一覧</a> ·
+  <a href="#-インストール">インストール</a> ·
+  <a href="#-機能一覧">機能一覧</a> ·
   <a href="#-benchmark-2026-10-31">Benchmark</a> ·
   <a href="https://simpleti.com.br/simplicio/#start">ウェブサイト</a>
 </p>
