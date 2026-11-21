@@ -136,6 +136,11 @@ class RepoBuilder:
             },
         )
 
+        _write_json(
+            root / "docs/flow/simplicio.flow.json",
+            {"schema": "simplicio.flow/v1", "id": "simplicio", "version": v, "nodes": [], "edges": []},
+        )
+
         return self
 
     # -- scenario mutators -------------------------------------------------
@@ -205,6 +210,18 @@ class RepoBuilder:
         path = self.root / "server.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         data["packages"][0].update(overrides)
+        _write_json(path, data)
+        return self
+
+    def with_flow(self, **overrides: Any) -> "RepoBuilder":
+        """Change top-level keys of docs/flow/simplicio.flow.json; a None value deletes the key."""
+        path = self.root / "docs/flow/simplicio.flow.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in overrides.items():
+            if value is None:
+                data.pop(key, None)
+            else:
+                data[key] = value
         _write_json(path, data)
         return self
 

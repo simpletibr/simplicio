@@ -35,6 +35,10 @@ class DistributionFixture:
         scoped = {"name": SCOPED_NPM_NAME, "mcpName": MCP_REGISTRY_NAME, "version": version}
         self.put("npm/simplicio/package.json", json.dumps(scoped))
 
+    def put_flow_version(self, version: str) -> None:
+        flow = {"schema": "simplicio.flow/v1", "id": "simplicio", "version": version, "nodes": [], "edges": []}
+        self.put("docs/flow/simplicio.flow.json", json.dumps(flow))
+
     def write(self) -> None:
         self.put("VERSION.md", f"## Current Version: v{self.version}\nUse `master` branch only\n")
         for relative in (
@@ -95,6 +99,7 @@ class DistributionFixture:
                 }
             ),
         )
+        self.put_flow_version(self.version)
         self.put("pypi/simplicio/pyproject.toml", f'version = "{self.version}"\n')
         self.put("SIMPLICIO_ECOSYSTEM.md", f"## Versão atual\n{self.version} (manifest)\n")
         self.put(
@@ -128,7 +133,7 @@ class DistributionConsistencyTests(unittest.TestCase):
         return [item.level for item in audit.run_audit(self.root, today=date(2026, 7, 14))]
 
     def test_clean_distribution_has_no_blocking_findings(self):
-        self.assertEqual(self.levels(), ["OK"] * 9)
+        self.assertEqual(self.levels(), ["OK"] * 10)
 
     def registry_errors(self):
         return [
@@ -146,6 +151,22 @@ class DistributionConsistencyTests(unittest.TestCase):
     def test_missing_registry_entry_blocks_the_release(self):
         (self.root / "server.json").unlink()
         self.assertEqual(len(self.registry_errors()), 1)
+        self.assertEqual(audit.main(["--root", str(self.root)]), 1)
+
+    def flow_errors(self):
+        return [
+            item.message
+            for item in audit.run_audit(self.root, today=date(2026, 7, 14))
+            if item.level == "ERROR" and "docs/flow/simplicio.flow.json" in item.message
+        ]
+
+    def test_stale_flow_version_blocks_the_release(self):
+        self.fixture.put_flow_version("3.5.1")
+        (error,) = self.flow_errors()
+        self.assertIn(
+            "flow source docs/flow/simplicio.flow.json version 3.5.1 differs from the manifest version 3.5.2",
+            error,
+        )
         self.assertEqual(audit.main(["--root", str(self.root)]), 1)
 
     def test_regression_wrong_branch_and_version_fail(self):
@@ -327,7 +348,7 @@ class DistributionConsistencyTests(unittest.TestCase):
             result = audit.main(["--root", str(self.root), "--strict", "--junit", str(junit), "--json"])
         self.assertEqual(result, 0)
         self.assertTrue(junit.exists())
-        self.assertEqual(len(json.loads(output.getvalue())), 9)
+        self.assertEqual(len(json.loads(output.getvalue())), 10)
 
     def test_strict_mode_fails_warning_while_default_does_not(self):
         self.fixture.put_scoped_wrapper_version("3.0.2")

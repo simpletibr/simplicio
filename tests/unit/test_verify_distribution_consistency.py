@@ -53,6 +53,7 @@ def test_happy_path_all_consistent_exits_zero(verify_module, repo, monkeypatch, 
     assert "release version sources agree on 3.5.2" in out
     assert "wrapper/package versions match the release manifest" in out
     assert "MCP registry entry server.json agrees with the manifest" in out
+    assert "flow source docs/flow/simplicio.flow.json carries the manifest version 3.5.2" in out
 
 
 # ---------------------------------------------------------------------------
@@ -246,6 +247,82 @@ def test_several_registry_problems_are_reported_in_one_finding(verify_module, re
     assert [item.level for item in findings] == ["ERROR"]
     assert "version 3.5.1 differs" in findings[0].message
     assert "name 'io.github.someone-else/simplicio' differs" in findings[0].message
+
+
+# ---------------------------------------------------------------------------
+# ERROR cases: the flow source (docs/flow/simplicio.flow.json)
+# ---------------------------------------------------------------------------
+
+
+def flow_findings(module, repo):
+    return [item for item in module.run_audit(repo.root) if "docs/flow/simplicio.flow.json" in item.message]
+
+
+def test_flow_source_in_agreement_is_one_ok_finding(verify_module, repo):
+    findings = flow_findings(verify_module, repo)
+
+    assert [item.level for item in findings] == ["OK"]
+
+
+def test_flow_source_with_a_stale_version_is_error(verify_module, repo, monkeypatch, capsys):
+    repo.with_flow(version="3.10.0")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "flow source docs/flow/simplicio.flow.json version 3.10.0 differs from the manifest version 3.5.2" in out
+
+
+def test_flow_source_without_a_version_is_error(verify_module, repo, monkeypatch, capsys):
+    repo.with_flow(version=None)
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "flow source docs/flow/simplicio.flow.json version None differs from the manifest version 3.5.2" in out
+
+
+def test_missing_flow_source_is_error(verify_module, repo, monkeypatch, capsys):
+    (repo.root / "docs/flow/simplicio.flow.json").unlink()
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "docs/flow/simplicio.flow.json (flow source) is missing" in out
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        ("{not json", "is not valid JSON"),
+        ("", "is not valid JSON"),
+        ("[]", "is not a JSON object"),
+        ("\"text\"", "is not a JSON object"),
+    ],
+)
+def test_flow_source_that_is_not_a_json_object_is_error(verify_module, repo, monkeypatch, capsys, body, message):
+    (repo.root / "docs/flow/simplicio.flow.json").write_text(body, encoding="utf-8")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    assert exit_code == 1
+    assert "docs/flow/simplicio.flow.json (flow source) " + message in out
+
+
+def test_flow_source_is_not_hidden_by_wrapper_version_lag_warning(verify_module, repo, monkeypatch, capsys):
+    repo.with_npm_version("simplicio", "1.0.0")
+    repo.with_flow(version="1.0.0")
+    freeze_today(monkeypatch, verify_module, "2020-01-01")
+
+    exit_code, out = run_main(verify_module, repo, capsys)
+
+    # The flow source follows the release manifest, not the lagging wrapper.
+    assert exit_code == 1
+    assert "flow source docs/flow/simplicio.flow.json version 1.0.0 differs from the manifest version 3.5.2" in out
 
 
 # ---------------------------------------------------------------------------
