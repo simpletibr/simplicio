@@ -24,7 +24,8 @@ OpenDots has no config file and no CLI. It keeps its data in SQLite and stores t
 - Connections: each connection belongs to one Dot.
 - Approval: a tool marked `readOnlyHint` runs without asking. Other tools are "Ask first". They show an approval card, "Approve & run". Approvals work in the web app only. Slack and scheduled runs ask you to go to the web. Each tool can be turned on or off. An approval expires after 1 hour.
 - Read-only hints: 8 of Simplicio's 22 tools carry `readOnlyHint`, and 14 carry none. The study names `simplicio_edit` and `simplicio_codegen` as tools that ask first. This count comes from a stand-in client.
-- New connection for each call: OpenDots opens a new MCP session for each call and closes it afterwards. Nothing kept in an MCP session survives between calls.
+- New connection for each call: OpenDots opens a new MCP session for each call and closes it afterwards. OpenDots keeps nothing between calls, while the Simplicio server keeps the order for its process.
+- Write order: a write to a folder of more than 10 visible files is refused until the server has had a `simplicio_map` answer and then a `simplicio_context` answer. The server keeps that order for its process across connections, for one hour by default, and a refused write carries a `commit_call` that applies it afterwards.
 - Result size: OpenDots cuts results at 20,000 characters. On a 17-file test folder, with a stand-in client, Simplicio replies were 7,452 characters at most (single samples). A large tree was not run.
 - Time-out: the transport has a 60,000 ms time-out. The study does not say whether it covers connecting, the call, or both.
 - Tool names: the model sees `<connection name>__<tool name>`. Each part is a lowercase slug. The connection name is cut to 20 characters and the tool name to 40. Slugs use only `a-z`, `0-9`, `_` and `-`. The separator is a double underscore.

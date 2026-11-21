@@ -22,6 +22,7 @@ Simplicio writes nothing for OpenBot. `simplicio integrations routes openbot` pr
 
 - Authentication: OpenBot offers OAuth under the MCP auth spec, or a static key. The study does not say how a static key is sent.
 - Approval: an admin governs MCP access. Each MCP call checks the grant, then the action policy, then the audit log.
+- Write order: a write to a folder of more than 10 visible files is refused until the server has had a `simplicio_map` answer and then a `simplicio_context` answer. The server keeps that order for its process across connections, for one hour by default, and a refused write carries a `commit_call` that applies it afterwards.
 - Tools: custom-server tools are treated as writes unless they are classified as read.
 - Team edition: an "Only approved servers" allowlist. Personal edition: no allowlist.
 - Addresses: HTTPS only, with no IP literal, no localhost and no internal host. The development override above also allows `[::1]`.
