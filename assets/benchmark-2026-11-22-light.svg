@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="408" viewBox="0 0 840 408" role="img" aria-labelledby="title desc">
+<title id="title">Same agent, same model, same task: time, cost and output tokens with no Simplicio, Simplicio 3.14.0 and Simplicio 3.15.0</title>
+<desc id="desc">Horizontal bars, median of 3 sessions per setup, with the lowest and highest session as a thin line. Time for the whole job: No Simplicio 121 s, Simplicio 3.14.0 104 s, Simplicio 3.15.0 25 s. Cost reported by the agent: No Simplicio $0.0226, Simplicio 3.14.0 $0.0220, Simplicio 3.15.0 $0.0076. Output tokens: No Simplicio 18,162, Simplicio 3.14.0 19,722, Simplicio 3.15.0 3,211.</desc>
+<style>
+text{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;fill:#1f2328}
+.t{font-size:22px;font-weight:600;fill:#59636e}
+.n{font-size:22px}
+.nb{font-size:22px;font-weight:700}
+.v{font-size:22px;font-weight:600}
+.vb{font-size:22px;font-weight:700}
+.k{font-size:19px;fill:#59636e}
+.g{fill:#8c959f}
+.a{fill:#008300}
+.w{stroke:#1f2328;stroke-width:2;fill:none}
+.z{stroke:#d1d9e0;stroke-width:1}
+</style>
+<rect x="0.5" y="0.5" width="839" height="407" rx="10" fill="#ffffff" stroke="#d1d9e0"/>
+<text class="t" x="22" y="38">Time for the whole job</text>
+<text class="k" x="818" y="37" text-anchor="end">line: lowest to highest of 3 sessions</text>
+<line class="z" x1="234" y1="51" x2="234" y2="133"/>
+<text class="n" x="22" y="72">No Simplicio</text>
+<path class="g" d="M234 54H559.67A4 4 0 0 1 563.67 58V70A4 4 0 0 1 559.67 74H234z"/>
+<path class="w" d="M497.9 64H702M497.9 59V69M702 59V69"/>
+<text class="v" x="712" y="72">121 s</text>
+<text class="n" x="22" y="100">Simplicio 3.14.0</text>
+<path class="g" d="M234 82H511.56A4 4 0 0 1 515.56 86V98A4 4 0 0 1 511.56 102H234z"/>
+<path class="w" d="M479.14 92H523.17M479.14 87V97M523.17 87V97"/>
+<text class="v" x="533.17" y="100">104 s</text>
+<text class="nb" x="22" y="128">Simplicio 3.15.0</text>
+<path class="a" d="M234 110H297.4A4 4 0 0 1 301.4 114V126A4 4 0 0 1 297.4 130H234z"/>
+<path class="w" d="M296.24 120H306.29M296.24 115V125M306.29 115V125"/>
+<text class="vb" x="316.29" y="128">25 s</text>
+<text class="t" x="22" y="168">Cost reported by the agent</text>
+<line class="z" x1="234" y1="181" x2="234" y2="263"/>
+<text class="n" x="22" y="202">No Simplicio</text>
+<path class="g" d="M234 184H606.71A4 4 0 0 1 610.71 188V200A4 4 0 0 1 606.71 204H234z"/>
+<path class="w" d="M544.79 194H702M544.79 189V199M702 189V199"/>
+<text class="v" x="712" y="202">$0.0226</text>
+<text class="n" x="22" y="230">Simplicio 3.14.0</text>
+<path class="g" d="M234 212H597.97A4 4 0 0 1 601.97 216V228A4 4 0 0 1 597.97 232H234z"/>
+<path class="w" d="M591.92 222H650.2M591.92 217V227M650.2 217V227"/>
+<text class="v" x="660.2" y="230">$0.0220</text>
+<text class="nb" x="22" y="258">Simplicio 3.15.0</text>
+<path class="a" d="M234 240H356.85A4 4 0 0 1 360.85 244V256A4 4 0 0 1 356.85 260H234z"/>
+<path class="w" d="M352.06 250H397.65M352.06 245V255M397.65 245V255"/>
+<text class="vb" x="407.65" y="258">$0.0076</text>
+<text class="t" x="22" y="298">Output tokens</text>
+<line class="z" x1="234" y1="311" x2="234" y2="393"/>
+<text class="n" x="22" y="332">No Simplicio</text>
+<path class="g" d="M234 314H570.03A4 4 0 0 1 574.03 318V330A4 4 0 0 1 570.03 334H234z"/>
+<path class="w" d="M526.05 324H670.75M526.05 319V329M670.75 319V329"/>
+<text class="v" x="680.75" y="332">18,162</text>
+<text class="n" x="22" y="360">Simplicio 3.14.0</text>
+<path class="g" d="M234 342H599.24A4 4 0 0 1 603.24 346V358A4 4 0 0 1 599.24 362H234z"/>
+<path class="w" d="M585.3 352H702M585.3 347V357M702 347V357"/>
+<text class="v" x="712" y="360">19,722</text>
+<text class="nb" x="22" y="388">Simplicio 3.15.0</text>
+<path class="a" d="M234 370H290.12A4 4 0 0 1 294.12 374V386A4 4 0 0 1 290.12 390H234z"/>
+<path class="w" d="M291.44 380H300.89M291.44 375V385M300.89 375V385"/>
+<text class="vb" x="310.89" y="388">3,211</text>
+</svg>
