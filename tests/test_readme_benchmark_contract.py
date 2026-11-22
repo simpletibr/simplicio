@@ -843,10 +843,12 @@ def test_tagline_is_the_same_english_line_in_all_15_pages_under_the_name():
         index = lines.index(TAGLINE)
         assert lines[index - 2] == "<h1>Simplicio</h1>" and lines[index - 1] == "", \
             f"{page.name}: the tagline goes right under <h1>Simplicio</h1>"
-        # the arrow points the way the page is read: right to left in the Arabic and Hebrew pages
-        arrow = "←" if page.name.endswith(("ar-SA.md", "he-IL.md")) else "→"
-        assert arrow in lines[index + 2] and lines[index + 2].startswith("<p><b>"), \
+        assert "→" in lines[index + 2] and lines[index + 2].startswith("<p><b>"), \
             f"{page.name}: the measured headline follows the tagline"
+        # the two measured expressions keep their right arrows; in the Arabic and Hebrew pages each is one left-to-right unit
+        spans = lines[index + 2].count('<span dir="ltr">')
+        assert spans == (2 if page.name.endswith(("ar-SA.md", "he-IL.md")) else 0), \
+            f"{page.name}: the headline wraps its two expressions in a left-to-right span in ar-SA and he-IL only"
 
 
 def test_first_screen_questions_and_wording_follow_the_review():

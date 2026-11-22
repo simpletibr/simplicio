@@ -561,6 +561,12 @@ def _headline(doc: Doc) -> str:
     return ""
 
 
+def _headline_expressions(en: Doc) -> str:
+    """The headline of README.md with its two measured expressions wrapped, as the Arabic and Hebrew pages write them."""
+    return re.sub(r"(121&nbsp;s&nbsp;\u2192&nbsp;25&nbsp;s|\$0\.0226&nbsp;\u2192&nbsp;\$0\.0076)", r'<span dir="ltr">\1</span>',
+                  _headline(en))
+
+
 def _prose_numbers(doc: Doc) -> Counter:
     """The numbers of the prose that a translator could localize by mistake: 4.9, 3,211, $0.0548, 375 MB, 3.15.0 ..."""
     found = Counter()
@@ -598,13 +604,20 @@ def check_numbers(en: Doc, tr: Doc, lang: str) -> list[str]:
     if numeric_tokens(want) != numeric_tokens(got) or _arrows(want) != _arrows(got):
         problems.append(f"the headline (the bold line under the name): numbers or arrows differ. Expected {numeric_tokens(want)} "
                         f"with {_arrows(want)} arrows, found {numeric_tokens(got)} with {_arrows(got)}")
-    # the arrows point the way the text is read: in a right-to-left paragraph an arrow to the right points from the second
-    # value back to the first, and "121 s -> 25 s" reads as "25 s -> 121 s"
+    # The two measured expressions of the headline keep the arrow of README.md ("121 s -> 25 s"), in every language: in the
+    # Arabic and Hebrew pages each of them is one left-to-right unit (see R10). Only the prose line under the headline
+    # ("Without Simplicio -> with Simplicio 3.15.0") is a sentence of the page's language, and in a right-to-left sentence the
+    # arrow points to the left.
+    en_rest, tr_rest = en.raw.replace(_headline(en), "", 1), tr.raw.replace(got, "", 1)
+    if got.count(ARROW) != want.count(ARROW) or LEFT_ARROW in got:
+        problems.append(f"the headline has {got.count(ARROW)} '{ARROW}' and {got.count(LEFT_ARROW)} '{LEFT_ARROW}'; "
+                        f"README.md has {want.count(ARROW)} '{ARROW}'. Keep '{ARROW}' in both expressions of the headline, "
+                        "in every language")
     expected, other = (LEFT_ARROW, ARROW) if lang in RTL_LANGS else (ARROW, LEFT_ARROW)
-    if tr.raw.count(expected) != en.raw.count(ARROW) or tr.raw.count(other):
-        problems.append(f"the page has {tr.raw.count(expected)} '{expected}' and {tr.raw.count(other)} '{other}'; README.md has "
-                        f"{en.raw.count(ARROW)} '{ARROW}'. Write '{expected}' for each of them: the arrow must point the way "
-                        f"the language is read ({'right to left' if lang in RTL_LANGS else 'left to right'})")
+    if tr_rest.count(expected) != en_rest.count(ARROW) or tr_rest.count(other):
+        how = "a right-to-left sentence: the arrow points the way it is read" if lang in RTL_LANGS else "as in README.md"
+        problems.append(f"outside the headline the page has {tr_rest.count(expected)} '{expected}' and {tr_rest.count(other)} "
+                        f"'{other}'; README.md has {en_rest.count(ARROW)} '{ARROW}'. Write '{expected}' for each of them ({how})")
     # the prose
     for token, n in (_prose_numbers(en) - _prose_numbers(tr)).items():
         problems.append(f"the number {token!r} of README.md is missing in the prose (needed {n} time(s)). Keep numbers and "
@@ -671,13 +684,30 @@ def test_r09_the_prose_is_translated(lang):
 BIDI_CONTROLS = "\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069"
 
 
+LTR_SPAN = '<span dir="ltr">'
+LTR_SPAN_RE = re.compile(r'<span dir="ltr">([^<>]*)</span>')
+
+
 def check_direction(en: Doc, tr: Doc, lang: str) -> list[str]:
     problems = []
-    # The convention of the current ar-SA and he-IL files: no explicit direction anywhere. GitHub sets the direction of
-    # each paragraph from its first letters, and fenced code stays left to right.
-    if re.search(r"\bdir\s*=|direction\s*:|<bdo\b", tr.raw, re.I):
+    # GitHub sets the direction of each paragraph from its first letters, and fenced code stays left to right. The one thing
+    # a page may set itself, only in ar-SA and he-IL, is <span dir="ltr"> around each of the two measured expressions of the
+    # headline: without it the bidirectional algorithm splits "121 s -> 25 s" and puts the 121 away from its unit.
+    text = tr.raw
+    spans = LTR_SPAN_RE.findall(text)
+    if lang in RTL_LANGS:
+        headline = _headline(tr)
+        want = LTR_SPAN_RE.findall(_headline_expressions(en))
+        wrapped = all(LTR_SPAN + x + "</span>" in headline for x in want)
+        if spans != want or len(text.split(LTR_SPAN)) != len(want) + 1 or not wrapped:
+            problems.append(f"in the headline wrap each of the two measured expressions in {LTR_SPAN}...</span>, exactly as "
+                            f"{want} and nowhere else on the page (found {spans}). This keeps '121 s -> 25 s' and "
+                            "'$0.0226 -> $0.0076' together as one left-to-right unit in a right-to-left line")
+        text = LTR_SPAN_RE.sub(lambda m: m.group(1), text)
+    if re.search(r"\bdir\s*=|direction\s*:|<bdo\b", text, re.I):
         problems.append("the page sets a text direction (dir=, direction: or <bdo>). Do not: GitHub picks the direction of each "
-                        "paragraph itself, and code blocks must stay left to right")
+                        "paragraph itself, and code blocks must stay left to right. The only exception is "
+                        f"{LTR_SPAN} around the two expressions of the headline, in ar-SA and he-IL")
     if any(ch in tr.raw for ch in BIDI_CONTROLS):
         problems.append("the page contains an invisible direction-control character (RLM, LRE, RLE, PDF, LRO, RLO, LRI, RLI, "
                         "FSI, PDI). Remove it. Only the &lrm; entity after a right-to-left name in the language bar is allowed")
@@ -694,8 +724,8 @@ def check_direction(en: Doc, tr: Doc, lang: str) -> list[str]:
 @pytest.mark.parametrize("lang", LANGS)
 def test_r10_no_explicit_text_direction(lang):
     _run(lang, "R10", "text direction",
-         "write the page the way the current ar-SA and he-IL files are written: no dir attribute, no direction style, "
-         "no invisible direction characters. Code blocks must stay left to right.", check_direction)
+         "no dir attribute, no direction style, no invisible direction characters, and code blocks stay left to right. "
+         "Only ar-SA and he-IL wrap the two measured expressions of the headline in <span dir=\"ltr\">.", check_direction)
 
 
 # --------------------------------------------------------------------------
