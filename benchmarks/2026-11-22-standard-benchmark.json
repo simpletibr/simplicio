@@ -1,0 +1,619 @@
+{
+  "schema": "simplicio.public-benchmark/v1",
+  "date": "2026-11-22",
+  "model": "claude-haiku-5-5",
+  "agent": "Claude Code 2.1.330",
+  "machine": {
+    "cpus": 4,
+    "memory_gb": 16,
+    "os": "Linux x86_64",
+    "swap": "none",
+    "sessions_at_the_same_time": 4
+  },
+  "round": {
+    "sessions_run": 12,
+    "sessions_published": 9,
+    "note": "The round had 12 sessions. 9 are published here. The other 3 belonged to a fourth setup, an unreleased development build that is not a published version and is not reported."
+  },
+  "arms": {
+    "no-simplicio": {
+      "label": "No Simplicio",
+      "release_commit": null
+    },
+    "simplicio-3.14.0": {
+      "label": "Simplicio 3.14.0",
+      "release_commit": "fe004296161fc693fde35f6fea663889886a061d"
+    },
+    "simplicio-3.15.0": {
+      "label": "Simplicio 3.15.0",
+      "release_commit": "d2bef403ff12914542fab777aa2c9ace6d8eca46"
+    }
+  },
+  "sessions": [
+    {
+      "arm": "no-simplicio",
+      "rep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 57.3,
+          "cpu_s": 3.29,
+          "peak_rss_mb": 274.418,
+          "cost_usd_cli": 0.012821
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 20.8,
+          "cpu_s": 2.31,
+          "peak_rss_mb": 234.98,
+          "cost_usd_cli": 0.004736
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 43.2,
+          "cpu_s": 3.56,
+          "peak_rss_mb": 259.75,
+          "cost_usd_cli": 0.010486
+        }
+      ],
+      "totals": {
+        "input_tokens": 42543,
+        "output_tokens": 23328,
+        "reasoning_tokens": 9221,
+        "cache_read_tokens": 787484,
+        "cache_write_tokens": 42499,
+        "model_requests": 33,
+        "tool_calls": 30,
+        "cost_usd_table": 0.022741
+      }
+    },
+    {
+      "arm": "no-simplicio",
+      "rep": 2,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 129.4,
+          "cpu_s": 4.43,
+          "peak_rss_mb": 270.062,
+          "cost_usd_cli": 0.008939
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 14.5,
+          "cpu_s": 1.53,
+          "peak_rss_mb": 234.551,
+          "cost_usd_cli": 0.003182
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 28.3,
+          "cpu_s": 2.52,
+          "peak_rss_mb": 243.629,
+          "cost_usd_cli": 0.006502
+        }
+      ],
+      "totals": {
+        "input_tokens": 30447,
+        "output_tokens": 15599,
+        "reasoning_tokens": 4457,
+        "cache_read_tokens": 473821,
+        "cache_write_tokens": 30415,
+        "model_requests": 19,
+        "tool_calls": 16,
+        "cost_usd_table": 0.015348
+      }
+    },
+    {
+      "arm": "no-simplicio",
+      "rep": 3,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 48.4,
+          "cpu_s": 3.69,
+          "peak_rss_mb": 239.895,
+          "cost_usd_cli": 0.011142
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 17.3,
+          "cpu_s": 1.95,
+          "peak_rss_mb": 248.082,
+          "cost_usd_cli": 0.003959
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 31.4,
+          "cpu_s": 2.86,
+          "peak_rss_mb": 240.891,
+          "cost_usd_cli": 0.007472
+        }
+      ],
+      "totals": {
+        "input_tokens": 34691,
+        "output_tokens": 18162,
+        "reasoning_tokens": 3973,
+        "cache_read_tokens": 655730,
+        "cache_write_tokens": 34649,
+        "model_requests": 25,
+        "tool_calls": 22,
+        "cost_usd_table": 0.018068
+      }
+    },
+    {
+      "arm": "simplicio-3.14.0",
+      "rep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 61.7,
+          "cpu_s": 5.25,
+          "peak_rss_mb": 439.254,
+          "cost_usd_cli": 0.013888
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 14.4,
+          "cpu_s": 1.88,
+          "peak_rss_mb": 346.988,
+          "cost_usd_cli": 0.002934
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 27.5,
+          "cpu_s": 2.88,
+          "peak_rss_mb": 358.301,
+          "cost_usd_cli": 0.005227
+        }
+      ],
+      "totals": {
+        "input_tokens": 33121,
+        "output_tokens": 18764,
+        "reasoning_tokens": 6510,
+        "cache_read_tokens": 604660,
+        "cache_write_tokens": 33081,
+        "model_requests": 22,
+        "tool_calls": 19,
+        "cost_usd_table": 0.018041
+      }
+    },
+    {
+      "arm": "simplicio-3.14.0",
+      "rep": 2,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 50.4,
+          "cpu_s": 3.98,
+          "peak_rss_mb": 432.383,
+          "cost_usd_cli": 0.012526
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 15.7,
+          "cpu_s": 2.11,
+          "peak_rss_mb": 347.512,
+          "cost_usd_cli": 0.003359
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 24.1,
+          "cpu_s": 2.83,
+          "peak_rss_mb": 363.0,
+          "cost_usd_cli": 0.005562
+        }
+      ],
+      "totals": {
+        "input_tokens": 34141,
+        "output_tokens": 19722,
+        "reasoning_tokens": 9109,
+        "cache_read_tokens": 475977,
+        "cache_write_tokens": 34111,
+        "model_requests": 18,
+        "tool_calls": 15,
+        "cost_usd_table": 0.018383
+      }
+    },
+    {
+      "arm": "simplicio-3.14.0",
+      "rep": 3,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 53.7,
+          "cpu_s": 4.45,
+          "peak_rss_mb": 436.129,
+          "cost_usd_cli": 0.01368
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 15.2,
+          "cpu_s": 2.1,
+          "peak_rss_mb": 356.5,
+          "cost_usd_cli": 0.003225
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 37.5,
+          "cpu_s": 3.48,
+          "peak_rss_mb": 385.449,
+          "cost_usd_cli": 0.008034
+        }
+      ],
+      "totals": {
+        "input_tokens": 40017,
+        "output_tokens": 24997,
+        "reasoning_tokens": 12479,
+        "cache_read_tokens": 443908,
+        "cache_write_tokens": 39991,
+        "model_requests": 18,
+        "tool_calls": 15,
+        "cost_usd_table": 0.022332
+      }
+    },
+    {
+      "arm": "simplicio-3.15.0",
+      "rep": 1,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 5.0,
+          "cpu_s": 1.33,
+          "peak_rss_mb": 312.812,
+          "cost_usd_cli": 0.004889
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 8.9,
+          "cpu_s": 1.92,
+          "peak_rss_mb": 365.191,
+          "cost_usd_cli": 0.002251
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 10.9,
+          "cpu_s": 2.04,
+          "peak_rss_mb": 351.797,
+          "cost_usd_cli": 0.002666
+        }
+      ],
+      "totals": {
+        "input_tokens": 33300,
+        "output_tokens": 3068,
+        "reasoning_tokens": 1302,
+        "cache_read_tokens": 161356,
+        "cache_write_tokens": 33286,
+        "model_requests": 10,
+        "tool_calls": 7,
+        "cost_usd_table": 0.00732
+      }
+    },
+    {
+      "arm": "simplicio-3.15.0",
+      "rep": 2,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 5.9,
+          "cpu_s": 1.37,
+          "peak_rss_mb": 315.363,
+          "cost_usd_cli": 0.002231
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 7.6,
+          "cpu_s": 1.73,
+          "peak_rss_mb": 352.539,
+          "cost_usd_cli": 0.002218
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 9.4,
+          "cpu_s": 2.2,
+          "peak_rss_mb": 374.504,
+          "cost_usd_cli": 0.002625
+        }
+      ],
+      "totals": {
+        "input_tokens": 18466,
+        "output_tokens": 3211,
+        "reasoning_tokens": 1488,
+        "cache_read_tokens": 177700,
+        "cache_write_tokens": 18452,
+        "model_requests": 10,
+        "tool_calls": 7,
+        "cost_usd_table": 0.005229
+      }
+    },
+    {
+      "arm": "simplicio-3.15.0",
+      "rep": 3,
+      "steps": [
+        {
+          "step": 1,
+          "name": "Build a user listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true
+          },
+          "wall_s": 5.8,
+          "cpu_s": 1.48,
+          "peak_rss_mb": 311.23,
+          "cost_usd_cli": 0.002131
+        },
+        {
+          "step": 2,
+          "name": "Change the listing",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true
+          },
+          "wall_s": 10.5,
+          "cpu_s": 1.94,
+          "peak_rss_mb": 357.863,
+          "cost_usd_cli": 0.002943
+        },
+        {
+          "step": 3,
+          "name": "Add a simple registration",
+          "delivered": true,
+          "checks": {
+            "list_api": true,
+            "list_page": true,
+            "date_column": true,
+            "no_role_column": true,
+            "role_filter": true,
+            "create_ok": true,
+            "create_without_name_rejected": true,
+            "create_duplicate_email_rejected": true,
+            "new_user_page": true
+          },
+          "wall_s": 10.3,
+          "cpu_s": 2.09,
+          "peak_rss_mb": 379.07,
+          "cost_usd_cli": 0.002527
+        }
+      ],
+      "totals": {
+        "input_tokens": 18755,
+        "output_tokens": 3573,
+        "reasoning_tokens": 1663,
+        "cache_read_tokens": 206516,
+        "cache_write_tokens": 18739,
+        "model_requests": 10,
+        "tool_calls": 7,
+        "cost_usd_table": 0.005577
+      }
+    }
+  ]
+}
