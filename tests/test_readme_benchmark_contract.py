@@ -34,6 +34,7 @@ ARM_IDS = ("no-simplicio", "simplicio-3.14.0", "simplicio-3.15.0")
 
 # The brand line: the same English text in every language, never translated.
 TAGLINE = "<p><b>UltraFast Mode for all.</b></p>"
+LOCALIZED = sorted((ROOT / "READMEs").glob("README.*.md"))
 
 TOP_LEVEL_KEYS = {"schema", "date", "model", "agent", "machine", "round", "arms", "sessions"}
 SESSION_KEYS = {"arm", "rep", "steps", "totals"}
@@ -829,6 +830,23 @@ def test_install_and_safety_statements_match_what_the_scripts_do():
                  "every public command"):
         assert gone not in text, gone
     assert "Windows Desktop is not published." in text and "Apple Developer ID signing" in text
+
+
+def test_tagline_is_the_same_english_line_in_all_15_pages_under_the_name():
+    pages = [README, *LOCALIZED]
+    assert len(pages) == 15
+    for page in pages:
+        text = _read(page)
+        assert text.count(TAGLINE) == 1, f"{page.name}: the tagline must appear once, unchanged and in English"
+        assert text.count("UltraFast") == 1, f"{page.name}: UltraFast appears outside the tagline"
+        lines = text.split("\n")
+        index = lines.index(TAGLINE)
+        assert lines[index - 2] == "<h1>Simplicio</h1>" and lines[index - 1] == "", \
+            f"{page.name}: the tagline goes right under <h1>Simplicio</h1>"
+        # the arrow points the way the page is read: right to left in the Arabic and Hebrew pages
+        arrow = "←" if page.name.endswith(("ar-SA.md", "he-IL.md")) else "→"
+        assert arrow in lines[index + 2] and lines[index + 2].startswith("<p><b>"), \
+            f"{page.name}: the measured headline follows the tagline"
 
 
 def test_first_screen_questions_and_wording_follow_the_review():
