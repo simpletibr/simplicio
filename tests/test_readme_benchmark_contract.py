@@ -12,6 +12,7 @@ import html
 import importlib.util
 import json
 import re
+import struct
 import subprocess
 import sys
 from decimal import ROUND_HALF_UP, Decimal
@@ -31,13 +32,15 @@ SVGS = (
 
 ARM_IDS = ("no-simplicio", "simplicio-3.14.0", "simplicio-3.15.0")
 
-TOP_LEVEL_KEYS = {"schema", "date", "model", "agent", "machine", "arms", "sessions"}
-STEP_KEYS = {
-    "step", "name", "delivered", "checks", "wall_s", "cpu_s", "peak_rss_mb",
-    "input_tokens", "output_tokens", "reasoning_tokens", "cache_read_tokens",
-    "cache_write_tokens", "cost_usd_cli", "cost_usd_table", "model_requests",
-    "tool_calls",
+TOP_LEVEL_KEYS = {"schema", "date", "model", "agent", "machine", "round", "arms", "sessions"}
+SESSION_KEYS = {"arm", "rep", "steps", "totals"}
+# Per step: delivery, checks, time, CPU, memory and cost. Counts are published per session, not per step.
+STEP_KEYS = {"step", "name", "delivered", "checks", "wall_s", "cpu_s", "peak_rss_mb", "cost_usd_cli"}
+TOTALS_KEYS = {
+    "input_tokens", "output_tokens", "reasoning_tokens", "cache_read_tokens", "cache_write_tokens",
+    "model_requests", "tool_calls", "cost_usd_table",
 }
+PER_STEP_COUNT_KEYS = TOTALS_KEYS - {"cost_usd_table"} | {"cost_usd_table"}
 REMOVED_RAW_KEYS = {
     "sequence", "tool_names", "simplicio_replies", "binary", "stderr",
     "mcp_status", "errors", "usage", "num_turns", "tools", "cost_real",
@@ -80,12 +83,14 @@ def _session_totals(data: dict) -> dict[str, list[dict]]:
             "wall": sum(_d(s["wall_s"]) for s in steps),
             "cpu": sum(_d(s["cpu_s"]) for s in steps),
             "rss": max(_d(s["peak_rss_mb"]) for s in steps),
-            "input": sum(s["input_tokens"] for s in steps),
-            "output": sum(s["output_tokens"] for s in steps),
+            "input": session["totals"]["input_tokens"],
+            "output": session["totals"]["output_tokens"],
+            "reasoning": session["totals"]["reasoning_tokens"],
+            "cache_read": session["totals"]["cache_read_tokens"],
             "cost_cli": sum(_d(s["cost_usd_cli"]) for s in steps),
-            "cost_table": sum(_d(s["cost_usd_table"]) for s in steps),
-            "requests": sum(s["model_requests"] for s in steps),
-            "tools": sum(s["tool_calls"] for s in steps),
+            "cost_table": _d(session["totals"]["cost_usd_table"]),
+            "requests": session["totals"]["model_requests"],
+            "tools": session["totals"]["tool_calls"],
             "delivered": sum(1 for s in steps if s["delivered"]),
             "steps": len(steps),
         })
@@ -108,9 +113,36 @@ def _cell(totals: dict, arm: str, key: str) -> str:
         return f"{_round(med, 0)} MB ({_round(lo, 0)} to {_round(hi, 0)})"
     if key in ("cost_cli", "cost_table"):
         return f"${_round(med, 4)} ({_round(lo, 4)} to {_round(hi, 4)})"
-    if key in ("input", "output"):
+    if key in ("input", "output", "reasoning", "cache_read"):
         return f"{med:,} ({lo:,} to {hi:,})"
     return f"{med} ({lo} to {hi})"
+
+
+def _readme_cell_parts(totals: dict, arm: str, key: str) -> tuple[str, str]:
+    """The value and the range as the README prints them: the range sits under the value."""
+    med, lo, hi = _spread(totals, arm, key)
+    if key == "wall":
+        return f"{_round(med, 0)} s", f"{_round(lo, 0)}\u2013{_round(hi, 0)}"
+    if key == "cpu":
+        return f"{_round(med, 1)} s", f"{_round(lo, 1)}\u2013{_round(hi, 1)}"
+    if key == "rss":
+        return f"{_round(med, 0)} MB", f"{_round(lo, 0)}\u2013{_round(hi, 0)}"
+    if key == "cost_cli":
+        return f"${_round(med, 4)}", f"{_round(lo, 4)}\u2013{_round(hi, 4)}"
+    if key in ("input", "output", "reasoning", "cache_read"):
+        return f"{med:,}", f"{lo:,}\u2013{hi:,}"
+    return f"{med}", f"{lo}\u2013{hi}"
+
+
+def _best_arm_with_a_clear_gap(totals: dict, key: str):
+    """The arm with the lowest median, or None when its range overlaps another arm's range."""
+    spreads = {arm: _spread(totals, arm, key) for arm in ARM_IDS}
+    best = min(ARM_IDS, key=lambda arm: spreads[arm][0])
+    _, lo, hi = spreads[best]
+    for arm, (_, other_lo, other_hi) in spreads.items():
+        if arm != best and other_lo <= hi and lo <= other_hi:
+            return None
+    return best
 
 
 def _read(path: Path) -> str:
@@ -146,9 +178,49 @@ def test_public_json_has_exactly_the_three_published_arms():
         sessions = [s for s in data["sessions"] if s["arm"] == arm]
         assert [s["rep"] for s in sessions] == [1, 2, 3], arm
         for session in sessions:
+            assert set(session) == SESSION_KEYS
+            assert set(session["totals"]) == TOTALS_KEYS
             assert [step["step"] for step in session["steps"]] == [1, 2, 3]
             for step in session["steps"]:
                 assert set(step) == STEP_KEYS
+
+
+def test_public_json_says_how_many_sessions_the_round_ran_and_why_nine_are_published():
+    data = _data()
+    round_ = data["round"]
+    assert set(round_) == {"sessions_run", "sessions_published", "note"}
+    assert round_["sessions_run"] == 12
+    assert round_["sessions_published"] == len(data["sessions"]) == 9
+    note = round_["note"]
+    assert "unreleased development build" in note
+    assert "12 sessions" in note and "9" in note and "other 3" in note
+    # The fourth setup gets no name, no number and no description beyond this.
+    assert len(note.split()) < 50
+
+
+def test_report_discloses_the_fourth_setup_in_the_setup_table_and_in_the_limits():
+    text = _read(REPORT)
+    assert text.count("unreleased development build") >= 2
+    setup_row = next(line for line in text.splitlines() if line.startswith("| Concurrency |"))
+    assert "12 sessions" in setup_row and "9 are reported" in setup_row
+    assert "unreleased development build" in setup_row
+    assert "is the reason four sessions ran at once" in setup_row
+    limits = text.split("## Limits", 1)[1].split("## Data", 1)[0]
+    assert "12 sessions, 9 reported" in limits and "unreleased development build" in limits
+    assert "is the reason four sessions ran at once" in limits
+    assert "`round`" in text.split("## Data", 1)[1]
+
+
+def test_report_says_counts_are_per_session_and_lists_the_totals_fields():
+    report = _read(REPORT)
+    assert "Token, request and tool-call counts are published per session, not per step." in report
+    data_section = report.split("## Data", 1)[1]
+    for key in TOTALS_KEYS:
+        assert f"`{key}`" in data_section, key
+    step_table = data_section.split("Fields of each step:", 1)[1].split("Token, request and tool-call counts", 1)[0]
+    for key in TOTALS_KEYS - {"cost_usd_cli"}:
+        assert f"`{key}`" not in step_table, f"{key} is documented as a per-step field"
+    assert "in all 27 measured steps" not in report and "in all 9 sessions that count is at or below the output count" in report
 
 
 def test_public_json_carries_none_of_the_raw_record_keys():
@@ -158,7 +230,7 @@ def test_public_json_carries_none_of_the_raw_record_keys():
 
 
 def test_public_files_name_only_published_setups_and_no_private_paths():
-    texts = {path: _read(path) for path in (DATA, REPORT, CHART_SCRIPT, *SVGS)}
+    texts = {path: _read(path) for path in (DATA, REPORT, CHART_SCRIPT, *FIGURE_FILES)}
     email = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}")
     for path, text in texts.items():
         assert not re.search(r"\batual\b", text, re.IGNORECASE), path
@@ -181,18 +253,58 @@ def test_public_files_name_only_published_setups_and_no_private_paths():
 # (a) the numbers in the README and in the report
 # --------------------------------------------------------------------------
 
-@pytest.mark.parametrize("path", [README, REPORT], ids=["README", "report"])
-def test_tables_carry_the_medians_and_ranges_recomputed_from_the_json(path):
-    text = _read(path)
+def test_readme_table_puts_the_value_first_and_the_range_under_it():
+    text = _read(README)
+    totals = _session_totals(_data())
+    assert "The small line under each value is the lowest and the highest session." in text
+    for key in ("wall", "cost_cli", "requests", "tools", "output", "input", "cpu", "rss"):
+        best = _best_arm_with_a_clear_gap(totals, key)
+        for arm in ARM_IDS:
+            value, span = _readme_cell_parts(totals, arm, key)
+            bold = arm == best
+            shown = f"**{value}**" if bold else value
+            cell = f"{shown}<br><sub>{span}</sub>"
+            assert cell in text, f"README: {arm} {key}: {cell!r} not found"
+            if not bold:
+                assert f"**{value}**<br><sub>{span}</sub>" not in text, f"README: {arm} {key} must not be bold"
+    for arm in ARM_IDS:
+        delivered = sum(s["delivered"] for s in totals[arm])
+        total = sum(s["steps"] for s in totals[arm])
+        assert f"{delivered} of {total}" in text
+    assert "| Steps delivered | 9 of 9 | 9 of 9 | 9 of 9 |" in text
+    assert " to " not in " ".join(line for line in text.splitlines() if "<sub>" in line and line.startswith("|"))
+
+
+REPORT_ROWS = ("wall", "cost_cli", "cost_table", "output", "reasoning", "input", "cache_read",
+               "requests", "tools", "cpu", "rss")
+
+
+def test_report_tables_carry_the_medians_and_ranges_with_to():
+    text = _read(REPORT)
     totals = _session_totals(_data())
     for arm in ARM_IDS:
-        for key in ("wall", "cost_cli", "requests", "tools", "output", "input", "cpu", "rss"):
+        for key in REPORT_ROWS:
             cell = _cell(totals, arm, key)
-            assert cell in text, f"{path.name}: {arm} {key}: {cell!r} not found"
+            assert cell in text, f"report: {arm} {key}: {cell!r} not found"
         delivered = sum(s["delivered"] for s in totals[arm])
         total = sum(s["steps"] for s in totals[arm])
         assert f"{delivered} of {total}" in text
     assert "9 of 9" in text
+
+
+def test_report_applies_the_bold_rule_to_every_row_the_same_way():
+    """Bold marks the lowest median, only where its range does not overlap the other two."""
+    text = _read(REPORT)
+    totals = _session_totals(_data())
+    for key in REPORT_ROWS:
+        best = _best_arm_with_a_clear_gap(totals, key)
+        for arm in ARM_IDS:
+            cell = _cell(totals, arm, key)
+            if arm == best:
+                assert f"**{cell}**" in text, f"report: {key}: {arm} should be bold"
+            else:
+                assert f"**{cell}**" not in text, f"report: {key}: {arm} must not be bold"
+    assert "The same holds for reasoning tokens" not in text
 
 
 def test_report_also_carries_the_fixed_price_table_cost_and_the_per_step_table():
@@ -223,6 +335,20 @@ def test_readme_headline_and_reading_paragraph_match_the_data():
     req_none, req_new = (_spread(totals, arm, "requests")[0] for arm in (ARM_IDS[0], ARM_IDS[2]))
     out_none, out_new = (_spread(totals, arm, "output")[0] for arm in (ARM_IDS[0], ARM_IDS[2]))
     assert f"{req_new} requests instead of {req_none}" in text
+    assert "The ratios come from the unrounded medians." in text
+    assert "and the job passed the same outside checks" in text
+    assert "for the same delivered result" not in text
+    walls = {arm: [s["wall"] for s in totals[arm]] for arm in ARM_IDS}
+    costs = {arm: [s["cost_cli"] for s in totals[arm]] for arm in ARM_IDS}
+    fastest_none, slowest_new = min(walls[ARM_IDS[0]]), max(walls[ARM_IDS[2]])
+    cheapest_none, dearest_new = min(costs[ARM_IDS[0]]), max(costs[ARM_IDS[2]])
+    worst = (
+        f"Worst case: the fastest session without Simplicio ({_round(fastest_none, 0)} s) against the slowest session "
+        f"with Simplicio 3.15.0 ({_round(slowest_new, 0)} s) is still {_round(fastest_none / slowest_new, 1)} times faster, "
+        f"and the cheapest (${_round(cheapest_none, 4)}) against the dearest (${_round(dearest_new, 4)}) "
+        f"is {_round(cheapest_none / dearest_new, 1)} times cheaper."
+    )
+    assert worst in text
     assert f"{out_new:,} output tokens instead of {out_none:,}" in text
     sessions = len([s for s in _data()["sessions"] if s["arm"] == ARM_IDS[0]])
     assert f"median of {sessions} sessions" in text.lower()
@@ -269,6 +395,19 @@ def _chart_module():
     return module
 
 
+def _registry():
+    """(figure, theme, absolute path) for every file the chart script writes: its own registry is the one list."""
+    module = _chart_module()
+    return [
+        (figure, theme, ROOT / module.figure_path(figure, theme))
+        for figure in module.FIGURES
+        for theme in module.THEME_NAMES
+    ]
+
+
+FIGURE_FILES = [path for _, _, path in _registry()]
+
+
 def test_committed_svgs_are_what_the_chart_script_would_write():
     module = _chart_module()
     stale = module.check()
@@ -295,6 +434,372 @@ def test_chart_svgs_are_self_contained_and_accessible():
         for arm in ARM_IDS:
             wall = _round(_spread(totals, arm, "wall")[0], 0)
             assert f"{wall} s" in text, (path, arm)
+        # The annotations on the Simplicio 3.15.0 rows, against no Simplicio.
+        none, new = ARM_IDS[0], ARM_IDS[2]
+
+        def med(arm, key):
+            return _d(_spread(totals, arm, key)[0])
+
+        faster = f"{_round(med(none, 'wall') / med(new, 'wall'), 1)}\u00d7 faster"
+        less = f"{_round((1 - med(new, 'cost_cli') / med(none, 'cost_cli')) * 100, 0)}% less"
+        fewer = f"{_round((1 - med(new, 'output') / med(none, 'output')) * 100, 0)}% fewer"
+        for note in (faster, less, fewer):
+            assert f">{note}</tspan>" in text, (path.name, note)
+            assert note in text.split("<desc", 1)[1].split("</desc>", 1)[0], (path.name, note, "desc")
+
+
+# --------------------------------------------------------------------------
+# the figures: one registry, every file current, referenced and truthful
+# --------------------------------------------------------------------------
+
+PICTURE_RE = re.compile(
+    r'<picture>\s*<source media="\(prefers-color-scheme: dark\)" srcset="([^"]+)">\s*'
+    r'<img src="([^"]+)" width="840" alt="([^"]*)">\s*</picture>'
+)
+
+
+def _pictures(text: str) -> list[tuple[str, str, str]]:
+    return [(m.group(1), m.group(2), html.unescape(m.group(3))) for m in PICTURE_RE.finditer(text)]
+
+
+def _desc(path: Path) -> str:
+    match = re.search(r'<desc id="desc">(.*?)</desc>', _read(path), re.DOTALL)
+    assert match, f"{path.name}: no <desc>"
+    return html.unescape(match.group(1))
+
+
+def _arm_labels() -> dict[str, str]:
+    return {arm: info["label"] for arm, info in _data()["arms"].items()}
+
+
+def _step_median(arm: str, step: int) -> Decimal:
+    values = [_d(s["steps"][step - 1]["wall_s"]) for s in _data()["sessions"] if s["arm"] == arm]
+    return _median(values)
+
+
+def _session_pairs(totals: dict, arm: str) -> list[tuple[Decimal, Decimal]]:
+    return sorted((record["wall"], record["cost_cli"]) for record in totals[arm])
+
+
+def _expected_figure_numbers() -> dict[str, dict[str, list[str]]]:
+    """For every figure key: strings that must be in its <desc>, and strings that must be in the README alt text."""
+    totals = _session_totals(_data())
+    labels = _arm_labels()
+    none, prev, new = ARM_IDS
+
+    def med(arm, key):
+        return _d(_spread(totals, arm, key)[0])
+
+    out: dict[str, dict[str, list[str]]] = {}
+
+    # the headline chart
+    faster = f"{_round(med(none, 'wall') / med(new, 'wall'), 1)}× faster"
+    less = f"{_round((1 - med(new, 'cost_cli') / med(none, 'cost_cli')) * 100, 0)}% less"
+    fewer = f"{_round((1 - med(new, 'output') / med(none, 'output')) * 100, 0)}% fewer"
+    walls = [f"{_round(med(arm, 'wall'), 0)} s" for arm in ARM_IDS]
+    costs = [f"${_round(med(arm, 'cost_cli'), 4)}" for arm in ARM_IDS]
+    tokens = [f"{int(med(arm, 'output')):,}" for arm in ARM_IDS]
+    out["hero"] = {
+        "desc": [f"{labels[a]} {w}" for a, w in zip(ARM_IDS, walls)]
+        + [f"{labels[a]} {c}" for a, c in zip(ARM_IDS, costs)]
+        + [f"{labels[a]} {t}" for a, t in zip(ARM_IDS, tokens)]
+        + [faster, less, fewer],
+        "alt": [
+            f"{walls[0]} with no Simplicio, {walls[1]} with Simplicio 3.14.0 and {walls[2]} with Simplicio 3.15.0",
+            f"Cost: {costs[0]}, {costs[1]} and {costs[2]}",
+            f"Output tokens: {tokens[0]}, {tokens[1]} and {tokens[2]}",
+        ],
+    }
+
+    # every session
+    desc, alt = [], []
+    for arm in ARM_IDS:
+        pairs = _session_pairs(totals, arm)
+        assert len(pairs) == 3
+        desc += [f"{_round(w, 0)} s and ${_round(c, 4)}" for w, c in pairs]
+        lo_w, hi_w = pairs[0][0], pairs[-1][0]
+        costs_sorted = sorted(c for _, c in pairs)
+        alt.append(f"{_round(lo_w, 0)} to {_round(hi_w, 0)} s and ${_round(costs_sorted[0], 4)} to ${_round(costs_sorted[-1], 4)}")
+    out["sessions"] = {"desc": desc, "alt": alt}
+
+    # requests and tool calls
+    counts = {key: [int(med(arm, key)) for arm in ARM_IDS] for key in ("requests", "tools")}
+    out["work"] = {
+        "desc": [f"{labels[arm]} {counts[key][i]}" for key in counts for i, arm in enumerate(ARM_IDS)],
+        "alt": [
+            f"Model requests: {counts['requests'][0]} with no Simplicio, {counts['requests'][1]} with Simplicio 3.14.0 "
+            f"and {counts['requests'][2]} with Simplicio 3.15.0",
+            f"Tool calls: {counts['tools'][0]}, {counts['tools'][1]} and {counts['tools'][2]}",
+        ],
+    }
+
+    # time by step
+    steps = {step: [_round(_step_median(arm, step), 1) for arm in ARM_IDS] for step in (1, 2, 3)}
+    out["steps"] = {
+        "desc": [f"{labels[arm]} {steps[step][i]} s" for step in steps for i, arm in enumerate(ARM_IDS)],
+        "alt": [
+            f"Step 1, build: {steps[1][0]} s with no Simplicio, {steps[1][1]} s with Simplicio 3.14.0 "
+            f"and {steps[1][2]} s with Simplicio 3.15.0",
+            f"Step 2, change: {steps[2][0]} s, {steps[2][1]} s and {steps[2][2]} s",
+            f"Step 3, register: {steps[3][0]} s, {steps[3][1]} s and {steps[3][2]} s",
+        ],
+    }
+
+    # peak memory: the loss, in numbers
+    rss = [_round(med(arm, "rss"), 0) for arm in ARM_IDS]
+    more_prev = f"{_round((med(prev, 'rss') / med(none, 'rss') - 1) * 100, 0)}% more"
+    more_new = f"{_round((med(new, 'rss') / med(none, 'rss') - 1) * 100, 0)}% more"
+    out["memory"] = {
+        "desc": [f"{labels[arm]} {rss[i]} MB" for i, arm in enumerate(ARM_IDS)] + [more_prev, more_new],
+        "alt": [
+            f"{rss[0]} MB with no Simplicio, the lowest",
+            f"{rss[1]} MB with Simplicio 3.14.0, {more_prev}",
+            f"{rss[2]} MB with Simplicio 3.15.0, {more_new}",
+        ],
+    }
+    return out
+
+
+def test_registry_lists_every_figure_the_script_writes_and_every_file_is_current():
+    module = _chart_module()
+    keys = [figure.key for figure in module.FIGURES]
+    assert keys == ["hero", "sessions", "work", "steps", "memory"]
+    files = [path for _, _, path in _registry()]
+    assert len(files) == len(set(files)) == 2 * len(keys)
+    for path in files:
+        assert path.is_file(), f"{path.name} is missing"
+    assert module.check() == [], "stale or missing figure files: run python3 scripts/render_benchmark_chart.py"
+
+
+@pytest.mark.parametrize("path", FIGURE_FILES, ids=lambda p: p.name)
+def test_every_figure_is_self_contained_and_accessible(path):
+    text = _read(path)
+    assert text.startswith("<svg"), path.name
+    assert 'viewBox="0 0 840 ' in text and 'width="840"' in text, path.name
+    assert 'role="img"' in text and "<title" in text and "<desc" in text, path.name
+    for forbidden in ("@import", "url(http", "<image", "<script", "xlink:href", "href=", "<foreignObject"):
+        assert forbidden not in text, (path.name, forbidden)
+    sizes = [float(size) for size in re.findall(r"font-size:(\d+(?:\.\d+)?)px", text)]
+    assert sizes and min(sizes) >= 19, (path.name, sizes)
+
+
+def test_every_figure_desc_carries_the_numbers_recomputed_from_the_json():
+    expected = _expected_figure_numbers()
+    for figure, theme, path in _registry():
+        desc = _desc(path)
+        for needle in expected[figure.key]["desc"]:
+            assert needle in desc, f"{path.name}: {needle!r} not in <desc>"
+
+
+def test_readme_references_every_figure_through_a_picture_with_a_dark_source_and_a_light_default():
+    pictures = _pictures(_read(README))
+    by_light = {light: (dark, alt) for dark, light, alt in pictures}
+    assert len(by_light) == len(pictures), "a figure is placed twice"
+    for figure, _theme, _path in _registry():
+        light = f"assets/{figure.stem}-light.svg"
+        assert light in by_light, f"README does not show {light}"
+        assert by_light[light][0] == f"assets/{figure.stem}-dark.svg", figure.key
+
+
+def test_readme_alt_texts_state_the_numbers_of_their_figures():
+    expected = _expected_figure_numbers()
+    by_light = {light: alt for _dark, light, alt in _pictures(_read(README))}
+    for figure, _theme, _path in _registry():
+        alt = by_light[f"assets/{figure.stem}-light.svg"]
+        for needle in expected[figure.key]["alt"]:
+            assert needle in alt, f"README alt of {figure.key}: {needle!r} not found in {alt!r}"
+
+
+def test_every_image_the_readme_and_the_report_show_exists_in_the_repository():
+    for path in (README, REPORT):
+        text = _read(path)
+        targets = re.findall(r'(?:src|srcset)="([^"]+)"', text) + re.findall(r"!\[[^\]]*\]\(([^)\s]+)\)", text)
+        assert targets, path.name
+        for target in targets:
+            if target.startswith(("http://", "https://", "data:")):
+                continue
+            assert (path.parent / target).resolve().is_file(), f"{path.name} shows {target}, which does not exist"
+
+
+def test_report_shows_the_sessions_steps_and_memory_figures_next_to_their_tables():
+    text = _read(REPORT)
+    by_light = {light: (dark, alt) for dark, light, alt in _pictures(text)}
+    expected = _expected_figure_numbers()
+    module = _chart_module()
+    for figure in module.FIGURES:
+        light = f"../assets/{figure.stem}-light.svg"
+        if figure.key in ("sessions", "steps", "memory"):
+            assert light in by_light, f"report does not show {light}"
+            assert by_light[light][0] == f"../assets/{figure.stem}-dark.svg"
+            for needle in expected[figure.key]["alt"]:
+                assert needle in by_light[light][1], (figure.key, needle)
+        else:
+            assert light not in by_light, figure.key
+    # next to the tables they picture
+    assert text.index("sessions-light.svg") < text.index("### By step")
+    assert text.index("### By step") < text.index("steps-light.svg") < text.index("Median time of each step")
+    assert text.index("## Where Simplicio did not win") < text.index("memory-light.svg") < text.index("- **Memory.**")
+
+
+def test_readme_puts_each_figure_where_the_page_needs_it_and_keeps_the_exact_numbers_visible():
+    text = _read(README)
+    at = lambda needle: text.index(needle)
+    assert at("Every session is on this chart, not only the medians.") < at("sessions-light.svg") < at("| Measure | No Simplicio")
+    assert at("| Steps delivered | 9 of 9 |") < at("What changed in the session, in counts") < at("work-light.svg")
+    assert at("work-light.svg") < at("Time by step, on one shared scale.") < at("steps-light.svg")
+    details = "<details>\n<summary>Exact numbers by step</summary>"
+    assert at("steps-light.svg") < at(details) < at("| 1. Build | 57.3 s")
+    # the by-step table is inside the details block, not visible on its own
+    before = text[: at(details)]
+    assert "| 1. Build |" not in before
+    assert at("| 3. Register |") < at("</details>", ) < at("**How to read it.**")
+    assert at("### Where Simplicio does not win") < at("memory-light.svg") < at("- **Memory.**")
+    assert "| Measure | No Simplicio | Simplicio 3.14.0 | Simplicio 3.15.0 |" in text
+
+
+def test_privacy_section_lists_the_destinations_and_does_not_claim_only_what_you_configure():
+    text = _read(README)
+    section = text.split("## Safety and privacy", 1)[1].split("## Also in this repository", 1)[0]
+    assert "This section describes version 3.15.0." in section
+    for needle in ("**Stays on your machine.**", "**To SimpleTI (simpleti.com.br).**", "**To GitHub.**",
+                   "**No analytics.**", "**To services you configure.**",
+                   "**Two features reach a public service without any configuration.**", "**Downloads.**",
+                   "DuckDuckGo", "osv.dev", "SIMPLICIO_DISABLE_AUTO_UPDATE=1"):
+        assert needle in section, needle
+    assert "only when you point Simplicio at one yourself" not in text
+    assert "**Signed releases.**" in section and "**What the installer changes in your agent.**" in section
+
+
+# --------------------------------------------------------------------------
+# what the page says about agents, checks, links, install and wording
+# --------------------------------------------------------------------------
+
+HOSTS_MATRIX = ROOT / "docs" / "hosts" / "compatibility-matrix.md"
+HOST_REGISTRY = ROOT / "plugins" / "simplicio" / "host-surfaces.json"
+
+
+def _matrix_rows() -> dict[str, str]:
+    """Agent name to its capability, read from the compatibility matrix."""
+    rows = {}
+    for line in _read(HOSTS_MATRIX).splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) == 4 and cells[0] != "Host" and not set(cells[0]) <= {"-", " "}:
+            rows[cells[0]] = cells[1]
+    return rows
+
+
+def _section(text: str, start: str, end: str) -> str:
+    return text.split(start, 1)[1].split(end, 1)[0]
+
+
+def test_agents_section_follows_the_compatibility_matrix_and_the_registry():
+    text = _read(README)
+    section = _section(text, "## Works with the agent you already use", "<summary>Manual configuration</summary>")
+    matrix = _matrix_rows()
+    registry = [host["name"] for host in json.loads(_read(HOST_REGISTRY))["hosts"]]
+    acted_on = [name for name, capability in matrix.items() if capability != "unsupported"]
+    assert acted_on, "the matrix has no agent with a capability"
+    assert f"gives {len(acted_on)} agents a capability other than `unsupported`" in section
+    for name in acted_on:
+        assert name in section.split("The registry in")[0], f"{name} is not named as detected"
+    assert f"names {len(registry)} agent ids in all" in section
+    rest = [name for name in registry if name not in acted_on]
+    details = section.split("<details>", 1)[1].split("</details>", 1)[0]
+    assert f"<summary>The other {len(rest)} agents in the registry</summary>" in details
+    for name in rest:
+        assert name in details, f"{name} is missing from the list of the others"
+    lower = [row.lower() for row in matrix]
+    no_row = [name for name in rest if not any(name.lower() in row for row in lower)]
+    marked = [name for name in rest if name not in no_row]
+    assert f"Marked `unsupported` and `unverified` in the matrix ({len(marked)}):" in details
+    assert f"Not in the matrix ({len(no_row)}):" in details
+    assert f"marks {len(marked)} of the other {len(rest)} `unsupported`" in section
+    assert f"no row for the remaining {len(no_row)}" in section
+    # Statements that are true of every row and every guide, and nothing about verification of every guide.
+    assert "| How Simplicio reaches it |" not in text
+    assert "Each host guide states" not in text and "shows what the installer does for each host" not in text
+    assert "the plugin is applied in a separate step that asks for your consent" in section
+    assert "[INSTALL.md](INSTALL.md) describes it" in section
+
+
+def test_readme_says_what_the_checks_do_not_test_and_what_is_published():
+    text = _read(README)
+    assert ("The checks do not test the search box, sorting, the redirect after saving, "
+            "the look of the page or the quality of the code.") in text
+    assert text.count("The checks do not test") == 1
+    assert ("[The report](benchmarks/2026-11-22-standard-benchmark.md) publishes the three prompts "
+            "(in Portuguese, with a translation), a description of every outside check and the per-session numbers") in text
+    assert "The test harness is not published." in text
+    assert "Each median is taken separately, so the steps do not add up to the whole-job median." in text
+    for needle in ("**The previous release showed no gain on this job.**",
+                   "**What you install is not exactly what was measured.**",
+                   "No session of these three setups was dropped or re-run.",
+                   "We have not measured how much of your work looks like this job.",
+                   "Read with it: one small job, three sessions per setup, one model."):
+        assert needle in text, needle
+    assert "pay for itself" not in text
+
+
+def test_readme_links_no_benchmarks_folder_and_the_report_names_the_old_round_in_code_font():
+    readme, report = _read(README), _read(REPORT)
+    assert not re.search(r'\]\(benchmarks/?\)|href="benchmarks/?"', readme)
+    assert "[`benchmarks/`]" not in readme and "[benchmarks/]" not in readme
+    assert "(benchmarks/2026-11-22-standard-benchmark.md)" in readme
+    assert "(benchmarks/2026-11-22-standard-benchmark.json)" in readme
+    assert "](2026-11-01-multi-model.md)" not in report
+    assert "`2026-11-01-multi-model.md`" in report
+
+
+def test_install_and_safety_statements_match_what_the_scripts_do():
+    text = _read(README)
+    for needle in ("- `--doctor` checks the installation.",
+                   "A purge needs `SIMPLICIO_CONFIRM_PURGE=1`.",
+                   "You can run either installer again at any time",
+                   "Uninstall does not edit your agents' configuration. The Simplicio entries stay in each agent until you remove them in that agent's own settings.",
+                   "It does not edit your agents' configuration, so remove the Simplicio entries in each agent's own settings.",
+                   "For stable releases the contract makes a missing or invalid signature and a checksum mismatch hard failures.",
+                   "The DMG has no signature file and bundles the Simplicio 3.8.47 binary.",
+                   "and Gatekeeper acceptance is not claimed, so macOS may warn you when you open it.",
+                   "[MCP-CONNECT.md](MCP-CONNECT.md) describes the core tools.",
+                   "The commands and tools documented in README.md and MCP-CONNECT.md are drawn as one flow,"):
+        assert needle in text, needle
+    for gone in ("read-only", "idempotent", "type `PURGE`", "Uninstall removes only the entries", "the full catalogue",
+                 "every public command"):
+        assert gone not in text, gone
+    assert "Windows Desktop is not published." in text and "Apple Developer ID signing" in text
+
+
+def test_first_screen_questions_and_wording_follow_the_review():
+    text = _read(README)
+    top = text.split("</div>", 1)[0]
+    assert "<b>Same agent, same model, same job: 121&nbsp;s&nbsp;→&nbsp;25&nbsp;s, and $0.0226&nbsp;→&nbsp;$0.0076.</b>" in top
+    assert "<p>Without Simplicio → with Simplicio 3.15.0. Median of 3 runs of one small coding job in Claude Code with Claude Haiku 5.5.</p>" in top
+    assert "<p>Simplicio runs on your machine and adds tools to the coding agent you already use.</p>" in top
+    assert '<p align="center">How Simplicio gets this result is not published. The measurements are, including the ones where it loses.</p>' in text
+    assert "\n> " not in text
+    assert ("Read with it: one small job, three sessions per setup, one model. The outside checks are narrower than the prompts. "
+            "Peak memory was higher: 375 MB against 270 MB. The Simplicio builds were compiled from the release commits, "
+            "with sign-in off.") in text
+    # "setup" is defined where it is first used
+    first_use = re.search(r"\bsetups?\b", text).start()
+    assert first_use == text.index("Median of 3 sessions for each setup (no Simplicio, Simplicio 3.14.0 and Simplicio 3.15.0)") + len("Median of 3 sessions for each ")
+    assert text.index("## Questions people ask") < text.index("**Is the comparison fair?**") < text.index("**Do I have to change my agent or my model?**")
+    for needle in ("It gives your agent tools.", "so an agent that can start a local MCP server can be pointed at it",
+                   "These are the core tools your agent gets:", "Structured file edits from a prepared plan",
+                   "the tokens used times the model's published price", "It counts model tokens only.",
+                   "In Claude Code, `/mcp` lists the connected servers.",
+                   "Prefer to read the installer first? It is [install.sh](install.sh).",
+                   "The names you will see in Simplicio's messages: Mapper observes,"):
+        assert needle in text, needle
+    for gone in ("did not pay for itself", "tokens served times", "applied as described", "the tools your agent sees most",
+                 "a competent, widely used agent", "It is not handicapped"):
+        assert gone not in text, gone
+    # "Runtime" is only in the pinned vocabulary sentence; agents, not hosts.
+    for line in text.splitlines():
+        if "Runtime" in line:
+            assert line.startswith("The names you will see in Simplicio's messages:"), line[:100]
+    assert " host ids" not in text and "host guide" not in text.lower()
+    assert "© 2026 SimpleTI. Simplicio is a registered proprietary software. All rights reserved." in text
 
 
 # --------------------------------------------------------------------------
@@ -307,7 +812,13 @@ FORBIDDEN_PHRASES = (
     # the explanation of the gain
     r"generators?\b", r"code[- ]generation", r"codegen", r"writes? the file", r"\b0 llm tokens\b",
     r"zero llm tokens", r"zero[- ]token", r"\b0 tokens\b",
-    r"\bhooks?\b", r"pre-?fill", r"prompt[- ]?exec", r"session-start", r"appends? the map",
+    r"pre-?fill", r"prompt[- ]?exec", r"session-start", r"appends? the map",
+    # A hook may be named. What a hook does, and its events, are not said in public.
+    r"prompt[- ]hooks?", r"session[- ]?start[- ]hooks?", r"pre-?tool[- ]?(?:use)?[- ]hooks?",
+    r"hooks?\s+(?:that|which)\s+(?:write|writes|wrote|pre-?fill\w*|run|runs|ran|execute\w*|append\w*|inject\w*|fill\w*|edit\w*)",
+    r"hooks?\s+(?:write|writes|wrote|pre-?fills?|run|runs|ran|execute|executes|append|appends|inject|injects|fill|fills)\b",
+    r"hooks?\b[^.\n]{0,80}\bbefore the model", r"\bbefore the model'?s? (?:first )?(?:turn|request)",
+    r"userpromptsubmit", r"sessionstart", r"pretooluse", r"subagentstart", r"hooks? pre-tool",
     r"contract fill", r"\bfill route\b",
     r"\brout(?:e|es|ed|ing)\b",
     r"order gate", r"write order", r"orientation gate", r"orientation_required", r"context_required",
@@ -323,7 +834,8 @@ FORBIDDEN_PHRASES = (
     r"never leaves your machine", r"zero (?:silent )?telemetry", r"works offline", r"offline-first",
     r"100% rust", r"~?46\s?mb\b", r"cold start", r"http/oauth",
     # placeholders that must not reach a public page
-    r"unverified", r"\btodo\b", r"\btbd\b",
+    # Only the upper-case marker: the compatibility matrix itself uses the lower-case word as a status.
+    r"(?-i:\bUNVERIFIED\b)", r"\btodo\b", r"\btbd\b",
 )
 
 # Public names and commands that the forbidden list must never catch.
@@ -335,6 +847,10 @@ ALLOWED_PUBLIC_STRINGS = (
     "simplicio mcp register", "simplicio serve --mcp --stdio", "simplicio auth login",
     "Mapper observes, Fast projects or retrieves, Dev CLI edits, Runtime governs, and Loop converges.",
     "local STDIO MCP", "SIMPLICIO_CONFIRM_PURGE=1", "--uninstall --keep-data", "--uninstall --purge",
+    # The plain statements about hooks: which programs they run, not what they do.
+    "In agents whose hook interface the installer has verified, it also installs Simplicio's hooks there.",
+    "The hooks it installs run local programs only (the Simplicio binary and, for optional plugins, local scripts); "
+    "none of them contacts the network.",
 )
 
 
@@ -344,11 +860,70 @@ def test_forbidden_list_does_not_catch_the_public_interface():
             assert not re.search(pattern, phrase, re.IGNORECASE), (pattern, phrase)
 
 
-@pytest.mark.parametrize("path", [README, REPORT, DATA, *SVGS, CHART_SCRIPT], ids=lambda p: p.name)
+@pytest.mark.parametrize("path", [README, REPORT, DATA, *FIGURE_FILES, CHART_SCRIPT], ids=lambda p: p.name)
 def test_public_benchmark_texts_do_not_explain_the_mechanism(path):
     text = _read(path)
     hits = [pattern for pattern in FORBIDDEN_PHRASES if re.search(pattern, text, re.IGNORECASE)]
     assert not hits, f"{path.name} matches forbidden patterns: {hits}"
+
+
+def test_hooks_are_named_plainly_in_two_places_only_and_never_described():
+    readme, report = _read(README), _read(REPORT)
+    plain = "In agents whose hook interface the installer has verified, it also installs Simplicio's hooks there."
+    assert plain in readme
+    assert "[INSTALL.md](INSTALL.md) says what the installer writes" in readme
+    # The word appears in the README only in the installer paragraph and in the privacy item.
+    for line in readme.splitlines():
+        if "hook" in line.lower():
+            assert line.startswith("**What the installer changes in your agent.**") or line.startswith("- **No analytics.**"), line[:80]
+    assert "hook" not in report.lower()
+    # The setups are not enumerated in the measurement paragraph or in the report.
+    assert "The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration." in readme
+    assert "No MCP server and no Simplicio configuration of any kind." in report
+    assert "set up the way the installer sets it up for Claude Code (`INSTALL.md` lists what the installer writes)" in report
+    assert "without its optional resident background process and with sign-in turned off" in report
+
+
+@pytest.mark.parametrize("sentence", [
+    "The prompt hook writes the files.",
+    "A hook that writes the first files runs before the model.",
+    "Hooks which pre-fill the project are installed.",
+    "The session-start hook adds the map.",
+    "The PreToolUse and UserPromptSubmit events are used.",
+])
+def test_a_description_of_what_a_hook_does_is_still_caught(sentence):
+    hits = [pattern for pattern in FORBIDDEN_PHRASES if re.search(pattern, sentence, re.IGNORECASE)]
+    assert hits, sentence
+
+
+def test_readme_says_beta_the_way_install_md_does():
+    text = _read(README)
+    assert text.count("including during the beta") == 2
+    assert "public beta" not in text.lower()
+
+
+def test_flow_block_is_a_plain_link_for_maintainers_without_the_counts():
+    text = _read(README)
+    assert "<summary>For maintainers: the generated flow diagram</summary>" in text
+    assert "[docs/flow/simplicio.svg](docs/flow/simplicio.svg)" in text
+    assert not re.search(r"!\[[^\]]*\]\([^)]*simplicio\.svg\)", text)
+    assert not re.search(r"<img[^>]*simplicio\.svg", text)
+    for needle in ("scripts/generate_flow.py", "scripts/verify_flow_langflow.py", "docs/flow/README.md"):
+        assert needle in text, needle
+    assert not re.search(r"\b42 nodes\b|\b63 edges\b|\b27 steps\b", text)
+
+
+def test_readme_icon_is_the_small_copy_of_the_same_artwork():
+    text = _read(README)
+    icon = ROOT / "assets" / "simplicio-icon-192.png"
+    assert 'src="assets/simplicio-icon-192.png"' in text
+    assert 'width="96" height="96"' in text
+    assert "apps/desktop/public/icon.png" not in text
+    data = icon.read_bytes()
+    assert data[:8] == b"\x89PNG\r\n\x1a\n"
+    width, height = struct.unpack(">II", data[16:24])
+    assert (width, height) == (192, 192)
+    assert len(data) < 40_000, len(data)
 
 
 def test_readme_does_not_use_the_retired_hero_images():

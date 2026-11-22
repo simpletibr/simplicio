@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="424" viewBox="0 0 840 424" role="img" aria-labelledby="title desc">
+<title id="title">Every session, not only the median: time against cost</title>
+<desc id="desc">Scatter plot with one mark per session, nine in all. Across is the time for the whole job in seconds, up is the cost reported by the agent in dollars. Both scales start at zero. No Simplicio is hollow circles, Simplicio 3.14.0 is grey squares and Simplicio 3.15.0 is green diamonds. No Simplicio: 97 s and $0.0226, 121 s and $0.0280, 172 s and $0.0186. Simplicio 3.14.0: 90 s and $0.0214, 104 s and $0.0220, 106 s and $0.0249. Simplicio 3.15.0: 23 s and $0.0071, 25 s and $0.0098, 27 s and $0.0076.</desc>
+<style>
+text{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;fill:#f0f6fc}
+.t{font-size:22px;font-weight:600;fill:#9198a1}
+.n{font-size:22px}
+.nb{font-size:22px;font-weight:700}
+.v{font-size:22px;font-weight:600}
+.vb{font-size:22px;font-weight:700}
+.k{font-size:19px;fill:#9198a1}
+.m{font-size:19px;font-weight:400;fill:#9198a1}
+.mb{font-size:19px;font-weight:700}
+.g{fill:#6e7681}
+.a{fill:#0ca30c}
+.w{stroke:#f0f6fc;stroke-width:2;fill:none}
+.z{stroke:#30363d;stroke-width:1}
+.ho{fill:#0d1117;stroke:#6e7681;stroke-width:3}
+.gs{fill:#6e7681;stroke:#0d1117;stroke-width:2}
+.as{fill:#0ca30c;stroke:#0d1117;stroke-width:2}
+</style>
+<rect x="0.5" y="0.5" width="839" height="423" rx="10" fill="#0d1117" stroke="#30363d"/>
+<text class="t" x="22" y="30">Every session, not only the median</text>
+<text class="k" x="22" y="58">Cost reported by the agent, in dollars</text>
+<line class="z" x1="96" y1="352" x2="812" y2="352"/>
+<text class="k" x="86" y="359" text-anchor="end">$0</text>
+<line class="z" x1="96" y1="262" x2="812" y2="262"/>
+<text class="k" x="86" y="269" text-anchor="end">$0.01</text>
+<line class="z" x1="96" y1="172" x2="812" y2="172"/>
+<text class="k" x="86" y="179" text-anchor="end">$0.02</text>
+<line class="z" x1="96" y1="82" x2="812" y2="82"/>
+<text class="k" x="86" y="89" text-anchor="end">$0.03</text>
+<line class="z" x1="96" y1="82" x2="96" y2="352"/>
+<text class="k" x="96" y="378" text-anchor="middle">0</text>
+<line class="z" x1="294.89" y1="82" x2="294.89" y2="352"/>
+<text class="k" x="294.89" y="378" text-anchor="middle">50</text>
+<line class="z" x1="493.78" y1="82" x2="493.78" y2="352"/>
+<text class="k" x="493.78" y="378" text-anchor="middle">100</text>
+<line class="z" x1="692.67" y1="82" x2="692.67" y2="352"/>
+<text class="k" x="692.67" y="378" text-anchor="middle">150</text>
+<text class="k" x="454" y="406" text-anchor="middle">Time for the whole job, in seconds</text>
+<circle class="ho" cx="482.24" cy="148.84" r="8"/>
+<circle class="ho" cx="578.5" cy="99.61" r="8"/>
+<circle class="ho" cx="780.97" cy="184.39" r="8"/>
+<rect class="gs" x="446.8" y="150.98" width="16" height="16"/>
+<rect class="gs" x="500.1" y="145.56" width="16" height="16"/>
+<rect class="gs" x="511.24" y="119.55" width="16" height="16"/>
+<path class="as" d="M187.09 277.33L198.09 288.33L187.09 299.33L176.09 288.33z"/>
+<path class="as" d="M194.65 252.75L205.65 263.75L194.65 274.75L183.65 263.75z"/>
+<path class="as" d="M201.81 272.59L212.81 283.59L201.81 294.59L190.81 283.59z"/>
+<text class="n" x="760.97" y="192.39" text-anchor="end">No Simplicio</text>
+<text class="n" x="487.02" y="200.98" text-anchor="middle">Simplicio 3.14.0</text>
+<text class="nb" x="225.81" y="284.04">Simplicio 3.15.0</text>
+</svg>

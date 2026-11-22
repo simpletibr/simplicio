@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="150" viewBox="0 0 840 150" role="img" aria-labelledby="title desc">
+<title id="title">Peak memory: Simplicio uses more than the plain agent</title>
+<desc id="desc">Peak memory, median of 3 sessions, with the lowest and highest session as a thin line. No Simplicio 270 MB, lowest to highest session 248 to 274 MB, the lowest of the three. Simplicio 3.14.0 436 MB, lowest to highest session 432 to 439 MB, 61% more than No Simplicio. Simplicio 3.15.0 375 MB, lowest to highest session 365 to 379 MB, 39% more than No Simplicio.</desc>
+<style>
+text{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;fill:#f0f6fc}
+.t{font-size:22px;font-weight:600;fill:#9198a1}
+.n{font-size:22px}
+.nb{font-size:22px;font-weight:700}
+.v{font-size:22px;font-weight:600}
+.vb{font-size:22px;font-weight:700}
+.k{font-size:19px;fill:#9198a1}
+.m{font-size:19px;font-weight:400;fill:#9198a1}
+.mb{font-size:19px;font-weight:700}
+.g{fill:#6e7681}
+.a{fill:#0ca30c}
+.w{stroke:#f0f6fc;stroke-width:2;fill:none}
+.z{stroke:#30363d;stroke-width:1}
+.ho{fill:#0d1117;stroke:#6e7681;stroke-width:3}
+.gs{fill:#6e7681;stroke:#0d1117;stroke-width:2}
+.as{fill:#0ca30c;stroke:#0d1117;stroke-width:2}
+</style>
+<rect x="0.5" y="0.5" width="839" height="149" rx="10" fill="#0d1117" stroke="#30363d"/>
+<text class="t" x="22" y="38">Peak memory</text>
+<text class="k" x="818" y="37" text-anchor="end">line: lowest to highest of 3 sessions</text>
+<line class="z" x1="234" y1="51" x2="234" y2="133"/>
+<text class="n" x="22" y="72">No Simplicio</text>
+<path class="g" d="M234 54H463.63A4 4 0 0 1 467.63 58V70A4 4 0 0 1 463.63 74H234z"/>
+<path class="w" d="M448.62 64H471.4M448.62 59V69M471.4 59V69"/>
+<text class="v" x="481.4" y="72">270 MB<tspan class="mb" dx="12">lowest</tspan></text>
+<text class="n" x="22" y="100">Simplicio 3.14.0</text>
+<path class="g" d="M234 82H607.3A4 4 0 0 1 611.3 86V98A4 4 0 0 1 607.3 102H234z"/>
+<path class="w" d="M608.06 92H614M608.06 87V97M614 87V97"/>
+<text class="v" x="624" y="100">436 MB<tspan class="mb" dx="12">61% more</tspan></text>
+<text class="nb" x="22" y="128">Simplicio 3.15.0</text>
+<path class="a" d="M234 110H553.98A4 4 0 0 1 557.98 114V126A4 4 0 0 1 553.98 130H234z"/>
+<path class="w" d="M549.93 120H561.93M549.93 115V125M561.93 115V125"/>
+<text class="vb" x="571.93" y="128">375 MB<tspan class="mb" dx="12">39% more</tspan></text>
+</svg>

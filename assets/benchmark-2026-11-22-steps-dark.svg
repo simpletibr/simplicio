@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="262" viewBox="0 0 840 262" role="img" aria-labelledby="title desc">
+<title id="title">Time by step, median of 3 sessions, one scale for all three steps</title>
+<desc id="desc">Three small panels side by side, one for each step of the job, on one shared scale from 0 to 60 seconds. Each bar is the median time of 3 sessions. Step 1. Build: No Simplicio 57.3 s, Simplicio 3.14.0 53.7 s, Simplicio 3.15.0 5.8 s. Step 2. Change: No Simplicio 17.3 s, Simplicio 3.14.0 15.2 s, Simplicio 3.15.0 8.9 s. Step 3. Register: No Simplicio 31.4 s, Simplicio 3.14.0 27.5 s, Simplicio 3.15.0 10.3 s.</desc>
+<style>
+text{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;fill:#f0f6fc}
+.t{font-size:22px;font-weight:600;fill:#9198a1}
+.n{font-size:22px}
+.nb{font-size:22px;font-weight:700}
+.v{font-size:22px;font-weight:600}
+.vb{font-size:22px;font-weight:700}
+.k{font-size:19px;fill:#9198a1}
+.m{font-size:19px;font-weight:400;fill:#9198a1}
+.mb{font-size:19px;font-weight:700}
+.g{fill:#6e7681}
+.a{fill:#0ca30c}
+.w{stroke:#f0f6fc;stroke-width:2;fill:none}
+.z{stroke:#30363d;stroke-width:1}
+.ho{fill:#0d1117;stroke:#6e7681;stroke-width:3}
+.gs{fill:#6e7681;stroke:#0d1117;stroke-width:2}
+.as{fill:#0ca30c;stroke:#0d1117;stroke-width:2}
+</style>
+<rect x="0.5" y="0.5" width="839" height="261" rx="10" fill="#0d1117" stroke="#30363d"/>
+<text class="n" x="22" y="76">No Simplicio</text>
+<text class="n" x="22" y="112">Simplicio 3.14.0</text>
+<text class="nb" x="22" y="148">Simplicio 3.15.0</text>
+<text class="t" x="214" y="38">1. Build</text>
+<line class="z" x1="214" y1="50" x2="214" y2="158"/>
+<path class="z" d="M214 166V160H332V166" fill="none"/>
+<text class="k" x="214" y="184" text-anchor="middle">0</text>
+<text class="k" x="332" y="184" text-anchor="middle">60 s</text>
+<path class="g" d="M214 58H322.69A4 4 0 0 1 326.69 62V74A4 4 0 0 1 322.69 78H214z"/>
+<text class="v" x="334.69" y="76">57.3 s</text>
+<path class="g" d="M214 94H315.61A4 4 0 0 1 319.61 98V110A4 4 0 0 1 315.61 114H214z"/>
+<text class="v" x="327.61" y="112">53.7 s</text>
+<path class="a" d="M214 130H221.41A4 4 0 0 1 225.41 134V146A4 4 0 0 1 221.41 150H214z"/>
+<text class="vb" x="233.41" y="148">5.8 s</text>
+<text class="t" x="416" y="38">2. Change</text>
+<line class="z" x1="416" y1="50" x2="416" y2="158"/>
+<path class="z" d="M416 166V160H534V166" fill="none"/>
+<text class="k" x="416" y="184" text-anchor="middle">0</text>
+<text class="k" x="534" y="184" text-anchor="middle">60 s</text>
+<path class="g" d="M416 58H446.02A4 4 0 0 1 450.02 62V74A4 4 0 0 1 446.02 78H416z"/>
+<text class="v" x="458.02" y="76">17.3 s</text>
+<path class="g" d="M416 94H441.89A4 4 0 0 1 445.89 98V110A4 4 0 0 1 441.89 114H416z"/>
+<text class="v" x="453.89" y="112">15.2 s</text>
+<path class="a" d="M416 130H429.5A4 4 0 0 1 433.5 134V146A4 4 0 0 1 429.5 150H416z"/>
+<text class="vb" x="441.5" y="148">8.9 s</text>
+<text class="t" x="618" y="38">3. Register</text>
+<line class="z" x1="618" y1="50" x2="618" y2="158"/>
+<path class="z" d="M618 166V160H736V166" fill="none"/>
+<text class="k" x="618" y="184" text-anchor="middle">0</text>
+<text class="k" x="736" y="184" text-anchor="middle">60 s</text>
+<path class="g" d="M618 58H675.75A4 4 0 0 1 679.75 62V74A4 4 0 0 1 675.75 78H618z"/>
+<text class="v" x="687.75" y="76">31.4 s</text>
+<path class="g" d="M618 94H668.08A4 4 0 0 1 672.08 98V110A4 4 0 0 1 668.08 114H618z"/>
+<text class="v" x="680.08" y="112">27.5 s</text>
+<path class="a" d="M618 130H634.26A4 4 0 0 1 638.26 134V146A4 4 0 0 1 634.26 150H618z"/>
+<text class="vb" x="646.26" y="148">10.3 s</text>
+<text class="k" x="22" y="220">All three panels use the same scale, 0 to 60 s. Bars are the median of 3 sessions.</text>
+</svg>

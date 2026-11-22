@@ -10,6 +10,11 @@
     "swap": "none",
     "sessions_at_the_same_time": 4
   },
+  "round": {
+    "sessions_run": 12,
+    "sessions_published": 9,
+    "note": "The round had 12 sessions. 9 are published here. The other 3 belonged to a fourth setup, an unreleased development build that is not a published version and is not reported."
+  },
   "arms": {
     "no-simplicio": {
       "label": "No Simplicio",
@@ -40,15 +45,7 @@
           "wall_s": 57.3,
           "cpu_s": 3.29,
           "peak_rss_mb": 274.418,
-          "input_tokens": 21975,
-          "output_tokens": 11534,
-          "reasoning_tokens": 5156,
-          "cache_read_tokens": 266056,
-          "cache_write_tokens": 21955,
-          "cost_usd_cli": 0.012821,
-          "cost_usd_table": 0.011015,
-          "model_requests": 13,
-          "tool_calls": 12
+          "cost_usd_cli": 0.012821
         },
         {
           "step": 2,
@@ -64,15 +61,7 @@
           "wall_s": 20.8,
           "cpu_s": 2.31,
           "peak_rss_mb": 234.98,
-          "input_tokens": 7072,
-          "output_tokens": 3754,
-          "reasoning_tokens": 789,
-          "cache_read_tokens": 144565,
-          "cache_write_tokens": 7064,
-          "cost_usd_cli": 0.004736,
-          "cost_usd_table": 0.003747,
-          "model_requests": 10,
-          "tool_calls": 9
+          "cost_usd_cli": 0.004736
         },
         {
           "step": 3,
@@ -92,17 +81,19 @@
           "wall_s": 43.2,
           "cpu_s": 3.56,
           "peak_rss_mb": 259.75,
-          "input_tokens": 13496,
-          "output_tokens": 8040,
-          "reasoning_tokens": 3276,
-          "cache_read_tokens": 376863,
-          "cache_write_tokens": 13480,
-          "cost_usd_cli": 0.010486,
-          "cost_usd_table": 0.007979,
-          "model_requests": 10,
-          "tool_calls": 9
+          "cost_usd_cli": 0.010486
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 42543,
+        "output_tokens": 23328,
+        "reasoning_tokens": 9221,
+        "cache_read_tokens": 787484,
+        "cache_write_tokens": 42499,
+        "model_requests": 33,
+        "tool_calls": 30,
+        "cost_usd_table": 0.022741
+      }
     },
     {
       "arm": "no-simplicio",
@@ -119,15 +110,7 @@
           "wall_s": 129.4,
           "cpu_s": 4.43,
           "peak_rss_mb": 270.062,
-          "input_tokens": 17676,
-          "output_tokens": 7668,
-          "reasoning_tokens": 2382,
-          "cache_read_tokens": 157152,
-          "cache_write_tokens": 17662,
-          "cost_usd_cli": 0.008939,
-          "cost_usd_table": 0.007724,
-          "model_requests": 9,
-          "tool_calls": 8
+          "cost_usd_cli": 0.008939
         },
         {
           "step": 2,
@@ -143,15 +126,7 @@
           "wall_s": 14.5,
           "cpu_s": 1.53,
           "peak_rss_mb": 234.551,
-          "input_tokens": 4757,
-          "output_tokens": 2643,
-          "reasoning_tokens": 319,
-          "cache_read_tokens": 90989,
-          "cache_write_tokens": 4751,
-          "cost_usd_cli": 0.003182,
-          "cost_usd_table": 0.002572,
-          "model_requests": 3,
-          "tool_calls": 2
+          "cost_usd_cli": 0.003182
         },
         {
           "step": 3,
@@ -171,17 +146,19 @@
           "wall_s": 28.3,
           "cpu_s": 2.52,
           "peak_rss_mb": 243.629,
-          "input_tokens": 8014,
-          "output_tokens": 5288,
-          "reasoning_tokens": 1756,
-          "cache_read_tokens": 225680,
-          "cache_write_tokens": 8002,
-          "cost_usd_cli": 0.006502,
-          "cost_usd_table": 0.005052,
-          "model_requests": 7,
-          "tool_calls": 6
+          "cost_usd_cli": 0.006502
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 30447,
+        "output_tokens": 15599,
+        "reasoning_tokens": 4457,
+        "cache_read_tokens": 473821,
+        "cache_write_tokens": 30415,
+        "model_requests": 19,
+        "tool_calls": 16,
+        "cost_usd_table": 0.015348
+      }
     },
     {
       "arm": "no-simplicio",
@@ -198,15 +175,7 @@
           "wall_s": 48.4,
           "cpu_s": 3.69,
           "peak_rss_mb": 239.895,
-          "input_tokens": 19801,
-          "output_tokens": 8903,
-          "reasoning_tokens": 2121,
-          "cache_read_tokens": 273268,
-          "cache_write_tokens": 19779,
-          "cost_usd_cli": 0.011142,
-          "cost_usd_table": 0.009132,
-          "model_requests": 13,
-          "tool_calls": 12
+          "cost_usd_cli": 0.011142
         },
         {
           "step": 2,
@@ -222,15 +191,7 @@
           "wall_s": 17.3,
           "cpu_s": 1.95,
           "peak_rss_mb": 248.082,
-          "input_tokens": 5255,
-          "output_tokens": 3134,
-          "reasoning_tokens": 437,
-          "cache_read_tokens": 134131,
-          "cache_write_tokens": 5247,
-          "cost_usd_cli": 0.003959,
-          "cost_usd_table": 0.003071,
-          "model_requests": 4,
-          "tool_calls": 3
+          "cost_usd_cli": 0.003959
         },
         {
           "step": 3,
@@ -250,17 +211,19 @@
           "wall_s": 31.4,
           "cpu_s": 2.86,
           "peak_rss_mb": 240.891,
-          "input_tokens": 9635,
-          "output_tokens": 6125,
-          "reasoning_tokens": 1415,
-          "cache_read_tokens": 248331,
-          "cache_write_tokens": 9623,
-          "cost_usd_cli": 0.007472,
-          "cost_usd_table": 0.005865,
-          "model_requests": 8,
-          "tool_calls": 7
+          "cost_usd_cli": 0.007472
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 34691,
+        "output_tokens": 18162,
+        "reasoning_tokens": 3973,
+        "cache_read_tokens": 655730,
+        "cache_write_tokens": 34649,
+        "model_requests": 25,
+        "tool_calls": 22,
+        "cost_usd_table": 0.018068
+      }
     },
     {
       "arm": "simplicio-3.14.0",
@@ -277,15 +240,7 @@
           "wall_s": 61.7,
           "cpu_s": 5.25,
           "peak_rss_mb": 439.254,
-          "input_tokens": 23181,
-          "output_tokens": 10234,
-          "reasoning_tokens": 2168,
-          "cache_read_tokens": 413805,
-          "cache_write_tokens": 23151,
-          "cost_usd_cli": 0.013888,
-          "cost_usd_table": 0.010859,
-          "model_requests": 16,
-          "tool_calls": 15
+          "cost_usd_cli": 0.013888
         },
         {
           "step": 2,
@@ -301,15 +256,7 @@
           "wall_s": 14.4,
           "cpu_s": 1.88,
           "peak_rss_mb": 346.988,
-          "input_tokens": 3406,
-          "output_tokens": 3104,
-          "reasoning_tokens": 1803,
-          "cache_read_tokens": 70099,
-          "cache_write_tokens": 3402,
-          "cost_usd_cli": 0.002934,
-          "cost_usd_table": 0.002584,
-          "model_requests": 2,
-          "tool_calls": 1
+          "cost_usd_cli": 0.002934
         },
         {
           "step": 3,
@@ -329,17 +276,19 @@
           "wall_s": 27.5,
           "cpu_s": 2.88,
           "peak_rss_mb": 358.301,
-          "input_tokens": 6534,
-          "output_tokens": 5426,
-          "reasoning_tokens": 2539,
-          "cache_read_tokens": 120756,
-          "cache_write_tokens": 6528,
-          "cost_usd_cli": 0.005227,
-          "cost_usd_table": 0.004598,
-          "model_requests": 4,
-          "tool_calls": 3
+          "cost_usd_cli": 0.005227
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 33121,
+        "output_tokens": 18764,
+        "reasoning_tokens": 6510,
+        "cache_read_tokens": 604660,
+        "cache_write_tokens": 33081,
+        "model_requests": 22,
+        "tool_calls": 19,
+        "cost_usd_table": 0.018041
+      }
     },
     {
       "arm": "simplicio-3.14.0",
@@ -356,15 +305,7 @@
           "wall_s": 50.4,
           "cpu_s": 3.98,
           "peak_rss_mb": 432.383,
-          "input_tokens": 23801,
-          "output_tokens": 11590,
-          "reasoning_tokens": 5316,
-          "cache_read_tokens": 197202,
-          "cache_write_tokens": 23785,
-          "cost_usd_cli": 0.012526,
-          "cost_usd_table": 0.011116,
-          "model_requests": 10,
-          "tool_calls": 9
+          "cost_usd_cli": 0.012526
         },
         {
           "step": 2,
@@ -380,15 +321,7 @@
           "wall_s": 15.7,
           "cpu_s": 2.11,
           "peak_rss_mb": 347.512,
-          "input_tokens": 3812,
-          "output_tokens": 2987,
-          "reasoning_tokens": 1639,
-          "cache_read_tokens": 110331,
-          "cache_write_tokens": 3806,
-          "cost_usd_cli": 0.003359,
-          "cost_usd_table": 0.002695,
-          "model_requests": 3,
-          "tool_calls": 2
+          "cost_usd_cli": 0.003359
         },
         {
           "step": 3,
@@ -408,17 +341,19 @@
           "wall_s": 24.1,
           "cpu_s": 2.83,
           "peak_rss_mb": 363.0,
-          "input_tokens": 6528,
-          "output_tokens": 5145,
-          "reasoning_tokens": 2154,
-          "cache_read_tokens": 168444,
-          "cache_write_tokens": 6520,
-          "cost_usd_cli": 0.005562,
-          "cost_usd_table": 0.004572,
-          "model_requests": 5,
-          "tool_calls": 4
+          "cost_usd_cli": 0.005562
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 34141,
+        "output_tokens": 19722,
+        "reasoning_tokens": 9109,
+        "cache_read_tokens": 475977,
+        "cache_write_tokens": 34111,
+        "model_requests": 18,
+        "tool_calls": 15,
+        "cost_usd_table": 0.018383
+      }
     },
     {
       "arm": "simplicio-3.14.0",
@@ -435,15 +370,7 @@
           "wall_s": 53.7,
           "cpu_s": 4.45,
           "peak_rss_mb": 436.129,
-          "input_tokens": 26111,
-          "output_tokens": 13240,
-          "reasoning_tokens": 5892,
-          "cache_read_tokens": 183928,
-          "cache_write_tokens": 26097,
-          "cost_usd_cli": 0.01368,
-          "cost_usd_table": 0.012412,
-          "model_requests": 11,
-          "tool_calls": 10
+          "cost_usd_cli": 0.01368
         },
         {
           "step": 2,
@@ -459,15 +386,7 @@
           "wall_s": 15.2,
           "cpu_s": 2.1,
           "peak_rss_mb": 356.5,
-          "input_tokens": 3865,
-          "output_tokens": 3383,
-          "reasoning_tokens": 1869,
-          "cache_read_tokens": 76061,
-          "cache_write_tokens": 3861,
-          "cost_usd_cli": 0.003225,
-          "cost_usd_table": 0.002838,
-          "model_requests": 2,
-          "tool_calls": 1
+          "cost_usd_cli": 0.003225
         },
         {
           "step": 3,
@@ -487,17 +406,19 @@
           "wall_s": 37.5,
           "cpu_s": 3.48,
           "peak_rss_mb": 385.449,
-          "input_tokens": 10041,
-          "output_tokens": 8374,
-          "reasoning_tokens": 4718,
-          "cache_read_tokens": 183919,
-          "cache_write_tokens": 10033,
-          "cost_usd_cli": 0.008034,
-          "cost_usd_table": 0.007082,
-          "model_requests": 5,
-          "tool_calls": 4
+          "cost_usd_cli": 0.008034
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 40017,
+        "output_tokens": 24997,
+        "reasoning_tokens": 12479,
+        "cache_read_tokens": 443908,
+        "cache_write_tokens": 39991,
+        "model_requests": 18,
+        "tool_calls": 15,
+        "cost_usd_table": 0.022332
+      }
     },
     {
       "arm": "simplicio-3.15.0",
@@ -514,15 +435,7 @@
           "wall_s": 5.0,
           "cpu_s": 1.33,
           "peak_rss_mb": 312.812,
-          "input_tokens": 23031,
-          "output_tokens": 567,
-          "reasoning_tokens": 563,
-          "cache_read_tokens": 0,
-          "cache_write_tokens": 23029,
-          "cost_usd_cli": 0.004889,
-          "cost_usd_table": 0.003795,
-          "model_requests": 1,
-          "tool_calls": 0
+          "cost_usd_cli": 0.004889
         },
         {
           "step": 2,
@@ -538,15 +451,7 @@
           "wall_s": 8.9,
           "cpu_s": 1.92,
           "peak_rss_mb": 365.191,
-          "input_tokens": 4771,
-          "output_tokens": 1123,
-          "reasoning_tokens": 330,
-          "cache_read_tokens": 73590,
-          "cache_write_tokens": 4765,
-          "cost_usd_cli": 0.002251,
-          "cost_usd_table": 0.00161,
-          "model_requests": 4,
-          "tool_calls": 3
+          "cost_usd_cli": 0.002251
         },
         {
           "step": 3,
@@ -566,17 +471,19 @@
           "wall_s": 10.9,
           "cpu_s": 2.04,
           "peak_rss_mb": 351.797,
-          "input_tokens": 5498,
-          "output_tokens": 1378,
-          "reasoning_tokens": 409,
-          "cache_read_tokens": 87766,
-          "cache_write_tokens": 5492,
-          "cost_usd_cli": 0.002666,
-          "cost_usd_table": 0.001915,
-          "model_requests": 5,
-          "tool_calls": 4
+          "cost_usd_cli": 0.002666
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 33300,
+        "output_tokens": 3068,
+        "reasoning_tokens": 1302,
+        "cache_read_tokens": 161356,
+        "cache_write_tokens": 33286,
+        "model_requests": 10,
+        "tool_calls": 7,
+        "cost_usd_table": 0.00732
+      }
     },
     {
       "arm": "simplicio-3.15.0",
@@ -593,15 +500,7 @@
           "wall_s": 5.9,
           "cpu_s": 1.37,
           "peak_rss_mb": 315.363,
-          "input_tokens": 8049,
-          "output_tokens": 943,
-          "reasoning_tokens": 873,
-          "cache_read_tokens": 14988,
-          "cache_write_tokens": 8047,
-          "cost_usd_cli": 0.002231,
-          "cost_usd_table": 0.001818,
-          "model_requests": 1,
-          "tool_calls": 0
+          "cost_usd_cli": 0.002231
         },
         {
           "step": 2,
@@ -617,15 +516,7 @@
           "wall_s": 7.6,
           "cpu_s": 1.73,
           "peak_rss_mb": 352.539,
-          "input_tokens": 4994,
-          "output_tokens": 954,
-          "reasoning_tokens": 242,
-          "cache_read_tokens": 74267,
-          "cache_write_tokens": 4988,
-          "cost_usd_cli": 0.002218,
-          "cost_usd_table": 0.001544,
-          "model_requests": 4,
-          "tool_calls": 3
+          "cost_usd_cli": 0.002218
         },
         {
           "step": 3,
@@ -645,17 +536,19 @@
           "wall_s": 9.4,
           "cpu_s": 2.2,
           "peak_rss_mb": 374.504,
-          "input_tokens": 5423,
-          "output_tokens": 1314,
-          "reasoning_tokens": 373,
-          "cache_read_tokens": 88445,
-          "cache_write_tokens": 5417,
-          "cost_usd_cli": 0.002625,
-          "cost_usd_table": 0.001867,
-          "model_requests": 5,
-          "tool_calls": 4
+          "cost_usd_cli": 0.002625
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 18466,
+        "output_tokens": 3211,
+        "reasoning_tokens": 1488,
+        "cache_read_tokens": 177700,
+        "cache_write_tokens": 18452,
+        "model_requests": 10,
+        "tool_calls": 7,
+        "cost_usd_table": 0.005229
+      }
     },
     {
       "arm": "simplicio-3.15.0",
@@ -672,15 +565,7 @@
           "wall_s": 5.8,
           "cpu_s": 1.48,
           "peak_rss_mb": 311.23,
-          "input_tokens": 8048,
-          "output_tokens": 744,
-          "reasoning_tokens": 740,
-          "cache_read_tokens": 14988,
-          "cache_write_tokens": 8046,
-          "cost_usd_cli": 0.002131,
-          "cost_usd_table": 0.001699,
-          "model_requests": 1,
-          "tool_calls": 0
+          "cost_usd_cli": 0.002131
         },
         {
           "step": 2,
@@ -696,15 +581,7 @@
           "wall_s": 10.5,
           "cpu_s": 1.94,
           "peak_rss_mb": 357.863,
-          "input_tokens": 5664,
-          "output_tokens": 1591,
-          "reasoning_tokens": 500,
-          "cache_read_tokens": 101522,
-          "cache_write_tokens": 5656,
-          "cost_usd_cli": 0.002943,
-          "cost_usd_table": 0.002109,
-          "model_requests": 5,
-          "tool_calls": 4
+          "cost_usd_cli": 0.002943
         },
         {
           "step": 3,
@@ -724,17 +601,19 @@
           "wall_s": 10.3,
           "cpu_s": 2.09,
           "peak_rss_mb": 379.07,
-          "input_tokens": 5043,
-          "output_tokens": 1238,
-          "reasoning_tokens": 423,
-          "cache_read_tokens": 90006,
-          "cache_write_tokens": 5037,
-          "cost_usd_cli": 0.002527,
-          "cost_usd_table": 0.001769,
-          "model_requests": 4,
-          "tool_calls": 3
+          "cost_usd_cli": 0.002527
         }
-      ]
+      ],
+      "totals": {
+        "input_tokens": 18755,
+        "output_tokens": 3573,
+        "reasoning_tokens": 1663,
+        "cache_read_tokens": 206516,
+        "cache_write_tokens": 18739,
+        "model_requests": 10,
+        "tool_calls": 7,
+        "cost_usd_table": 0.005577
+      }
     }
   ]
 }

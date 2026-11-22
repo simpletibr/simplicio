@@ -12,9 +12,9 @@ Medians of 3 sessions per setup, with the lowest and highest session in brackets
 | Cost reported by the agent | $0.0226 (0.0186 to 0.0280) | $0.0220 (0.0214 to 0.0249) | **$0.0076 (0.0071 to 0.0098)** |
 | Cost from a fixed price table | $0.0181 (0.0153 to 0.0227) | $0.0184 (0.0180 to 0.0223) | **$0.0056 (0.0052 to 0.0073)** |
 | Output tokens | 18,162 (15,599 to 23,328) | 19,722 (18,764 to 24,997) | **3,211 (3,068 to 3,573)** |
-| of which reasoning tokens | 4,457 (3,973 to 9,221) | 9,109 (6,510 to 12,479) | 1,488 (1,302 to 1,663) |
+| of which reasoning tokens | 4,457 (3,973 to 9,221) | 9,109 (6,510 to 12,479) | **1,488 (1,302 to 1,663)** |
 | Input tokens | 34,691 (30,447 to 42,543) | 34,141 (33,121 to 40,017) | 18,755 (18,466 to 33,300) |
-| Cache-read tokens | 655,730 (473,821 to 787,484) | 475,977 (443,908 to 604,660) | 177,700 (161,356 to 206,516) |
+| Cache-read tokens | 655,730 (473,821 to 787,484) | 475,977 (443,908 to 604,660) | **177,700 (161,356 to 206,516)** |
 | Model requests | 25 (19 to 33) | 18 (18 to 22) | **10 (10 to 10)** |
 | Tool calls | 22 (16 to 30) | 15 (15 to 19) | **7 (7 to 7)** |
 | CPU time | 8.5 s (8.5 to 9.2) | 10.0 s (8.9 to 10.0) | **5.3 s (5.3 to 5.5)** |
@@ -23,9 +23,25 @@ Medians of 3 sessions per setup, with the lowest and highest session in brackets
 
 "9 of 9" means 3 steps in each of 3 sessions. Every step passed every outside check, in every setup.
 
-Input tokens: the range of Simplicio 3.15.0 (18,466 to 33,300) overlaps the range without Simplicio (30,447 to 42,543). This run claims no difference in input tokens. The same holds for reasoning tokens and cache-read tokens, which are listed for completeness and carry no claim.
+Every session, not only the median:
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-sessions-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-sessions-light.svg" width="840" alt="Scatter plot of every session, with the time for the whole job across and the cost reported by the agent up. Simplicio 3.15.0, green diamonds: 23 to 27 s and $0.0071 to $0.0098. Simplicio 3.14.0, grey squares: 90 to 106 s and $0.0214 to $0.0249. No Simplicio, hollow circles: 97 to 172 s and $0.0186 to $0.0280.">
+  </picture>
+</p>
+
+Input tokens: the range of Simplicio 3.15.0 (18,466 to 33,300) overlaps the range without Simplicio (30,447 to 42,543). This run claims no difference in input tokens.
 
 ### By step
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-steps-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-steps-light.svg" width="840" alt="Median time by step on one shared scale. Step 1, build: 57.3 s with no Simplicio, 53.7 s with Simplicio 3.14.0 and 5.8 s with Simplicio 3.15.0. Step 2, change: 17.3 s, 15.2 s and 8.9 s. Step 3, register: 31.4 s, 27.5 s and 10.3 s.">
+  </picture>
+</p>
 
 Median time of each step, with the lowest and highest session in brackets:
 
@@ -132,12 +148,12 @@ Projeto novo. Regras da casa:
 | Model | Claude Haiku 5.5 (`claude-haiku-5-5`), the same for every session |
 | Agent | Claude Code CLI 2.1.330, run without a person at the keyboard, with permission prompts skipped. Each session used its own new configuration folder and its own project folder. The agent was given its MCP configuration explicitly, so no other MCP server was present |
 | Machine | 4 CPUs, 16 GB of memory, no swap, Linux x86-64 |
-| Concurrency | 4 sessions ran at the same time on that machine, so every wall time includes the contention between them. Compare times only inside this run |
-| Sessions | 3 per setup, 9 in this report. Every session delivered every step |
+| Concurrency | 4 sessions ran at the same time on that machine, so every wall time includes the contention between them. The round had 12 sessions and 9 are reported here. The other 3 belonged to a fourth setup, an unreleased development build that is not a published version and is not reported. It is the reason four sessions ran at once. Compare times only inside this run |
+| Sessions | 3 per setup, 9 in this report (the round had 12, see Concurrency). Every reported session delivered every step |
 
-**No Simplicio.** The same agent and model with the agent's own tools. No MCP server and no Simplicio configuration of any kind. This is a competent, widely used agent working the way it works for anyone who has not installed Simplicio.
+**No Simplicio.** The same agent and model with the agent's own tools. No MCP server and no Simplicio configuration of any kind. This is Claude Code 2.1.330 working the way it works for anyone who has not installed Simplicio.
 
-**Simplicio 3.14.0 and Simplicio 3.15.0.** The same agent and model with Simplicio set up for Claude Code: its local STDIO MCP server entry and the Claude Code configuration that the installer writes. The benchmark harness wrote those entries itself and did not run the installer. Simplicio ran without its optional resident background process. The two builds were compiled from the Runtime source commit that each release was published from:
+**Simplicio 3.14.0 and Simplicio 3.15.0.** The same agent and model with Simplicio set up the way the installer sets it up for Claude Code (`INSTALL.md` lists what the installer writes). The benchmark harness wrote that configuration itself and did not run the installer. Simplicio ran without its optional resident background process and with sign-in turned off. The two builds were compiled from the Runtime source commit that each release was published from:
 
 | Setup | Release | Source commit |
 |---|---|---|
@@ -149,9 +165,9 @@ Sign-in was turned off for the automated run. The signed binaries that people do
 **How each number was taken**
 
 - *Time* is the wall-clock time of the agent call, summed over the three steps.
-- *Cost reported by the agent* is `total_cost_usd`, which the agent CLI reports: the tokens served multiplied by the published price of the model. It is an estimate made by the agent, not an invoice. The CLI reports a running total for the conversation, so the cost of a step is the difference between the total after the step and the total before it.
+- *Cost reported by the agent* is `total_cost_usd`, which the agent CLI reports: the tokens used multiplied by the model's published price. It counts model tokens only. It is an estimate made by the agent, not an invoice. The CLI reports a running total for the conversation, so the cost of a step is the difference between the total after the step and the total before it.
 - *Cost from a fixed price table* multiplies the tokens by one price list kept in the benchmark: $0.15 per million input tokens, $0.60 per million output tokens and $0.003 per million cache-read tokens. These are not the list prices of Claude Haiku 5.5. The row lets the three setups be compared on one price list and carries no other claim.
-- *Output tokens* are the output tokens the agent CLI reports. They include the reasoning tokens of the model. The data file also lists the reasoning tokens alone; in all 27 measured steps that count is at or below the output count.
+- *Output tokens* are the output tokens the agent CLI reports. They include the reasoning tokens of the model. The data file also lists the reasoning tokens alone; in all 9 sessions that count is at or below the output count.
 - *Input tokens* are the tokens sent to the model that were not read from the cache. They include the tokens written to the cache. Tokens read from the cache are counted separately as cache-read tokens and are cheaper.
 - *Model requests* is the number of model turns the agent reports. *Tool calls* is the number of tool calls the model made, its own tools and Simplicio's together.
 - *CPU time* is the CPU time of the agent process and of everything it started, as the operating system accounts for the finished processes.
@@ -161,9 +177,16 @@ Sign-in was turned off for the automated run. The signed binaries that people do
 
 ## Where Simplicio did not win
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-memory-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-memory-light.svg" width="840" alt="Peak memory, median of 3 sessions: 270 MB with no Simplicio, the lowest; 436 MB with Simplicio 3.14.0, 61% more; 375 MB with Simplicio 3.15.0, 39% more.">
+  </picture>
+</p>
+
 - **Memory.** Simplicio 3.15.0 used 375 MB at its peak against 270 MB without Simplicio, which is 39% more. The ranges do not overlap. Simplicio 3.14.0 used more still: 436 MB, which is 61% more than without Simplicio.
 - **Simplicio 3.14.0 did not pay for itself on this job.** Its cost was the same as without Simplicio ($0.0220 against $0.0226). Its time (104 s against 121 s) is inside the spread of the runs, and so are its output tokens (19,722 against 18,162) and its CPU time (10.0 s against 8.5 s). The gain on this page arrived with 3.15.0.
-- **A short one-off Python script, measured on an older release.** In the round of [2026-11-01](2026-11-01-multi-model.md), on a short one-off Python script that reads a data file and prints a count per role, Simplicio 3.10.8 was slower than the plain agent with each of the four models tried, and it cost more. The most direct case is Claude Sonnet 5.5 in Claude Code 2.1.316, 5 sessions per setup: 19.6 s and $0.0548 with Simplicio against 11.4 s and $0.0283 without. The other three were Grok 4.7 (82.0 s and $0.3315 against 63.1 s and $0.2452), Claude Haiku 5.5 in OpenCode (19.2 s and $0.0033 against 16.6 s and $0.0030) and DeepSeek V4.1 Flash in OpenCode (30.7 s and $0.0031 against 22.7 s and $0.0024). That task has not been measured again on Simplicio 3.15.0, so this page says nothing about it.
+- **A short one-off Python script, measured on an older release.** In the round of `2026-11-01-multi-model.md`, on a short one-off Python script that reads a data file and prints a count per role, Simplicio 3.10.8 was slower than the plain agent with each of the four models tried, and it cost more. The most direct case is Claude Sonnet 5.5 in Claude Code 2.1.316, 5 sessions per setup: 19.6 s and $0.0548 with Simplicio against 11.4 s and $0.0283 without. The other three were Grok 4.7 (82.0 s and $0.3315 against 63.1 s and $0.2452), Claude Haiku 5.5 in OpenCode (19.2 s and $0.0033 against 16.6 s and $0.0030) and DeepSeek V4.1 Flash in OpenCode (30.7 s and $0.0031 against 22.7 s and $0.0024). That task has not been measured again on Simplicio 3.15.0, so this page says nothing about it.
 - **Small sample.** Three sessions per setup, one model, one project, one machine, four sessions at once. Read the ratios as a measurement of this job, not as a promise for yours.
 
 ## Limits
@@ -177,11 +200,12 @@ Sign-in was turned off for the automated run. The signed binaries that people do
 - **Builds from release commits.** The Simplicio builds are compiled from the source commits of the published releases, with sign-in turned off for the automated run. The signed binaries that people download were not executed, so CPU time and memory were not measured on them.
 - **Cost is an estimate.** It is the agent's own calculation from tokens and a published price. It is not an invoice, and a plan with a flat fee or a different price list gives other dollar amounts.
 - **The checks are narrower than the prompts.** See "The checks" above for what is not tested.
+- **A round of 12 sessions, 9 reported.** The other 3 belonged to a fourth setup, an unreleased development build that is not a published version. It is not reported here. It is the reason four sessions ran at once.
 - **One round.** The three setups ran in the same round, so the time of day and the load of the model provider affect them alike. A later run can give other numbers.
 
 ## Data
 
-The file [2026-11-22-standard-benchmark.json](2026-11-22-standard-benchmark.json) holds every session and step behind the tables above. The chart in the README is drawn from it by `scripts/render_benchmark_chart.py`.
+The file [2026-11-22-standard-benchmark.json](2026-11-22-standard-benchmark.json) holds every session behind the tables above, with its three steps. The chart in the README is drawn from it by `scripts/render_benchmark_chart.py`.
 
 Top-level fields:
 
@@ -192,8 +216,9 @@ Top-level fields:
 | `model` | Model id |
 | `agent` | Agent name and version |
 | `machine` | CPUs, memory, operating system, swap and the number of sessions that ran at the same time |
+| `round` | How many sessions the round ran (`sessions_run`), how many are in this file (`sessions_published`), and a `note` that says why the two numbers differ |
 | `arms` | The three setups. The key is the id used in `sessions`. Each has a `label` and the `release_commit` it was built from (`null` without Simplicio) |
-| `sessions` | 9 records: `arm`, `rep` (1 to 3) and `steps` |
+| `sessions` | 9 records: `arm`, `rep` (1 to 3), `steps` and `totals` |
 
 Fields of each step:
 
@@ -205,14 +230,19 @@ Fields of each step:
 | `wall_s` | Wall-clock time of the step in seconds |
 | `cpu_s` | CPU time of the agent and what it started, in seconds |
 | `peak_rss_mb` | Peak resident memory of that process tree, in MB |
+| `cost_usd_cli` | Cost of this step as the agent CLI reports it, in US dollars. The steps of a session add up to its total |
+
+Token, request and tool-call counts are published per session, not per step. Fields of the `totals` object of each session, the sums over its three steps:
+
+| Field | Meaning |
+|---|---|
 | `input_tokens` | Tokens sent that were not read from the cache. Includes `cache_write_tokens` |
 | `output_tokens` | Output tokens. Includes `reasoning_tokens` |
 | `reasoning_tokens` | The part of the output tokens that the provider reports as reasoning |
 | `cache_read_tokens` | Tokens read from the cache |
 | `cache_write_tokens` | Tokens written to the cache |
-| `cost_usd_cli` | Cost of this step as the agent CLI reports it, in US dollars. The steps of a session add up to its total |
-| `cost_usd_table` | Cost of this step from the fixed price table, in US dollars |
-| `model_requests` | Model turns in this step |
-| `tool_calls` | Tool calls in this step |
+| `model_requests` | Model turns in the session |
+| `tool_calls` | Tool calls in the session |
+| `cost_usd_table` | Cost of the session from the fixed price table, in US dollars |
 
 To compare on your own work, run the same three prompts in your own agent, once with Simplicio and once without, in a small project of your own that has a README with house rules like the one above, and compare your own times and your own bill.
