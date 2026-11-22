@@ -74,7 +74,7 @@ Simplicio is a local program that gives the coding agent you already use an ultr
 
 - **You keep your agent and your model.** Simplicio does not replace Claude Code, Codex, Cursor or whatever model sits behind them.
 - **You install one signed native binary.** The installer verifies the signature, then registers Simplicio in the agents it finds on your machine.
-- **It runs on your machine.** Your agent starts it as a local STDIO MCP server. MCP is the Model Context Protocol, the standard way a coding agent calls outside tools. STDIO means the agent launches the program itself and talks to it through its standard input and output.
+- **It runs on your machine.** Your agent starts it as a local STDIO MCP server: MCP is the Model Context Protocol, the way a coding agent calls outside tools, and STDIO means the agent launches the program and talks to it directly.
 - **It gives your agent tools.** A repository map, bounded context, structured edits and checks. [The core tools](#works-with-the-agent-you-already-use) are listed below.
 - **What changes is the session.** How long it takes and what it costs. The next section shows by how much, and where it does not help.
 
@@ -97,7 +97,7 @@ One job, run the same way with and without Simplicio. The job is one agent sessi
 2. Change it: drop a column, add a filter by role and a date column.
 3. Add a simple registration: a `POST` endpoint that checks its input, and a form page.
 
-After every step the result is checked from outside the session. The API is called over HTTP and the pages are loaded in headless Chrome, which is Chrome without a window. Every setup used the same agent and the same model: Claude Code 2.1.330 with Claude Haiku 5.5. The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration. The checks do not test the search box, sorting, the redirect after saving, the look of the page or the quality of the code.
+After every step the result is checked from outside the session: the API over HTTP and the pages in headless Chrome, which is Chrome without a window. The checks do not test the search box, sorting, the redirect after saving, the look of the page or the quality of the code.
 
 Every session is on this chart, not only the medians.
 
@@ -122,9 +122,10 @@ Median of 3 sessions per setup. The small line under each value is the lowest an
 | Peak memory | **270 MB**<br><sub>248–274</sub> | 436 MB<br><sub>432–439</sub> | 375 MB<br><sub>365–379</sub> |
 | Steps delivered | 9 of 9 | 9 of 9 | 9 of 9 |
 
-Bold marks the best value in a row, only where its range does not overlap the others. The input-token ranges overlap, so this run claims no difference in input tokens. "9 of 9" is 3 steps in each of 3 sessions, and every step passed every outside check. Job time is the time for the whole job. A model request is one call to the model, and a tool call is one use of a tool by the agent. Reported cost is what the agent reports: the tokens used times the model's published price. It counts model tokens only. It is not an invoice.
+- Bold marks the best value in a row, only where its range does not overlap the others. The input-token ranges overlap, so no difference is claimed there.
+- "9 of 9" is 3 steps in each of 3 sessions, and every step passed every outside check.
+- A model request is one call to the model; a tool call is one use of a tool by the agent.
 
-What changed in the session, in counts: the model made fewer requests, and the agent made fewer tool calls.
 
 <p align="center">
   <picture>
@@ -157,7 +158,11 @@ Each cell is the median time and the median cost of the step:
 
 </details>
 
-**How to read it.** The ratios come from the unrounded medians. Against the same agent without Simplicio, the whole job ran 4.9 times faster and cost about a third as much. Against the previous release it ran 4.2 times faster. In the session, the model made 10 requests instead of 25 and wrote 3,211 output tokens instead of 18,162, and the job passed the same outside checks. Worst case: the fastest session without Simplicio (97.1 s) was still 3.7 times slower than the slowest session with Simplicio 3.15.0 (26.6 s), and the cheapest session without it ($0.0186) still cost 1.9 times as much as the most expensive session with it ($0.0098). The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration. Cost counts model tokens only. The sessions ran four at a time on one machine, so compare times only inside this round.
+**How to read it.**
+
+- The ratios come from the unrounded medians. Against the same agent without Simplicio, the whole job ran 4.9 times faster and cost about a third as much. Against the previous release it ran 4.2 times faster.
+- Worst case: the fastest session without Simplicio (97.1 s) was still 3.7 times slower than the slowest session with Simplicio 3.15.0 (26.6 s), and the cheapest session without it ($0.0186) still cost 1.9 times as much as the most expensive session with it ($0.0098).
+- The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration. Cost is the tokens used times the model's published price. It counts model tokens only. It is not an invoice. Four sessions ran at a time on one machine: compare times only inside this round.
 
 ### Where Simplicio does not win
 
@@ -169,14 +174,16 @@ Each cell is the median time and the median cost of the step:
 </p>
 
 - **Memory.** Peak memory was 39% higher than with the plain agent: 375 MB against 270 MB.
-- **The previous release showed no gain on this job.** Simplicio 3.14.0 cost the same as no Simplicio, and its time difference is inside the run-to-run spread. The gain on this page arrived with 3.15.0.
-- **A short one-off Python script.** In an earlier round, Simplicio 3.10.8 was slower than the plain agent with every model tried. On Claude Sonnet 5.5 in Claude Code it took 19.6 s and $0.0548, against 11.4 s and $0.0283 without it. That task has not been measured again on 3.15.0.
-- **What you install is not exactly what was measured.** The builds were compiled from the release commits, with sign-in off and the background process off. The signed downloads were not measured.
-- **The sample is small.** Three sessions per setup, one model, one small new project, one machine, four sessions at once. Read the ratios as a measurement of this job, not as a promise for yours. No session of these three setups was dropped or re-run. We have not measured how much of your work looks like this job.
+- **The previous release showed no gain on this job.** Simplicio 3.14.0 cost the same as no Simplicio, and its time difference is inside the run-to-run spread. The gain arrived with 3.15.0.
+- **A short one-off Python script.** In an earlier round, Simplicio 3.10.8 was slower than the plain agent with every model tried: on Claude Sonnet 5.5 in Claude Code, 19.6 s and $0.0548 against 11.4 s and $0.0283. Not measured again on 3.15.0.
+- **What you install is not exactly what was measured.** The builds were compiled from the release commits, with sign-in and the background process off. The signed downloads were not measured.
+- **The sample is small.** Three sessions per setup, one model, one small new project, one machine, four sessions at once; none dropped or re-run. The ratios measure this job, not yours, and we have not measured how much of your work looks like it.
 
 ### Check it yourself
 
-[The report](benchmarks/2026-11-22-standard-benchmark.md) publishes the three prompts (in Portuguese, with a translation), a description of every outside check and the per-session numbers; [the data file](benchmarks/2026-11-22-standard-benchmark.json) has them as JSON. The test harness is not published. Run the same three prompts in your own agent with Simplicio on and off, in a small project of your own, and compare your own times and your own bill.
+[The report](benchmarks/2026-11-22-standard-benchmark.md) publishes the three prompts (in Portuguese, with a translation), a description of every outside check and the per-session numbers; [the data file](benchmarks/2026-11-22-standard-benchmark.json) has them as JSON. The test harness is not published.
+
+Run the same three prompts with Simplicio on and off in a small project of your own, and compare your own times and your own bill.
 
 ## Install
 
@@ -203,14 +210,16 @@ simplicio install
 
 On Windows, use `py -m pip install --upgrade simplicio-installer` and then `simplicio install`. If the Python script directory is not on your `PATH`, add it first.
 
-The installer downloads the latest signed release for your platform and checks its SHA-256 and its Ed25519 signature. Only then does it replace the installed binary. It puts the binary under `~/.simplicio/bin/` (on Windows, `%USERPROFILE%\.simplicio\bin\`) and automatically registers Simplicio in the agents it finds. A registration failure stops the installer instead of reporting success. Restart any agent that is already open so it reloads its configuration.
+- It downloads the latest signed release for your platform and checks its SHA-256 and its Ed25519 signature before it replaces the installed binary.
+- The binary goes under `~/.simplicio/bin/` (on Windows, `%USERPROFILE%\.simplicio\bin\`), and Simplicio is automatically registered in the agents it finds. A registration failure stops the installer instead of reporting success.
+- Restart any agent that is already open so it reloads its configuration.
 
-**Sign in.** A Google sign-in is required, including during the beta. Run `simplicio auth login`, then `simplicio auth status --json`, and continue when the status reports `active: true`. Registration does not need you to be signed in, so the agents are configured even before you sign in. Never paste a password or token into an agent's configuration.
+**Sign in.** A Google sign-in is required, including during the beta. Run `simplicio auth login`, then `simplicio auth status --json`, and continue when it reports `active: true`. Registration works before you sign in. Never paste a password or token into an agent's configuration.
 
 <details>
 <summary>Check, update, remove</summary>
 
-To update, run the installer again. You can run either installer again at any time, and it resolves the latest release. `install.sh` and `install.ps1` are in the root of this repository.
+To update, run either installer again at any time: it resolves the latest release. `install.sh` and `install.ps1` are in the root of this repository.
 
 ```bash
 # macOS / Linux
@@ -244,16 +253,18 @@ cd my-project
 simplicio onboard
 ```
 
-`simplicio version` confirms the installed binary. `simplicio onboard` prepares the project the first time. Then open your agent in that project and work as usual. To confirm that Simplicio loaded, look for `simplicio` in the agent's list of MCP servers. In Claude Code, `/mcp` lists the connected servers. Prefer to read the installer first? It is [install.sh](install.sh).
+`simplicio version` confirms the installed binary; `simplicio onboard` prepares the project the first time. Then open your agent in that project and work as usual.
+
+To confirm Simplicio loaded, look for `simplicio` in the agent's list of MCP servers. In Claude Code, `/mcp` lists the connected servers. Prefer to read the installer first? It is [install.sh](install.sh).
 
 ## Works with the agent you already use
 
 Simplicio is a local STDIO MCP server, so an agent that can start a local MCP server can be pointed at it.
 
-The installer hands registration to Simplicio's own registrar. It detects the agents on your machine and writes the Simplicio entry for the ones it knows how to configure, among them Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI and Kiro. Two files in this repository say how far each integration goes:
+The installer hands registration to Simplicio's own registrar. It writes the Simplicio entry for the agents it knows how to configure, among them Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI and Kiro. Two files in this repository say how far each integration goes:
 
-- The registry [`plugins/simplicio/host-surfaces.json`](plugins/simplicio/host-surfaces.json) names 43 agent ids and says, for each, how Simplicio reaches it: an MCP entry that Simplicio writes (23), a native plugin or extension (5), a portable plugin package (4), a guided setup you follow yourself (9), or another command-line tool (2).
-- The compatibility matrix [`docs/hosts/compatibility-matrix.md`](docs/hosts/compatibility-matrix.md) says what has been verified. Of those 43 it marks 12 agents as supported and 29 `unverified`, and it has no row for Codex and Gemini CLI. Where the registry says Simplicio writes the entry and the matrix says `unverified`, treat that integration as untested.
+- The registry [`plugins/simplicio/host-surfaces.json`](plugins/simplicio/host-surfaces.json) names 43 agent ids and how Simplicio reaches each: an MCP entry that Simplicio writes (23), a native plugin or extension (5), a portable plugin package (4), a guided setup you follow yourself (9), or another command-line tool (2).
+- The compatibility matrix [`docs/hosts/compatibility-matrix.md`](docs/hosts/compatibility-matrix.md) says what has been verified: of those 43, 12 agents are supported and 29 are `unverified`; Codex and Gemini CLI have no row. Treat an `unverified` integration as untested, even if the registry says Simplicio writes the entry.
 
 23 agents have a guide in [`docs/hosts/`](docs/hosts/). For agents reached through a plugin, the plugin is applied in a separate step that asks for your consent, and [INSTALL.md](INSTALL.md) describes it.
 
@@ -349,17 +360,28 @@ This section describes version 3.15.0.
 
 **What Simplicio sends, and to whom**
 
-- **Stays on your machine.** Mapping, context, edits and checks run inside the Simplicio binary. It hands the results to your agent on the same machine. What your agent sends to its own model provider is decided by the agent, as before.
-- **To SimpleTI (simpleti.com.br).** Sign-in and plan checks only. They carry your sign-in token, the Simplicio version and your computer's host name. An optional license lookup also carries your account e-mail. They return your account e-mail, name and plan. No repository content: no files, no file paths, no prompts and no edits.
-- **To GitHub.** A background check for a new release, at most about once every 12 hours. It carries nothing about you or your code. Set `SIMPLICIO_DISABLE_AUTO_UPDATE=1` to turn it off. When you update, the new binary is downloaded from GitHub, and its SHA-256 and its signature are checked before it replaces the old one.
-- **No analytics.** Simplicio 3.15.0 and the files it installs into your agents were checked for this: none uploads analytics, crash reports or usage data. Usage and savings records are local files. The hooks it installs run local programs only (the Simplicio binary and, for optional plugins, local scripts); none of them contacts the network.
+- **Stays on your machine.** Mapping, context, edits and checks run inside the Simplicio binary. It hands the results to your agent on the same machine. Usage and savings records are local files. What your agent sends to its own model provider is decided by the agent, as before.
+- **To SimpleTI (simpleti.com.br).** Sign-in and plan checks only, with no repository content: no files, file paths, prompts or edits.
+  - They carry your sign-in token, the Simplicio version and your computer's host name. An optional license lookup also carries your account e-mail.
+  - They return your account e-mail, name and plan.
+- **To GitHub.** A background check for a new release, at most about once every 12 hours, carrying nothing about you or your code. Set `SIMPLICIO_DISABLE_AUTO_UPDATE=1` to turn it off. An update downloads the binary from GitHub and checks its SHA-256 and signature before it replaces the old one.
+- **No analytics.** Simplicio 3.15.0 and the files it installs into your agents were checked for this: none uploads analytics, crash reports or usage data. The hooks it installs run local programs only (the Simplicio binary and, for optional plugins, local scripts); none of them contacts the network.
 - **To services you configure.** A model provider, GitHub, Jira, a chat notifier or a team cache receive what that feature sends, which can include prompts and code. Requests to a model provider carry a header that names Simplicio as the client.
-- **Two features reach a public service without any configuration.** Web search, when it runs, sends the search query to DuckDuckGo unless you configure another search service. In Simplicio's own chat, a message that looks like a web question can become that query. The dependency security audit, when you run it, sends the names and versions of your dependencies to osv.dev. Neither sends file contents.
-- **Downloads.** The installer and the update path download from GitHub. Some optional helper scripts fetch their own tools from PyPI or npm when you run them. If an agent plugin starts and finds no Simplicio binary, it downloads the official installer from GitHub, pinned to a commit and checked by SHA-256.
+- **Two features reach a public service without any configuration.** Neither sends file contents.
+  - Web search, when it runs, sends the search query to DuckDuckGo unless you configure another search service. In Simplicio's own chat, a message that looks like a web question can become that query.
+  - The dependency security audit, when you run it, sends the names and versions of your dependencies to osv.dev.
+- **Downloads.** The installer and the update path download from GitHub. Some optional helper scripts fetch their own tools from PyPI or npm when you run them. An agent plugin that finds no Simplicio binary downloads the official installer from GitHub, pinned to a commit and checked by SHA-256.
 
-**Signed releases.** Each release publishes its binaries with SHA-256 checksums, Ed25519 signatures, an SBOM (a list of what is in the build) and build provenance. The installers and the update path check the checksum and the signature before they replace the installed binary. For stable releases the contract makes a missing or invalid signature and a checksum mismatch hard failures. The contract is in [docs/UPDATE_SIGNATURE_CONTRACT.md](docs/UPDATE_SIGNATURE_CONTRACT.md).
+**Signed releases.** Each release publishes its binaries with SHA-256 checksums, Ed25519 signatures, an SBOM (a list of what is in the build) and build provenance.
 
-**What the installer changes in your agent.** It adds a Simplicio entry to the agent's MCP configuration and keeps the rest of the configuration. In Claude Code it also allows `mcp__simplicio__*`, so a Simplicio tool is not denied in auto mode. In agents whose hook interface the installer has verified, it also installs Simplicio's hooks there. [INSTALL.md](INSTALL.md) says what the installer writes, and the guide of each agent in [`docs/hosts/`](docs/hosts/) gives the detail. Uninstall does not undo these entries. The Install section says how to remove them.
+The installers and the update path check the checksum and the signature before they replace the installed binary. For stable releases a missing or invalid signature and a checksum mismatch are hard failures; the contract is in [docs/UPDATE_SIGNATURE_CONTRACT.md](docs/UPDATE_SIGNATURE_CONTRACT.md).
+
+**What the installer changes in your agent.**
+
+- It adds a Simplicio entry to the agent's MCP configuration and keeps the rest of the configuration.
+- In Claude Code it also allows `mcp__simplicio__*`, so a Simplicio tool is not denied in auto mode.
+- In agents whose hook interface the installer has verified, it also installs Simplicio's hooks there.
+- Uninstall does not undo these entries; the Install section says how to remove them. [INSTALL.md](INSTALL.md) says what the installer writes, and the guide of each agent in [`docs/hosts/`](docs/hosts/) gives the detail.
 
 ## Also in this repository
 
@@ -379,7 +401,10 @@ Details: [docs/desktop/RELEASE.md](docs/desktop/RELEASE.md).
 <details>
 <summary>For maintainers: the generated flow diagram</summary>
 
-The commands and tools documented in README.md and MCP-CONNECT.md are drawn as one flow, [docs/flow/simplicio.svg](docs/flow/simplicio.svg), generated from one source file, `docs/flow/simplicio.flow.json`. Regenerate it with `python3 scripts/generate_flow.py` and check it for drift with `python3 scripts/generate_flow.py --check`. The contract that keeps it in step with this page and with MCP-CONNECT.md is `python3 -m pytest tests/test_flow_contract.py -q`. The Langflow import check is `scripts/verify_flow_langflow.py`, which fails closed (exit 2, `status=blocked`) when no server is running. The evidence is under `docs/flow/evidence/` and `docs/flow/render/`, and [docs/flow/README.md](docs/flow/README.md) has the requirements and how to repeat it.
+- The commands and tools documented in README.md and MCP-CONNECT.md are drawn as one flow, [docs/flow/simplicio.svg](docs/flow/simplicio.svg), generated from one source file, `docs/flow/simplicio.flow.json`.
+- Regenerate it with `python3 scripts/generate_flow.py` and check it for drift with `python3 scripts/generate_flow.py --check`.
+- The contract that keeps it in step with this page and with MCP-CONNECT.md is `python3 -m pytest tests/test_flow_contract.py -q`.
+- The Langflow import check is `scripts/verify_flow_langflow.py`, which fails closed (exit 2, `status=blocked`) when no server is running. The evidence is under `docs/flow/evidence/` and `docs/flow/render/`; [docs/flow/README.md](docs/flow/README.md) has the requirements and how to repeat it.
 
 </details>
 
@@ -398,13 +423,13 @@ No. They measure one job, with one model, on one machine, over three sessions pe
 No. Simplicio is proprietary. It is a signed binary, published as release assets, and its source is not public. This repository holds the installers, the packages for the agents, the Desktop app source, the documentation and the benchmark data.
 
 **How do I remove it?**<br>
-Run `sh install.sh --uninstall --keep-data`, or `pwsh install.ps1 -Uninstall -KeepData` on Windows. It removes the binary and keeps your data. It does not edit your agents' configuration, so remove the Simplicio entries in each agent's own settings. [Install](#install) has the details and the purge option.
+Run `sh install.sh --uninstall --keep-data`, or `pwsh install.ps1 -Uninstall -KeepData` on Windows. It removes the binary and keeps your data. It does not edit your agents' configuration, so remove the Simplicio entries in each agent's own settings. [Install](#install) has the details.
 
 **Do I need an account?**<br>
 Yes. A Google sign-in is required, including during the beta. Run `simplicio auth login`.
 
 **Does my code leave my machine?**<br>
-Mapping, context, edits and checks run on your machine. Simplicio talks to SimpleTI for sign-in and plan checks, and to GitHub to look for updates, with no repository content in either. Features you configure or run can reach other services. The full list is in [What Simplicio sends, and to whom](#safety-and-privacy).
+Mapping, context, edits and checks run on your machine. Simplicio talks to SimpleTI for sign-in and plan checks and to GitHub for updates, with no repository content in either. Features you configure or run can reach other services. [The full list](#safety-and-privacy).
 
 ## Documentation and community
 
