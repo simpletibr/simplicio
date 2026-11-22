@@ -6,7 +6,7 @@
 
 <p><b>UltraFast Mode for all.</b></p>
 
-<p><b>نفس الوكيل، ونفس النموذج، ونفس المهمة: 121&nbsp;s&nbsp;←&nbsp;25&nbsp;s، و$0.0226&nbsp;←&nbsp;$0.0076.</b></p>
+<p><b>نفس الوكيل، ونفس النموذج، ونفس المهمة: <span dir="ltr">121&nbsp;s&nbsp;→&nbsp;25&nbsp;s</span>، و<span dir="ltr">$0.0226&nbsp;→&nbsp;$0.0076</span>.</b></p>
 
 <p>بدون Simplicio ← مع Simplicio 3.15.0. وسيط 3 تشغيلات لمهمة برمجة صغيرة واحدة في Claude Code مع Claude Haiku 5.5.</p>
 

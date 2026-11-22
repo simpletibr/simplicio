@@ -6,7 +6,7 @@
 
 <p><b>UltraFast Mode for all.</b></p>
 
-<p><b>אותו סוכן, אותו מודל, אותה משימה: 121&nbsp;s&nbsp;←&nbsp;25&nbsp;s, ו-$0.0226&nbsp;←&nbsp;$0.0076.</b></p>
+<p><b>אותו סוכן, אותו מודל, אותה משימה: <span dir="ltr">121&nbsp;s&nbsp;→&nbsp;25&nbsp;s</span>, ו-<span dir="ltr">$0.0226&nbsp;→&nbsp;$0.0076</span>.</b></p>
 
 <p>בלי Simplicio ← עם Simplicio 3.15.0. חציון של 3 הרצות של משימת קוד קטנה אחת ב-Claude Code עם Claude Haiku 5.5.</p>
 
