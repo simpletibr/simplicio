@@ -1,157 +1,219 @@
-# ⚡ Simplicio
+<div align="center">
 
-> **The High-Performance Native AI Coding Runtime & Agent (100% Rust)**  
-> A page a generator covers takes 14 s and $0.0021, against 166 s and $0.0215 on 3.9.2. Local orientation, atomic edits and governed concurrency.
+<img src="apps/desktop/public/icon.png" alt="Simplicio logo" width="96" height="96">
 
-<p align="center">
-  <img src="assets/simplicio-hero.png" alt="Simplicio — AI coding agent" width="840" />
-</p>
+<h1>Simplicio</h1>
 
-## Fluxo visível
+<p><b>Same agent. Same model. Same task. 121&nbsp;s&nbsp;→&nbsp;25&nbsp;s, and $0.0226&nbsp;→&nbsp;$0.0076.</b></p>
 
-![Fluxo do Simplicio: entrada → passos → saídas](docs/flow/simplicio.svg)
+<p>A local runtime that plugs into the coding agent you already use.</p>
 
-O fluxo (8 entradas, 27 passos, 7 saídas) é gerado de `docs/flow/simplicio.flow.json` (fonte única) e cobre todos os comandos públicos da CLI e todas as MCP tools documentadas:
-
-```bash
-python3 scripts/generate_flow.py            # regenera mmd/svg/langflow
-python3 scripts/generate_flow.py --check    # gate de drift antes do release
-python3 -m pytest tests/test_flow_contract.py -q
-```
-
-Artefatos: `simplicio.mmd`, `simplicio.svg` e `langflow/simplicio.langflow.json`.
-
-Render Mermaid validado com `mmdc` (evidência e hashes em `docs/flow/render/`).
-O import do artefato atual (42 nós, 63 arestas) no Langflow 1.12.0 foi **verificado** localmente em 2026-11-21: recibo em `docs/flow/evidence/langflow-verify.json`
-e `GET /api/v1/flows/{id}` em `docs/flow/evidence/langflow-readback.json`.
-Sem servidor, `scripts/verify_flow_langflow.py` é fail-closed (exit 2, `status=blocked`).
-Requisitos e repro: [docs/flow/README.md](docs/flow/README.md).
-
-<p align="center">
-  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=2fe6a0&label=release" alt="Latest Release"></a>
+<p>
+  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=2fe6a0&label=release" alt="Latest release"></a>
   <a href="https://simpleti.com.br/simplicio/docs"><img src="https://img.shields.io/badge/docs-simpleti.com.br-ffd23f" alt="Documentation"></a>
   <a href="https://github.com/simpletibr/simplicio/stargazers"><img src="https://img.shields.io/github/stars/simpletibr/simplicio?style=social" alt="Stars"></a>
-  <img src="https://img.shields.io/badge/runtime-100%25%20Rust-orange" alt="Runtime">
-  <img src="https://img.shields.io/badge/license-Proprietary-red" alt="License">
+  <img src="https://img.shields.io/badge/license-Proprietary-red" alt="License: proprietary">
+</p>
+
+<p>
+  English ·
+  <a href="READMEs/README.pt-BR.md">Português (Brasil)</a> ·
+  <a href="READMEs/README.es-ES.md">Español</a> ·
+  <a href="READMEs/README.fr-FR.md">Français</a> ·
+  <a href="READMEs/README.it-IT.md">Italiano</a> ·
+  <a href="READMEs/README.pl-PL.md">Polski</a> ·
+  <a href="READMEs/README.ru-RU.md">Русский</a> ·
+  <a href="READMEs/README.zh-CN.md">简体中文</a> ·
+  <a href="READMEs/README.ja-JP.md">日本語</a> ·
+  <a href="READMEs/README.ko-KR.md">한국어</a> ·
+  <a href="READMEs/README.hi-IN.md">हिन्दी</a> ·
+  <a href="READMEs/README.ar-SA.md">العربية</a>&lrm; ·
+  <a href="READMEs/README.he-IL.md">עברית</a>&lrm; ·
+  <a href="READMEs/README.id-ID.md">Bahasa Indonesia</a> ·
+  <a href="READMEs/README.ms-MY.md">Bahasa Melayu</a>
+</p>
+
+</div>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/benchmark-2026-11-22-dark.svg">
+    <img src="assets/benchmark-2026-11-22-light.svg" width="840" alt="Bar chart of three measures, median of three sessions per setup. Time for the whole job: 121 s with no Simplicio, 104 s with Simplicio 3.14.0 and 25 s with Simplicio 3.15.0. Cost: $0.0226, $0.0220 and $0.0076. Output tokens: 18,162, 19,722 and 3,211.">
+  </picture>
 </p>
 
 <p align="center">
-  <a href="#-quick-install">Quick Install</a> •
-  <a href="#-measured-benchmark-simplicio-3108-vs-392-vs-no-mcp">Benchmarks</a> •
-  <a href="#-first-60-seconds">First 60 Seconds</a> •
-  <a href="#-mcp--ide-integration">MCP & IDEs</a> •
-  <a href="#core-architecture">Architecture</a> •
-  <a href="https://simpleti.com.br/simplicio/docs">Full Documentation</a>
+  <sub>Median of 3 sessions per setup. Claude Haiku 5.5 in Claude Code 2.1.330, 2026-11-22. Every setup delivered 9 of 9 steps. The thin line on each bar runs from the lowest to the highest session.<br>
+  <a href="benchmarks/2026-11-22-standard-benchmark.md">Method, data and limits</a></sub>
 </p>
 
----
+> The recipe stays inside the binary. The measurements are public, including the ones we lose.
 
-## ⚡ What is Simplicio?
+<p align="center">
+  <b>Try it:</b> <a href="#install">Install</a> · <a href="#first-run">First run</a><br>
+  <a href="#what-simplicio-is">What it is</a> ·
+  <a href="#the-measurement">Measurement</a> ·
+  <a href="#works-with-the-agent-you-already-use">Agents</a> ·
+  <a href="#command-line">Commands</a> ·
+  <a href="#safety-and-privacy">Privacy</a> ·
+  <a href="#questions-people-ask">Questions</a> ·
+  <a href="#documentation-and-community">Docs</a>
+</p>
 
-**Simplicio** is a single-binary, local-first runtime and AI coding agent built in 100% Rust. It replaces heavy context dumps and fragmented Python tools with mathematical token bounding, cryptographic atomic edits, and hardware-governed multi-agent orchestration.
+## What Simplicio is
 
-- **100% Native Rust**: Single ~46MB standalone binary. No Python, virtualenvs, or heavy background processes.
-- **Ultra-Low Latency**: ~4ms cold start vs. seconds in interpreted runtimes.
-- **Token Economy**: A generator writes what it covers with 0 LLM tokens, and bounded context replaces raw file trees for the rest. See the [benchmark](#-measured-benchmark-simplicio-3108-vs-392-vs-no-mcp).
-- **Fail-Closed Safety**: Every code modification uses SHA-256 pre-image checks, atomic replacements, and immutable audit receipts.
+Simplicio is a local runtime for coding agents.
 
----
-## 📊 Measured Benchmark: Simplicio 3.10.8 vs 3.9.2 vs No MCP
+- **You keep your agent and your model.** Simplicio does not replace Claude Code, Codex, Cursor or whatever model sits behind them.
+- **You install one signed native binary.** The installer verifies the signature, then registers Simplicio in the agents it finds on your machine.
+- **It runs on your machine.** Your agent starts it as a local STDIO MCP server. MCP is the Model Context Protocol, the standard way a coding agent calls outside tools. STDIO means the agent launches the program itself and talks to it through its standard input and output.
+- **What changes is the session.** How long it takes and what it costs. The next section shows by how much, and where it does not help.
 
-A real model creates a file and edits it in the same session. The result is checked outside the session: pages in headless Chrome, scripts by running them. 60 sessions on 2026-10-31, medians.
+## The measurement
 
-| Task | Setup | n | Time | Model requests | Output tokens | Cost | Delivered |
-|:---|:---|---:|---:|---:|---:|---:|---:|
-| **Page from a JSON file**, a generator covers it | **Simplicio 3.10.8** | 10 | **14.1 s** | **6** | **602** | **$0.0021** | **10/10** |
-| | Simplicio 3.9.2 | 10 | 166.2 s | 24.5 | 19,944 | $0.0215 | 10/10 |
-| | No MCP | 10 | 176.3 s | 32.5 | 17,929 | $0.0203 | 10/10 |
-| **New page**, other data, other language, not used to build the generator | **Simplicio 3.10.8** | 6 | **14.1 s** | **6** | **524** | **$0.0010** | **6/6** |
-| | Simplicio 3.9.2 | 6 | 110.9 s | 17.5 | 16,091 | $0.0153 | 6/6 |
-| **Python script**, no generator covers it | **Simplicio 3.10.8** | 6 | **30.7 s** | **10.5** | **1,796** | **$0.0031** | **6/6** |
-| | Simplicio 3.9.2 | 6 | 34.1 s | 11.5 | 2,485 | $0.0051 | 6/6 |
-| | No MCP | 6 | 22.7 s | 8 | 1,268 | $0.0024 | 6/6 |
+One job, run the same way with and without Simplicio. The job is one agent session with three steps in the same conversation:
 
-The gain comes from the generator: on the page tasks, `simplicio_map` routes the request and `simplicio_codegen` writes the file with 0 LLM tokens. On a task no generator covers, 3.10.8 beats 3.9.2 and costs about 8 s and $0.0007 more per session than no MCP at all.
+1. Build a user listing: an API and a page with a table, search and sorting.
+2. Change it: drop a column, add a filter by role and a date column.
+3. Add a simple registration: a `POST` endpoint that checks its input, and a form page.
 
-> **Setup:** OpenCode 2.1.4, DeepSeek V4.1 Flash on one fixed OpenRouter endpoint, the same for every run. Cost is computed at $0.15 input, $0.60 output and $0.003 cache read per million tokens. Measured on commit `6e232bb`; one real session per task repeated it on the release code. **Prompts, method and limits:** [`benchmarks/2026-10-31-map-codegen.md`](benchmarks/2026-10-31-map-codegen.md) · **Per-session data:** [`benchmarks/2026-10-31-map-codegen.json`](benchmarks/2026-10-31-map-codegen.json).
+After every step the result is checked from outside the session. The API is called over HTTP and the pages are loaded in headless Chrome, which is Chrome without a window. Every setup used the same agent and the same model: Claude Code 2.1.330 with Claude Haiku 5.5. The baseline is that agent working with its own tools, with no Simplicio and no MCP server.
 
-Same tasks on other models, with and without Simplicio. Each model ran in one client, so compare a model with itself.
+Median of 3 sessions per setup, with the lowest and highest session in brackets:
 
-| Model | Task | Simplicio 3.10.8 | No MCP | Delivered |
-|:---|:---|---:|---:|---:|
-| **Claude Sonnet 5.5** (Claude Code) | Page from a JSON file, a generator covers it | **17.5 s · $0.0672** | 33.4 s · $0.0927 | 10/10 |
-|  | New page, other data, other language, not used to build the generator | **16.3 s · $0.0514** | 22.5 s · $0.0610 | 10/10 |
-|  | Python script, no generator covers it | **19.6 s · $0.0548** | 11.4 s · $0.0283 | 10/10 |
-| **Grok 4.7** (Grok Build) | Page from a JSON file, a generator covers it | **31.0 s · $0.1690** | 359.7 s · $0.8590 | 6/6 |
-|  | New page, other data, other language, not used to build the generator | **36.0 s · $0.2059** | 387.5 s · $0.8518 | 6/6 |
-|  | Python script, no generator covers it | **82.0 s · $0.3315** | 63.1 s · $0.2452 | 6/6 |
-| **Claude Haiku 5.5** (OpenCode) | Page from a JSON file, a generator covers it | **13.7 s · $0.0046** | 29.3 s · $0.0083 | 10/10 |
-|  | New page, other data, other language, not used to build the generator | **13.8 s · $0.0023** | 28.7 s · $0.0057 | 10/10 |
-|  | Python script, no generator covers it | **19.2 s · $0.0033** | 16.6 s · $0.0030 | 10/10 |
+| Measure | No Simplicio | Simplicio 3.14.0 | Simplicio 3.15.0 |
+|---|---|---|---|
+| Time for the whole job | 121 s (97 to 172) | 104 s (90 to 106) | **25 s (23 to 27)** |
+| Cost reported by the agent | $0.0226 (0.0186 to 0.0280) | $0.0220 (0.0214 to 0.0249) | **$0.0076 (0.0071 to 0.0098)** |
+| Model requests | 25 (19 to 33) | 18 (18 to 22) | **10 (10 to 10)** |
+| Tool calls | 22 (16 to 30) | 15 (15 to 19) | **7 (7 to 7)** |
+| Output tokens | 18,162 (15,599 to 23,328) | 19,722 (18,764 to 24,997) | **3,211 (3,068 to 3,573)** |
+| Input tokens | 34,691 (30,447 to 42,543) | 34,141 (33,121 to 40,017) | 18,755 (18,466 to 33,300) |
+| CPU time | 8.5 s (8.5 to 9.2) | 10.0 s (8.9 to 10.0) | **5.3 s (5.3 to 5.5)** |
+| Peak memory | **270 MB (248 to 274)** | 436 MB (432 to 439) | 375 MB (365 to 379) |
+| Steps delivered | 9 of 9 | 9 of 9 | 9 of 9 |
 
-[Prompts, method, limits and per-session data](benchmarks/2026-11-01-multi-model.md).
+Bold marks the best value in a row, only where its range does not overlap the others. The input-token ranges overlap, so this run claims no difference in input tokens. "9 of 9" is 3 steps in each of 3 sessions, and every step passed every outside check. A model request is one call to the model, and a tool call is one use of a tool by the agent. Cost is what the agent reports: the tokens served times the published price of the model. It is not an invoice.
 
----
+By step, as numbered above. Each cell is the median time and the median cost:
 
-## 📦 Quick Install
+| Step | No Simplicio | Simplicio 3.14.0 | Simplicio 3.15.0 |
+|---|---|---|---|
+| 1. Build | 57.3 s / $0.0111 | 53.7 s / $0.0137 | 5.8 s / $0.0022 |
+| 2. Change | 17.3 s / $0.0040 | 15.2 s / $0.0032 | 8.9 s / $0.0023 |
+| 3. Register | 31.4 s / $0.0075 | 27.5 s / $0.0056 | 10.3 s / $0.0026 |
 
-Install the signed native binary in seconds:
+**How to read it.** Against the same agent without Simplicio, the whole job ran 4.9 times faster and cost about a third as much. Against the previous release it ran 4.2 times faster. In the session, the model made 10 requests instead of 25 and wrote 3,211 output tokens instead of 18,162, for the same delivered result. The baseline is a competent, widely used agent working with its own tools. It is not handicapped. The sessions ran four at a time on one machine, so compare times only inside this table.
 
-### macOS / Linux
+### Where Simplicio does not win
+
+- **Memory.** Peak memory was 39% higher than with the plain agent: 375 MB against 270 MB.
+- **The previous release did not pay for itself on this job.** Simplicio 3.14.0 cost the same as no Simplicio, and its time difference is inside the run-to-run spread. The gain on this page arrived with 3.15.0.
+- **A short one-off Python script.** In an earlier round, Simplicio 3.10.8 was slower than the plain agent with every model tried. On Claude Sonnet 5.5 in Claude Code it took 19.6 s and $0.0548, against 11.4 s and $0.0283 without it. That task has not been measured again on 3.15.0.
+- **The sample is small.** Three sessions per setup, one model, one small new project, one machine, four sessions at once. Read the ratios as a measurement of this job, not as a promise for yours.
+
+### Check it yourself
+
+The prompts, the outside checks and every per-session number are in [the report](benchmarks/2026-11-22-standard-benchmark.md) and in [the data file](benchmarks/2026-11-22-standard-benchmark.json). Run the same three prompts in your own agent with Simplicio on and off, in a small project of your own, and compare your own times and your own bill. Earlier published runs are in [`benchmarks/`](benchmarks/).
+
+## Install
+
+Install the signed native binary. Pick one path.
+
+macOS / Linux:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
-### Windows (PowerShell as Administrator)
+Windows (PowerShell):
+
 ```powershell
 irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex
 ```
 
-### Alternative (PyPI Bootstrapper)
-
-On Windows, use `py -m pip install --upgrade simplicio-installer` followed by `simplicio install`.
+Python (PyPI):
 
 ```bash
 python3 -m pip install --upgrade simplicio-installer
 simplicio install
 ```
 
-### Simplicio Video (hypit)
-To clone the Simplicio Video runtime repository:
+On Windows, use `py -m pip install --upgrade simplicio-installer` and then `simplicio install`. If the Python script directory is not on your `PATH`, add it first.
+
+The installer downloads the latest signed release for your platform and checks its SHA-256 and its Ed25519 signature. Only then does it replace the installed binary. It puts the binary under `~/.simplicio/bin/` (on Windows, `%USERPROFILE%\.simplicio\bin\`) and automatically registers Simplicio in the agents it finds. A registration failure stops the installer instead of reporting success. Restart any agent that is already open so it reloads its configuration.
+
+**Sign in.** A Google sign-in is required, including during the public beta. Run `simplicio auth login`, then `simplicio auth status --json`, and continue when the status reports `active: true`. Registration does not need you to be signed in, so the agents are configured even before you sign in. Never paste a password or token into an agent's configuration.
+
+<details>
+<summary>Check, update, remove</summary>
+
+To update, run the installer again. Both installers are idempotent and resolve the latest release. `install.sh` and `install.ps1` are in the root of this repository.
+
 ```bash
-git clone https://github.com/hypit-ai/hypit.git simplicio-video
+# macOS / Linux
+sh install.sh --doctor
+sh install.sh --uninstall --keep-data
+sh install.sh --uninstall --purge       # confirmation required; preserves ~/.simplicio/.env
 ```
 
----
+```powershell
+# Windows
+pwsh install.ps1 -Doctor
+pwsh install.ps1 -Uninstall -KeepData
+pwsh install.ps1 -Uninstall -Purge      # confirmation required; preserves .env
+```
 
-## 🚀 First 60 Seconds
+- `--doctor` is a read-only health check.
+- `--uninstall --keep-data` removes the installed binary and keeps your data. That includes the 30-day Google sign-in state in `~/.simplicio/login.json`.
+- `--uninstall --purge` removes only the state Simplicio manages, the sign-in state included. It keeps `~/.simplicio/.env`, where provider credentials may live. An interactive purge asks you to type `PURGE`. For a non-interactive purge, set `SIMPLICIO_CONFIRM_PURGE=1`.
+- Data inside a project's own `.simplicio` folder is not removed by `--keep-data`. Look at the target before you choose `--purge`.
 
-Once installed, test the CLI and orient your project:
+Full details: [INSTALL.md](INSTALL.md).
+
+</details>
+
+## First run
 
 ```bash
-# 1. Verify your installation
 simplicio version
-
-# 2. Orient and index your current repository
 cd my-project
 simplicio onboard
-
-# 3. Launch the interactive coding assistant
-simplicio
 ```
 
----
+`simplicio version` confirms the installed binary. `simplicio onboard` prepares the project the first time. Then open your agent in that project and work as usual.
 
-## 🔌 MCP & IDE Integration
+## Works with the agent you already use
 
-Simplicio runs as an official Model Context Protocol (MCP) server for your favorite editors:
+Simplicio is a local STDIO MCP server, so an agent that can start one can use it. The registry in [`plugins/simplicio/host-surfaces.json`](plugins/simplicio/host-surfaces.json) lists 43 host ids, grouped here by how Simplicio reaches them:
 
-```bash
-# Automatically configure Claude Code, Cursor, VS Code, Zed, and JetBrains:
-simplicio mcp register
-```
+| How Simplicio reaches it | Agents |
+|---|---|
+| Native plugin or extension (5) | Claude Code, Codex, OpenCode, Hermes Agent, Gemini CLI |
+| Portable plugin package (4) | Cursor, GitHub Copilot, Kiro, Qwen Code |
+| MCP entry written by the Runtime (23) | xAI Grok Build, MiMo Code, Amp, OpenClaude, Antigravity, Pi, oh-my-pi, Goose, Auggie, Autohand Code, Charm, Cline, Command Code, Continue, Droid, Kilocode, Kimi, Mistral Vibe, Rovo Dev, Visual Studio Code, Meta Muse Code, OpenMausBot, OpenMuse |
+| Guided setup, you follow the steps (9) | Devin, Codebuff, CopilotKit OpenDots, CopilotKit OpenBot, agentes.chat, OpenAI dots, xAI Grok Bot, Meta Muse app, Cue by Manus |
+| Through another CLI (2) | OrcaDev / Orca ADE, T3 Code |
 
-### Manual MCP Server Configuration (`stdio`)
+The 43 counts the host ids in that registry. It does not count products that were tested. Each host guide in [`docs/hosts/`](docs/hosts/) states what was verified and what was not, and the [compatibility matrix](docs/hosts/compatibility-matrix.md) shows what the installer does for each host.
+
+To repeat the registration, run `simplicio mcp register`. The server command is `simplicio serve --mcp --stdio`. These are the tools your agent sees most:
+
+| Tool | What it gives you |
+|---|---|
+| `simplicio_map` | A compact map of the repository, so the agent finds its way around |
+| `simplicio_context` | The context a task needs, bounded, instead of whole files |
+| `simplicio_edit` | Structured file edits, applied as described |
+| `simplicio_validate` | Pipeline, test and delivery checks |
+| `simplicio_run` | A task run under the Runtime's control |
+
+The live list is whatever the server reports at startup. [MCP-CONNECT.md](MCP-CONNECT.md) has the full catalogue.
+
+<details>
+<summary>Manual configuration</summary>
+
+Most agents are configured for you. If yours is not, add this entry to its MCP configuration. Replace the path with the absolute path of the installed binary.
+
 ```json
 {
   "mcpServers": {
@@ -163,83 +225,125 @@ simplicio mcp register
 }
 ```
 
-For Codex, use an absolute executable path in your TOML configuration and replace the example username:
+Codex reads TOML. Agents start `command` directly, so do not use `~` and do not rely on shell expansion. Use forward slashes in Windows paths, and replace the example user name.
+
+Windows:
 
 ```toml
 [mcp_servers.simplicio]
-# Windows:
 command = "C:/Users/YourName/.simplicio/bin/simplicio.exe"
 args = ["serve", "--mcp", "--stdio"]
 ```
 
-On macOS, replace the command line with:
+macOS:
 
 ```toml
+[mcp_servers.simplicio]
 command = "/Users/your-name/.simplicio/bin/simplicio"
+args = ["serve", "--mcp", "--stdio"]
 ```
 
-On Linux, replace it with:
+Linux:
 
 ```toml
+[mcp_servers.simplicio]
 command = "/home/your-name/.simplicio/bin/simplicio"
+args = ["serve", "--mcp", "--stdio"]
 ```
 
-See [MCP-CONNECT.md](MCP-CONNECT.md) for complete platform examples.
+Where each agent keeps its file: [MCP-CONNECT.md](MCP-CONNECT.md).
 
-Every host registers `SIMPLICIO_MCP_PROFILE=full`, the default since 3.13.0: `tools/list` advertises the whole Runtime catalogue (22 tools) plus the tools of the installed plugins (34 from the fifteen packaged plugins, 56 in total on a machine that has them all). `SIMPLICIO_MCP_PROFILE=exec` is the narrow option, with six tools. The retired `mapper-only` profile no longer exists.
+</details>
 
-The project Map also arrives without a call: the `initialize` instructions carry a structural header, and a session-start hook appends the Map body once per session.
+## Command line
 
-Exposed MCP tools (full profile):
-- `simplicio_map`: Structural repository orientation without prompt bloating.
-- `simplicio_context`: Bounded token retrieval for exact code snippets.
-- `simplicio_edit`: Atomic mechanical modifications with SHA-256 receipts.
-- `simplicio_validate`: Deterministic pipeline, test and delivery-gate checks.
-- `simplicio_run`: Governed task execution with receipts.
+| Command | What you get |
+|---|---|
+| `simplicio map --repo . --for-llm markdown` | A compact structural map of the repository, written for a model to read |
+| `simplicio context --repo .` | The bounded context for a task |
+| `simplicio memory query "query" --json` | What the project already knows, recalled from its indexed memory, as JSON |
+| `simplicio edit --plan plan.json --repo .` | A prepared set of structured edits, applied to the files |
+| `simplicio run "task" --repo . --agents N` | A task run with N agents under the Runtime's control |
+| `simplicio loop` | Work that goes on in rounds until it converges |
 
----
+The public vocabulary: Mapper observes, Fast projects or retrieves, Dev CLI edits, Runtime governs, and Loop converges.
 
-<a id="core-architecture"></a>
+## Safety and privacy
 
-## ⚙️ Core Architecture Highlights
+This section describes version 3.15.0.
 
+**What Simplicio sends, and to whom**
+
+- **Your machine.** Mapping, context, edits and checks run on your machine, inside the Simplicio binary. Simplicio hands its results to your agent on the same machine. What your agent then sends to its own model provider is decided by the agent, as before.
+- **SimpleTI (simpleti.com.br).** Sign-in and plan checks only. They identify your account and this machine: a sign-in token, the program version and the machine's host name as a device name. They return your account e-mail, name and plan. None of them carries repository content: no files, no file paths, no prompts and no edits.
+- **GitHub.** A background check for a new release, at most about once every 12 hours. It carries no data about you or your code. Set `SIMPLICIO_DISABLE_AUTO_UPDATE=1` to turn it off. A new version is downloaded with a SHA-256 check and a signature check.
+- **Analytics and crash reports.** The 3.15.0 source has no analytics, crash-report or usage upload. Usage and savings records are written to local files.
+- **Services you choose.** Your code goes to another service only when you point Simplicio at one yourself: a model provider you configure for a task you ask Simplicio to run, or an integration you set up, for example GitHub or Jira. It goes to the service you chose, not to SimpleTI.
+
+**Signed releases.** Each release publishes its binaries with SHA-256 checksums, Ed25519 signatures, an SBOM (a list of what is in the build) and build provenance. The installers and the update path check the checksum and the signature before they replace the installed binary. A missing or invalid signature and a checksum mismatch are hard failures. The contract is in [docs/UPDATE_SIGNATURE_CONTRACT.md](docs/UPDATE_SIGNATURE_CONTRACT.md).
+
+**What the installer changes in your agent.** It adds a Simplicio entry to the agent's MCP configuration and keeps the rest of the configuration. In Claude Code it also allows `mcp__simplicio__*`, so a Simplicio tool is not denied in auto mode. Uninstall removes only the entries the installer wrote.
+
+## Also in this repository
+
+<details>
+<summary>Desktop app (macOS preview)</summary>
+
+A macOS (Apple Silicon) Desktop preview is published as [Simplicio-3.8.47-arm64.dmg](https://github.com/simpletibr/simplicio/releases/download/v3.8.47/Simplicio-3.8.47-arm64.dmg). Its SHA-256 is in [DESKTOP-SHA256SUMS](DESKTOP-SHA256SUMS), separate from the Runtime checksums.
+
+- Windows Desktop is not published. On Windows, use the command-line install above.
+- Apple Developer ID signing and notarization are not done. The package is ad-hoc signed, which means without an Apple developer certificate, and Gatekeeper acceptance is not claimed.
+- The command-line install above is the supported public installation path until a signed Desktop package is published.
+
+Details: [docs/desktop/RELEASE.md](docs/desktop/RELEASE.md).
+
+</details>
+
+<details>
+<summary>Map of the public surface</summary>
+
+![Simplicio flow: inputs, steps, outputs](docs/flow/simplicio.svg)
+
+The flow has 8 inputs, 27 steps and 7 outputs (42 nodes, 63 edges). It covers every public command of the command line and the 13 MCP tools documented in [MCP-CONNECT.md](MCP-CONNECT.md). It is generated from one source file, `docs/flow/simplicio.flow.json`:
+
+```bash
+python3 scripts/generate_flow.py            # regenerate the Mermaid, SVG and Langflow files
+python3 scripts/generate_flow.py --check    # drift check before a release
+python3 -m pytest tests/test_flow_contract.py -q
 ```
-User Prompt ──► simplicio map ──► simplicio context ──► Wave Loop ──► simplicio edit ──► Validate & Deliver
-                 (Graph & AST)     (Token Bounding)     (Tokio DAG)   (Atomic SHA-256)   (Audit Receipts)
-```
 
-1. **Orientation (`simplicio map`)**: High-speed discovery of import topologies and public interfaces without reading thousands of redundant files into LLM context.
-2. **Context Bounding (`simplicio context`)**: Mathematical budget packing (`st_prompt_budget`) ensuring the model only receives the exact AST fragments it needs.
-3. **Mechanical Edits (`simplicio edit`)**: Deterministic exact search/replace, insertions, and deletions with pre-image hashing. If the file changed underneath, the patch safely aborts (*fail-closed*).
-4. **Wave Orchestrator (`simplicio loop`)**: Multi-stage DAG partitioner executing parallel reads and commands through Tokio semaphores with deterministic state reduction.
-5. **Hardware Governor (`CPUExecutor`)**: Dynamically samples CPU and memory pressure to prevent machine lockups. Automatically throttles subagents while keeping writes strictly serialized (`write_workers: 1`).
+The generated files are `simplicio.mmd`, `simplicio.svg` and `langflow/simplicio.langflow.json`. The Mermaid render was checked with `mmdc`; the evidence and hashes are in `docs/flow/render/`. The current artifact was imported into Langflow 1.12.0 on a local server on 2026-11-21 and read back. The receipt is `docs/flow/evidence/langflow-verify.json` and the read-back is `docs/flow/evidence/langflow-readback.json`. Without a server, `scripts/verify_flow_langflow.py` fails closed (exit 2, `status=blocked`). Requirements and how to repeat it: [docs/flow/README.md](docs/flow/README.md).
 
----
+</details>
 
-## 📖 Complete Documentation & Guides
+## Questions people ask
 
-For deep technical dives, CLI references, benchmark proofs, and multi-agent workflows, visit our official documentation hub:
+**Do I have to change my agent or my model?**<br>
+No. Simplicio plugs into the agent you already use. In the benchmark above, every setup used the same agent and the same model.
 
-👉 **[https://simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)**
+**Will I always get these numbers?**<br>
+No. They measure one job, with one model, on one machine, over three sessions per setup. See [Where Simplicio does not win](#where-simplicio-does-not-win), and run the comparison on your own work.
 
----
+**Is it open source?**<br>
+No. Simplicio is proprietary. The Runtime is a signed binary, published as release assets, and its source is not public. This repository holds the installers, the packages for the agents, the Desktop app source, the documentation and the benchmark data.
 
-## 🔒 Security & Privacy
+**How do I remove it?**<br>
+Run `sh install.sh --uninstall --keep-data`, or `pwsh install.ps1 -Uninstall -KeepData` on Windows. It removes the binary and keeps your data. [Install](#install) has the details and the purge option.
 
-- **Your Code Never Leaves Your Machine**: All repository mapping, context packaging, editing, and test gates execute locally.
-- **Auditable Provenance**: Every modification generates an immutable cryptographic receipt (`receipt.json`).
-- **No Mystery Telemetry**: Zero silent telemetry or code exfiltration.
+**Do I need an account?**<br>
+Yes. A Google sign-in is required, including during the public beta. Run `simplicio auth login`.
 
----
+**Does my code leave my machine?**<br>
+Mapping, context, edits and checks run on your machine. Simplicio talks to SimpleTI for sign-in and plan checks, and to GitHub to look for updates, with no repository content in either. See [What Simplicio sends, and to whom](#safety-and-privacy).
 
-## 💬 Community & Support
+## Documentation and community
 
-- **Official Website**: [simpleti.com.br/simplicio](https://simpleti.com.br/simplicio/)
-- **Documentation**: [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
-- **Discord**: [Join the Community](https://discord.gg/wM6tr7xVb)
-- **Issues**: [GitHub Issue Tracker](https://github.com/simpletibr/simplicio/issues)
-
----
+- **Website:** [simpleti.com.br/simplicio](https://simpleti.com.br/simplicio/)
+- **Documentation:** [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
+- **Discord:** [Join the community](https://discord.gg/wM6tr7xVb)
+- **Issues:** [GitHub issue tracker](https://github.com/simpletibr/simplicio/issues)
+- **In this repository:** [INSTALL.md](INSTALL.md), [MCP-CONNECT.md](MCP-CONNECT.md), [docs/hosts/](docs/hosts/) and [benchmarks/](benchmarks/)
+- **Related:** Simplicio Video (hypit). To clone it: `git clone https://github.com/hypit-ai/hypit.git simplicio-video`
 
 <p align="center">
   <sub>© 2026 SimpleTI. Simplicio is a registered proprietary software. All rights reserved.</sub>
