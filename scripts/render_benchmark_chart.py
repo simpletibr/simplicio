@@ -374,7 +374,6 @@ def sessions_points(data: dict) -> dict[str, list[tuple[Decimal, Decimal]]]:
 
 
 def render_sessions(data: dict, theme_name: str) -> str:
-    theme = THEMES[theme_name]
     points = sessions_points(data)
     labels = {arm: _arm_label(data, arm) for arm in ARM_ORDER}
     parts = []
