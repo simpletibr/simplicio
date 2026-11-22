@@ -4,6 +4,8 @@
 
 <h1>Simplicio</h1>
 
+<p><b>UltraFast Mode for all.</b></p>
+
 <p><b>Same agent, same model, same job: 121&nbsp;s&nbsp;→&nbsp;25&nbsp;s, and $0.0226&nbsp;→&nbsp;$0.0076.</b></p>
 
 <p>Without Simplicio → with Simplicio 3.15.0. Median of 3 runs of one small coding job in Claude Code with Claude Haiku 5.5.</p>
@@ -68,7 +70,7 @@
 
 ## What Simplicio is
 
-Simplicio is a local program for coding agents.
+Simplicio is a local program that gives the coding agent you already use an ultra-fast mode, whatever the agent and whatever the model. The numbers on this page come from one agent and one model; the section below says exactly what was measured.
 
 - **You keep your agent and your model.** Simplicio does not replace Claude Code, Codex, Cursor or whatever model sits behind them.
 - **You install one signed native binary.** The installer verifies the signature, then registers Simplicio in the agents it finds on your machine.
@@ -155,7 +157,7 @@ Each cell is the median time and the median cost of the step:
 
 </details>
 
-**How to read it.** The ratios come from the unrounded medians. Against the same agent without Simplicio, the whole job ran 4.9 times faster and cost about a third as much. Against the previous release it ran 4.2 times faster. In the session, the model made 10 requests instead of 25 and wrote 3,211 output tokens instead of 18,162, and the job passed the same outside checks. Worst case: the fastest session without Simplicio (97 s) was still 3.7 times slower than the slowest session with Simplicio 3.15.0 (27 s), and the cheapest session without it ($0.0186) still cost 1.9 times as much as the most expensive session with it ($0.0098). The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration. Cost counts model tokens only. The sessions ran four at a time on one machine, so compare times only inside this round.
+**How to read it.** The ratios come from the unrounded medians. Against the same agent without Simplicio, the whole job ran 4.9 times faster and cost about a third as much. Against the previous release it ran 4.2 times faster. In the session, the model made 10 requests instead of 25 and wrote 3,211 output tokens instead of 18,162, and the job passed the same outside checks. Worst case: the fastest session without Simplicio (97.1 s) was still 3.7 times slower than the slowest session with Simplicio 3.15.0 (26.6 s), and the cheapest session without it ($0.0186) still cost 1.9 times as much as the most expensive session with it ($0.0098). The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration. Cost counts model tokens only. The sessions ran four at a time on one machine, so compare times only inside this round.
 
 ### Where Simplicio does not win
 

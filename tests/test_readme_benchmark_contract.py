@@ -32,6 +32,10 @@ SVGS = (
 
 ARM_IDS = ("no-simplicio", "simplicio-3.14.0", "simplicio-3.15.0")
 
+# The brand line: the same English text in every language, never translated.
+TAGLINE = "<p><b>UltraFast Mode for all.</b></p>"
+LOCALIZED = sorted((ROOT / "READMEs").glob("README.*.md"))
+
 TOP_LEVEL_KEYS = {"schema", "date", "model", "agent", "machine", "round", "arms", "sessions"}
 SESSION_KEYS = {"arm", "rep", "steps", "totals"}
 # Per step: delivery, checks, time, CPU, memory and cost. Counts are published per session, not per step.
@@ -343,9 +347,9 @@ def test_readme_headline_and_reading_paragraph_match_the_data():
     fastest_none, slowest_new = min(walls[ARM_IDS[0]]), max(walls[ARM_IDS[2]])
     cheapest_none, dearest_new = min(costs[ARM_IDS[0]]), max(costs[ARM_IDS[2]])
     worst = (
-        f"Worst case: the fastest session without Simplicio ({_round(fastest_none, 0)} s) was still "
+        f"Worst case: the fastest session without Simplicio ({_round(fastest_none, 1)} s) was still "
         f"{_round(fastest_none / slowest_new, 1)} times slower than the slowest session with Simplicio 3.15.0 "
-        f"({_round(slowest_new, 0)} s), and the cheapest session without it (${_round(cheapest_none, 4)}) still cost "
+        f"({_round(slowest_new, 1)} s), and the cheapest session without it (${_round(cheapest_none, 4)}) still cost "
         f"{_round(cheapest_none / dearest_new, 1)} times as much as the most expensive session with it "
         f"(${_round(dearest_new, 4)})."
     )
@@ -520,7 +524,8 @@ def _expected_figure_numbers() -> dict[str, dict[str, list[str]]]:
         desc += [f"{_round(w, 0)} s and ${_round(c, 4)}" for w, c in pairs]
         lo_w, hi_w = pairs[0][0], pairs[-1][0]
         costs_sorted = sorted(c for _, c in pairs)
-        alt.append(f"{_round(lo_w, 0)} to {_round(hi_w, 0)} s and ${_round(costs_sorted[0], 4)} to ${_round(costs_sorted[-1], 4)}")
+        alt.append(f"{_round(lo_w, 0)} to {_round(hi_w, 0)} s and "
+                   f"${_round(costs_sorted[0], 4)} to ${_round(costs_sorted[-1], 4)}")
     out["sessions"] = {"desc": desc, "alt": alt}
 
     # requests and tool calls
@@ -644,7 +649,10 @@ def test_report_shows_the_sessions_steps_and_memory_figures_next_to_their_tables
 
 def test_readme_puts_each_figure_where_the_page_needs_it_and_keeps_the_exact_numbers_visible():
     text = _read(README)
-    at = lambda needle: text.index(needle)
+
+    def at(needle):
+        return text.index(needle)
+
     assert at("Every session is on this chart, not only the medians.") < at("sessions-light.svg") < at("| Measure | No Simplicio")
     assert at("| Steps delivered | 9 of 9 |") < at("What changed in the session, in counts") < at("work-light.svg")
     assert at("work-light.svg") < at("Time by step, on one shared scale.") < at("steps-light.svg")
@@ -741,7 +749,8 @@ def test_agents_section_is_written_from_the_registry_and_the_matrix():
     assert len(supported) + len(unverified) + len(no_row) == len(names)
     assert (f"Of those {len(names)} it marks {len(supported)} agents as supported and {len(unverified)} `unverified`, "
             f"and it has no row for {' and '.join(no_row)}.") in section
-    assert "Where the registry says Simplicio writes the entry and the matrix says `unverified`, treat that integration as untested." in section
+    assert ("Where the registry says Simplicio writes the entry and the matrix says `unverified`, "
+            "treat that integration as untested.") in section
 
     # the seven agents named as examples exist in the registry and in the sentence
     sentence = "among them " + ", ".join(SEVEN_NAMED_AGENTS[:-1]) + " and " + SEVEN_NAMED_AGENTS[-1] + "."
@@ -752,7 +761,8 @@ def test_agents_section_is_written_from_the_registry_and_the_matrix():
 
     # guides and plugins
     assert f"{len(_guides_for_registry_agents(registry))} agents have a guide in [`docs/hosts/`](docs/hosts/)." in section
-    assert "the plugin is applied in a separate step that asks for your consent, and [INSTALL.md](INSTALL.md) describes it." in section
+    assert ("the plugin is applied in a separate step that asks for your consent, "
+            "and [INSTALL.md](INSTALL.md) describes it.") in section
 
     # the collapsed table: names from the registry, counts in a column, the supported ones in bold
     details = section.split("<details>", 1)[1].split("</details>", 1)[0]
@@ -766,8 +776,9 @@ def test_agents_section_is_written_from_the_registry_and_the_matrix():
     assert "Bold: the compatibility matrix marks the agent as supported." in details
 
     # what must not come back
-    for gone in ("nothing is configured automatically", "The installer detects these today", "The other 31 agents in the registry",
-                 "If your agent is not one of the 12 above", "| How Simplicio reaches it |\n|---|---|\n| Native plugin or extension (5)",
+    for gone in ("nothing is configured automatically", "The installer detects these today",
+                 "The other 31 agents in the registry", "If your agent is not one of the 12 above",
+                 "| How Simplicio reaches it |\n|---|---|\n| Native plugin or extension (5)",
                  "Each host guide states", "shows what the installer does for each host"):
         assert gone not in text, gone
     assert "If your agent was not configured for you, add this entry to its MCP configuration." in text
@@ -806,7 +817,8 @@ def test_install_and_safety_statements_match_what_the_scripts_do():
     for needle in ("- `--doctor` checks the installation.",
                    "A purge needs `SIMPLICIO_CONFIRM_PURGE=1`.",
                    "You can run either installer again at any time",
-                   "Uninstall does not edit your agents' configuration. The Simplicio entries stay in each agent until you remove them in that agent's own settings.",
+                   "Uninstall does not edit your agents' configuration. The Simplicio entries stay in each agent "
+                   "until you remove them in that agent's own settings.",
                    "It does not edit your agents' configuration, so remove the Simplicio entries in each agent's own settings.",
                    "For stable releases the contract makes a missing or invalid signature and a checksum mismatch hard failures.",
                    "The DMG has no signature file and bundles the Simplicio 3.8.47 binary.",
@@ -820,21 +832,47 @@ def test_install_and_safety_statements_match_what_the_scripts_do():
     assert "Windows Desktop is not published." in text and "Apple Developer ID signing" in text
 
 
+def test_tagline_is_the_same_english_line_in_all_15_pages_under_the_name():
+    pages = [README, *LOCALIZED]
+    assert len(pages) == 15
+    for page in pages:
+        text = _read(page)
+        assert text.count(TAGLINE) == 1, f"{page.name}: the tagline must appear once, unchanged and in English"
+        assert text.count("UltraFast") == 1, f"{page.name}: UltraFast appears outside the tagline"
+        lines = text.split("\n")
+        index = lines.index(TAGLINE)
+        assert lines[index - 2] == "<h1>Simplicio</h1>" and lines[index - 1] == "", \
+            f"{page.name}: the tagline goes right under <h1>Simplicio</h1>"
+        # the arrow points the way the page is read: right to left in the Arabic and Hebrew pages
+        arrow = "←" if page.name.endswith(("ar-SA.md", "he-IL.md")) else "→"
+        assert arrow in lines[index + 2] and lines[index + 2].startswith("<p><b>"), \
+            f"{page.name}: the measured headline follows the tagline"
+
+
 def test_first_screen_questions_and_wording_follow_the_review():
     text = _read(README)
     top = text.split("</div>", 1)[0]
     assert "<b>Same agent, same model, same job: 121&nbsp;s&nbsp;→&nbsp;25&nbsp;s, and $0.0226&nbsp;→&nbsp;$0.0076.</b>" in top
-    assert "<p>Without Simplicio → with Simplicio 3.15.0. Median of 3 runs of one small coding job in Claude Code with Claude Haiku 5.5.</p>" in top
+    assert ("<p>Without Simplicio → with Simplicio 3.15.0. Median of 3 runs of one small coding job "
+            "in Claude Code with Claude Haiku 5.5.</p>") in top
     assert "<p>Simplicio runs on your machine and adds tools to the coding agent you already use.</p>" in top
-    assert '<p align="center">How Simplicio gets this result is not published. The measurements are, including the ones where it loses.</p>' in text
+    assert top.index("<h1>Simplicio</h1>") < top.index(TAGLINE) < top.index("<b>Same agent, same model, same job:")
+    assert text.count(TAGLINE) == 1
+    assert ("Simplicio is a local program that gives the coding agent you already use an ultra-fast mode, "
+            "whatever the agent and whatever the model. The numbers on this page come from one agent and one model; "
+            "the section below says exactly what was measured.") in text
+    assert ('<p align="center">How Simplicio gets this result is not published. '
+            'The measurements are, including the ones where it loses.</p>') in text
     assert "\n> " not in text
     assert ("Read with it: one small job, three sessions per setup, one model. The outside checks are narrower than the prompts. "
             "Peak memory was higher: 375 MB against 270 MB. The Simplicio builds were compiled from the release commits, "
             "with sign-in off.") in text
     # "setup" is defined where it is first used
     first_use = re.search(r"\bsetups?\b", text).start()
-    assert first_use == text.index("Median of 3 sessions for each setup (no Simplicio, Simplicio 3.14.0 and Simplicio 3.15.0)") + len("Median of 3 sessions for each ")
-    assert text.index("## Questions people ask") < text.index("**Is the comparison fair?**") < text.index("**Do I have to change my agent or my model?**")
+    caption = "Median of 3 sessions for each setup (no Simplicio, Simplicio 3.14.0 and Simplicio 3.15.0)"
+    assert first_use == text.index(caption) + len("Median of 3 sessions for each ")
+    assert (text.index("## Questions people ask") < text.index("**Is the comparison fair?**")
+            < text.index("**Do I have to change my agent or my model?**"))
     for needle in ("It gives your agent tools.", "so an agent that can start a local MCP server can be pointed at it",
                    "These are the core tools your agent gets:", "Structured file edits from a prepared plan",
                    "the tokens used times the model's published price", "It counts model tokens only.",
@@ -926,7 +964,8 @@ def test_hooks_are_named_plainly_in_two_places_only_and_never_described():
     # The word appears in the README only in the installer paragraph and in the privacy item.
     for line in readme.splitlines():
         if "hook" in line.lower():
-            assert line.startswith("**What the installer changes in your agent.**") or line.startswith("- **No analytics.**"), line[:80]
+            allowed = line.startswith("**What the installer changes in your agent.**") or line.startswith("- **No analytics.**")
+            assert allowed, line[:80]
     assert "hook" not in report.lower()
     # The setups are not enumerated in the measurement paragraph or in the report.
     assert "The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration." in readme

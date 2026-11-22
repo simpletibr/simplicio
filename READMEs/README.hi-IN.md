@@ -1,107 +1,196 @@
-# 🔥 Simplicio
+<div align="center">
+
+<img src="../assets/simplicio-icon-192.png" alt="Simplicio लोगो" width="96" height="96">
+
+<h1>Simplicio</h1>
+
+<p><b>UltraFast Mode for all.</b></p>
+
+<p><b>एक ही एजेंट, एक ही मॉडल, एक ही जॉब: 121&nbsp;s&nbsp;→&nbsp;25&nbsp;s, और $0.0226&nbsp;→&nbsp;$0.0076।</b></p>
+
+<p>Simplicio के बिना → Simplicio 3.15.0 के साथ। Claude Code में Claude Haiku 5.5 के साथ, एक छोटे कोडिंग जॉब के 3 रन का मीडियन।</p>
+
+<p>Simplicio आपकी मशीन पर चलता है और उस कोडिंग एजेंट में टूल जोड़ता है जो आप पहले से इस्तेमाल करते हैं।</p>
+
+<p>
+  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=2fe6a0&label=release" alt="नवीनतम रिलीज़"></a>
+  <a href="https://simpleti.com.br/simplicio/docs"><img src="https://img.shields.io/badge/docs-simpleti.com.br-ffd23f" alt="दस्तावेज़"></a>
+  <a href="https://github.com/simpletibr/simplicio/stargazers"><img src="https://img.shields.io/github/stars/simpletibr/simplicio?style=social" alt="स्टार्स"></a>
+  <img src="https://img.shields.io/badge/license-Proprietary-red" alt="लाइसेंस: मालिकाना">
+</p>
+
+<p>
+  <a href="../README.md">English</a> ·
+  <a href="README.pt-BR.md">Português (Brasil)</a> ·
+  <a href="README.es-ES.md">Español</a> ·
+  <a href="README.fr-FR.md">Français</a> ·
+  <a href="README.it-IT.md">Italiano</a> ·
+  <a href="README.pl-PL.md">Polski</a> ·
+  <a href="README.ru-RU.md">Русский</a> ·
+  <a href="README.zh-CN.md">简体中文</a> ·
+  <a href="README.ja-JP.md">日本語</a> ·
+  <a href="README.ko-KR.md">한국어</a> ·
+  हिन्दी ·
+  <a href="README.ar-SA.md">العربية</a>&lrm; ·
+  <a href="README.he-IL.md">עברית</a>&lrm; ·
+  <a href="README.id-ID.md">Bahasa Indonesia</a> ·
+  <a href="README.ms-MY.md">Bahasa Melayu</a>
+</p>
+
+<p align="center"><sub>यह फ़ाइल <a href="../README.md">English README</a> का अनुवाद है। अगर दोनों में फ़र्क हो, तो अंग्रेज़ी पेज ही संदर्भ है। चार्ट और चित्र अंग्रेज़ी में ही हैं।</sub></p>
+
+</div>
 
 <p align="center">
-  <img src="../assets/simplicio-hero.png" alt="Simplicio — AI कोडिंग एजेंट" width="920" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-light.svg" width="840" alt="बार चार्ट, जिसमें तीन मापों पर Simplicio के बिना, Simplicio 3.14.0 और Simplicio 3.15.0 की तुलना है। हर सेटअप के तीन सेशन का मीडियन। पूरे जॉब का समय: 121 s Simplicio के बिना, 104 s Simplicio 3.14.0 के साथ और 25 s Simplicio 3.15.0 के साथ। लागत: $0.0226, $0.0220 और $0.0076। आउटपुट टोकन: 18,162, 19,722 और 3,211।">
+  </picture>
 </p>
 
 <p align="center">
-  <a href="https://github.com/simpletibr/simplicio/releases/latest"><img src="https://img.shields.io/github/v/release/simpletibr/simplicio?color=blue&label=latest" alt="Latest Release"></a>
-  <a href="https://github.com/simpletibr/simplicio/stargazers"><img src="https://img.shields.io/github/stars/simpletibr/simplicio?style=social" alt="Stars"></a>
-  <a href="https://github.com/simpletibr/simplicio/releases"><img src="https://img.shields.io/github/downloads/simpletibr/simplicio/total?color=green" alt="Downloads"></a>
-  <a href="../plugins/simplicio/LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red" alt="License"></a>
+  <sub>हर सेटअप के 3 सेशन का मीडियन (Simplicio के बिना, Simplicio 3.14.0 और Simplicio 3.15.0)। Claude Code 2.1.330 में Claude Haiku 5.5, 2026-11-22। हर सेटअप ने 9 में से 9 चरण पूरे किए। हर बार पर पतली रेखा सबसे कम सेशन से सबसे ज़्यादा सेशन तक जाती है।<br>
+  <a href="../benchmarks/2026-11-22-standard-benchmark.md">विधि, डेटा और सीमाएँ</a></sub>
 </p>
 
 <p align="center">
-  <a href="#-इंस्टॉलेशन">इंस्टॉलेशन</a> ·
-  <a href="#-यह-क्या-करता-है">यह क्या करता है</a> ·
-  <a href="#-benchmark-2026-10-31">Benchmark</a> ·
-  <a href="https://simpleti.com.br/simplicio/#start">वेबसाइट</a>
+  <sub>इसे साथ में पढ़ें: एक छोटा जॉब, हर सेटअप के लिए तीन सेशन, एक मॉडल। बाहरी जाँच का दायरा प्रॉम्प्ट से सीमित है। पीक मेमोरी ज़्यादा थी: 270 MB के मुकाबले 375 MB। Simplicio के बिल्ड रिलीज़ कमिट से कंपाइल किए गए थे, जिनमें साइन-इन बंद था।</sub>
+</p>
+
+<p align="center">Simplicio यह नतीजा कैसे हासिल करता है, यह प्रकाशित नहीं किया गया है। मापन प्रकाशित किए गए हैं, उन मामलों समेत जहाँ Simplicio पीछे रहता है।</p>
+
+<p align="center">
+  <b>आज़माएँ:</b> <a href="#install">इंस्टॉल</a> · <a href="#first-run">पहली बार चलाना</a><br>
+  <a href="#what-simplicio-is">यह क्या है</a> ·
+  <a href="#the-measurement">मापन</a> ·
+  <a href="#works-with-the-agent-you-already-use">एजेंट</a> ·
+  <a href="#command-line">कमांड</a> ·
+  <a href="#safety-and-privacy">गोपनीयता</a> ·
+  <a href="#questions-people-ask">सवाल</a> ·
+  <a href="#documentation-and-community">दस्तावेज़</a>
+</p>
+
+<a id="what-simplicio-is"></a>
+
+## Simplicio क्या है
+
+Simplicio एक लोकल प्रोग्राम है जो आपके पहले से इस्तेमाल हो रहे कोडिंग एजेंट को अल्ट्रा-फ़ास्ट मोड देता है, चाहे एजेंट कोई भी हो और मॉडल कोई भी। इस पेज के आंकड़े एक एजेंट और एक मॉडल से आए हैं; नीचे का हिस्सा ठीक-ठीक बताता है कि क्या मापा गया।
+
+- **आप अपना एजेंट और अपना मॉडल रखते हैं।** Simplicio, Claude Code, Codex, Cursor या उनके पीछे जो भी मॉडल हो, उसकी जगह नहीं लेता।
+- **आप एक हस्ताक्षरित नेटिव बाइनरी इंस्टॉल करते हैं।** इंस्टॉलर हस्ताक्षर की पुष्टि करता है, फिर अपनी मशीन पर मिले एजेंट्स में Simplicio को रजिस्टर करता है।
+- **यह आपकी मशीन पर चलता है।** आपका एजेंट इसे एक लोकल STDIO MCP सर्वर के रूप में शुरू करता है। MCP का मतलब है Model Context Protocol, यानी वह मानक तरीका जिससे कोडिंग एजेंट बाहरी टूल्स को कॉल करता है। STDIO का मतलब है कि एजेंट प्रोग्राम को खुद शुरू करता है और उसके स्टैंडर्ड इनपुट और स्टैंडर्ड आउटपुट के ज़रिए उससे बात करता है।
+- **यह आपके एजेंट को टूल देता है।** रिपॉज़िटरी का मैप, सीमित कॉन्टेक्स्ट, स्ट्रक्चर्ड एडिट और जाँच। [मुख्य टूल](#works-with-the-agent-you-already-use) नीचे सूचीबद्ध हैं।
+- **जो बदलता है, वह सेशन है।** कितना समय लगता है और कितनी लागत आती है। अगला हिस्सा बताता है कि फ़र्क कितना है, और यह कहाँ मदद नहीं करता।
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/diagram-where-simplicio-runs-dark.svg">
+    <img src="../assets/diagram-where-simplicio-runs-light.svg" width="840" alt="आरेख। आपकी मशीन पर: आप, आपका कोडिंग एजेंट, Simplicio और आपकी रिपॉज़िटरी। एजेंट लोकल STDIO (MCP) पर Simplicio से बात करता है। एजेंट पहले की तरह आपके मॉडल प्रदाता से बात करता है। Simplicio साइन-इन और प्लान जाँच के लिए SimpleTI से और रिलीज़ जाँच के लिए GitHub से बात करता है, और दोनों में से किसी में भी रिपॉज़िटरी की सामग्री नहीं जाती।">
+  </picture>
 </p>
 
 <p align="center">
-  <strong>🌍 भाषाएँ:</strong><br>
-  <a href="../README.md">🇬🇧 English</a> |
-  <a href="README.pt-BR.md">🇧🇷 Português</a> |
-  <a href="README.es-ES.md">🇪🇸 Español</a> |
-  <a href="README.fr-FR.md">🇫🇷 Français</a> |
-  <a href="README.ja-JP.md">🇯🇵 日本語</a> |
-  <a href="README.ko-KR.md">🇰🇷 한국어</a> |
-  <a href="README.zh-CN.md">🇨🇳 简体中文</a> |
-  <a href="README.it-IT.md">🇮🇹 Italiano</a> |
-  <a href="README.ru-RU.md">🇷🇺 Русский</a> |
-  <a href="README.pl-PL.md">🇵🇱 Polski</a> |
-  <a href="README.hi-IN.md">🇮🇳 हिन्दी</a> |
-  <a href="README.ar-SA.md">🇸🇦 العربية</a> |
-  <a href="README.he-IL.md">🇮🇱 עברית</a> |
-  <a href="README.ms-MY.md">🇲🇾 Bahasa Melayu</a> |
-  <a href="README.id-ID.md">🇮🇩 Bahasa Indonesia</a>
+  <sub>चित्र दिखाता है कि डिफ़ॉल्ट रूप से क्या होता है। पूरी सूची, जिसमें वे फ़ीचर भी शामिल हैं जो दूसरी सेवाओं तक पहुँचते हैं, <a href="#safety-and-privacy">Simplicio क्या भेजता है, और किसे</a> में है, जो सुरक्षा और गोपनीयता के अंतर्गत है।</sub>
 </p>
 
----
+<a id="the-measurement"></a>
 
-## ⚡ TL;DR
+## मापन
 
-**Simplicio** एक टर्मिनल AI कोडिंग एजेंट है — एक एकल बाइनरी जो आपके संपूर्ण
-AI-सहायित विकास कार्यप्रवाह को बदल देता है: चैट, कोड जनरेशन, रिपॉजिटरी
-संदर्भ, योजना, स्थानीय मल्टी-एजेंट ऑर्केस्ट्रेशन (64 → 600 एजेंट), और
-साक्ष्य-समर्थित PR डिलीवरी।
+एक ही जॉब, Simplicio के साथ और बिना, एक ही तरीके से चलाया गया। जॉब एक एजेंट सेशन है, जिसमें एक ही बातचीत में तीन चरण हैं:
 
-**आपकी मशीन पर चलता है। आपका कोड कभी आपके नियंत्रण से बाहर नहीं जाता। रिमोट मॉडल
-वैकल्पिक हैं, अनिवार्य नहीं।**
+1. यूज़र लिस्टिंग बनाएँ: एक API और एक पेज, जिसमें टेबल, सर्च और सॉर्टिंग हो।
+2. इसमें बदलाव करें: एक कॉलम हटाएँ, रोल के हिसाब से फ़िल्टर और एक डेट कॉलम जोड़ें।
+3. एक सरल रजिस्ट्रेशन जोड़ें: एक `POST` एंडपॉइंट, जो इनपुट की जाँच करे, और एक फ़ॉर्म पेज।
 
-> हर इंटरैक्शन दिखाता है कि आपने कितने टोकन बचाए। एकल Rust बाइनरी, शून्य निर्भरताएँ।
+हर चरण के बाद नतीजे की जाँच सेशन के बाहर से होती है। API को HTTP पर कॉल किया जाता है, और पेज headless Chrome में लोड होते हैं, यानी ऐसा Chrome जिसकी कोई विंडो नहीं होती। हर सेटअप में एक ही एजेंट और एक ही मॉडल था: Claude Code 2.1.330, जिसमें Claude Haiku 5.5 था। बेसलाइन है Claude Code 2.1.330, उसके अपने टूल्स के साथ, बिना MCP सर्वर और बिना Simplicio कॉन्फ़िगरेशन के। ये जाँचें सर्च बॉक्स, सॉर्टिंग, सेव के बाद के रीडायरेक्ट, पेज के लुक या कोड की क्वालिटी की जाँच नहीं करतीं।
 
-## 🚀 इंस्टॉलेशन
+हर सेशन इस चार्ट पर है, सिर्फ़ मीडियन ही नहीं।
 
-### Codex प्लगइन से इंस्टॉल करें
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-sessions-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-sessions-light.svg" width="840" alt="हर सेशन का स्कैटर प्लॉट, जिसमें पूरे जॉब का समय क्षैतिज अक्ष पर और एजेंट द्वारा रिपोर्ट की गई लागत ऊर्ध्वाधर अक्ष पर है। Simplicio 3.15.0, हरे डायमंड: 23 से 27 s और $0.0071 से $0.0098। Simplicio 3.14.0, भूरे स्क्वेयर: 90 से 106 s और $0.0214 से $0.0249। Simplicio के बिना, खोखले सर्कल: 97 से 172 s और $0.0186 से $0.0280।">
+  </picture>
+</p>
 
-यदि आप Codex का उपयोग करते हैं, तो Simplicio को प्लगइन के रूप में इंस्टॉल कर सकते हैं। सार्वजनिक Marketplace जोड़ें, प्लगइन इंस्टॉल करें और नया Codex सत्र शुरू करें; प्लगइन Simplicio Runtime को इंस्टॉल और बूटस्ट्रैप करता है तथा उसकी skills और MCP टूल उपलब्ध कराता है।
+हर सेटअप के 3 सेशन का मीडियन। हर मान के नीचे की छोटी रेखा सबसे कम और सबसे ज़्यादा सेशन दिखाती है।
 
-```bash
-codex plugin marketplace add simpletibr/simplicio --ref master
-codex plugin add simplicio@simplicio-codex
-```
+| माप | Simplicio के बिना | Simplicio 3.14.0 | Simplicio 3.15.0 |
+|---|---|---|---|
+| जॉब का समय | 121 s<br><sub>97–172</sub> | 104 s<br><sub>90–106</sub> | **25 s**<br><sub>23–27</sub> |
+| रिपोर्ट की गई लागत | $0.0226<br><sub>0.0186–0.0280</sub> | $0.0220<br><sub>0.0214–0.0249</sub> | **$0.0076**<br><sub>0.0071–0.0098</sub> |
+| मॉडल रिक्वेस्ट | 25<br><sub>19–33</sub> | 18<br><sub>18–22</sub> | **10**<br><sub>10–10</sub> |
+| टूल कॉल | 22<br><sub>16–30</sub> | 15<br><sub>15–19</sub> | **7**<br><sub>7–7</sub> |
+| आउटपुट टोकन | 18,162<br><sub>15,599–23,328</sub> | 19,722<br><sub>18,764–24,997</sub> | **3,211**<br><sub>3,068–3,573</sub> |
+| इनपुट टोकन | 34,691<br><sub>30,447–42,543</sub> | 34,141<br><sub>33,121–40,017</sub> | 18,755<br><sub>18,466–33,300</sub> |
+| CPU समय | 8.5 s<br><sub>8.5–9.2</sub> | 10.0 s<br><sub>8.9–10.0</sub> | **5.3 s**<br><sub>5.3–5.5</sub> |
+| पीक मेमोरी | **270 MB**<br><sub>248–274</sub> | 436 MB<br><sub>432–439</sub> | 375 MB<br><sub>365–379</sub> |
+| पूरे हुए चरण | 9 में से 9 | 9 में से 9 | 9 में से 9 |
 
-### npm / npx (किसी भी OS पर)
+बोल्ड अक्षर हर पंक्ति का सबसे अच्छा मान दिखाता है, और सिर्फ़ तब, जब उसकी रेंज बाकी से ओवरलैप नहीं करती। इनपुट टोकन की रेंज आपस में ओवरलैप करती हैं, इसलिए इस रन में इनपुट टोकन में कोई फ़र्क होने का दावा नहीं है। "9 में से 9" का मतलब है, 3 सेशन में से हर एक में 3 चरण, और हर चरण ने हर बाहरी जाँच पास की। जॉब का समय पूरे जॉब का समय है। एक मॉडल रिक्वेस्ट, मॉडल को की गई एक कॉल है, और एक टूल कॉल, एजेंट द्वारा किसी टूल का एक इस्तेमाल है। रिपोर्ट की गई लागत वह है जो एजेंट रिपोर्ट करता है: इस्तेमाल किए गए टोकन गुणा मॉडल की प्रकाशित कीमत। इसमें सिर्फ़ मॉडल टोकन गिने जाते हैं। यह कोई इनवॉइस नहीं है।
 
-```bash
-npx simplicio install
-```
+सेशन में क्या बदला, गिनती में: मॉडल ने कम रिक्वेस्ट कीं, और एजेंट ने कम टूल कॉल कीं।
 
-### pip / PyPI (किसी भी OS पर)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-work-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-work-light.svg" width="840" alt="यूनिट चार्ट, जिसमें हर मॉडल रिक्वेस्ट या टूल कॉल के लिए एक निशान है। मीडियन, 3 सेशन। मॉडल रिक्वेस्ट: Simplicio के बिना 25, 18 Simplicio 3.14.0 के साथ और 10 Simplicio 3.15.0 के साथ। टूल कॉल: 22, 15 और 7।">
+  </picture>
+</p>
 
-```bash
-pip install simplicio-installer
-simplicio install
-```
+हर चरण का समय, एक ही साझा स्केल पर।
 
-### Homebrew (macOS)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-steps-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-steps-light.svg" width="840" alt="हर चरण का मीडियन समय, एक ही साझा स्केल पर। चरण 1, बिल्ड: Simplicio के बिना 57.3 s, 53.7 s Simplicio 3.14.0 के साथ और 5.8 s Simplicio 3.15.0 के साथ। चरण 2, बदलाव: 17.3 s, 15.2 s और 8.9 s। चरण 3, रजिस्ट्रेशन: 31.4 s, 27.5 s और 10.3 s।">
+  </picture>
+</p>
 
-```bash
-brew install simplicio
-```
+हर मीडियन अलग से लिया गया है, इसलिए चरणों का योग पूरे जॉब के मीडियन के बराबर नहीं होता।
 
-### Bun
+<details>
+<summary>चरण के हिसाब से सटीक आँकड़े</summary>
 
-```bash
-bunx simplicio install
-```
+हर सेल में चरण का मीडियन समय और मीडियन लागत है:
 
-### macOS / Linux
+| चरण | Simplicio के बिना | Simplicio 3.14.0 | Simplicio 3.15.0 |
+|---|---|---|---|
+| 1. बिल्ड | 57.3 s / $0.0111 | 53.7 s / $0.0137 | 5.8 s / $0.0022 |
+| 2. बदलाव | 17.3 s / $0.0040 | 15.2 s / $0.0032 | 8.9 s / $0.0023 |
+| 3. रजिस्ट्रेशन | 31.4 s / $0.0075 | 27.5 s / $0.0056 | 10.3 s / $0.0026 |
 
-```bash
-python3 -m pip install --upgrade simplicio-installer
-simplicio install
-```
+</details>
 
-### Windows
+**इसे कैसे पढ़ें।** अनुपात बिना राउंड किए मीडियन से निकाले गए हैं। Simplicio के बिना उसी एजेंट के मुकाबले पूरा जॉब 4.9 गुना तेज़ चला और लगभग एक-तिहाई लागत में हुआ। पिछले रिलीज़ के मुकाबले यह 4.2 गुना तेज़ चला। सेशन में मॉडल ने 25 के बजाय 10 रिक्वेस्ट कीं और 18,162 के बजाय 3,211 आउटपुट टोकन लिखे, और जॉब ने वही बाहरी जाँच पास की। सबसे बुरी स्थिति: Simplicio के बिना सबसे तेज़ सेशन (97.1 s) भी, Simplicio 3.15.0 वाले सबसे धीमे सेशन (26.6 s) से 3.7 गुना धीमा था, और Simplicio के बिना सबसे सस्ता सेशन ($0.0186) भी, Simplicio वाले सबसे महँगे सेशन ($0.0098) का 1.9 गुना था। बेसलाइन है Claude Code 2.1.330, उसके अपने टूल्स के साथ, बिना MCP सर्वर और बिना Simplicio कॉन्फ़िगरेशन के। लागत में सिर्फ़ मॉडल टोकन गिने जाते हैं। एक मशीन पर एक बार में चार सेशन चले, इसलिए समय की तुलना सिर्फ़ इसी राउंड के भीतर करें।
 
-```powershell
-py -m pip install --upgrade simplicio-installer
-simplicio install
-```
+<a id="where-simplicio-does-not-win"></a>
 
-### प्रत्यक्ष इंस्टॉलर (PyPI के बिना)
+### जहाँ Simplicio आगे नहीं रहता
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-memory-dark.svg">
+    <img src="../assets/benchmark-2026-11-22-memory-light.svg" width="840" alt="पीक मेमोरी, 3 सेशन का मीडियन: Simplicio के बिना 270 MB, सबसे कम; 436 MB, Simplicio 3.14.0 के साथ, 61% ज़्यादा; 375 MB, Simplicio 3.15.0 के साथ, 39% ज़्यादा।">
+  </picture>
+</p>
+
+- **मेमोरी।** पीक मेमोरी सादे एजेंट के मुकाबले 39% ज़्यादा थी: 270 MB के मुकाबले 375 MB।
+- **पिछले रिलीज़ में इस जॉब पर कोई फ़ायदा नहीं दिखा।** Simplicio 3.14.0 की लागत Simplicio के बिना जितनी ही थी, और समय में उसका फ़र्क रन-से-रन फैलाव के भीतर है। इस पेज का फ़ायदा 3.15.0 के साथ आया।
+- **एक छोटी एकबारगी Python स्क्रिप्ट।** पिछले राउंड में, आज़माए गए हर मॉडल के साथ Simplicio 3.10.8 सादे एजेंट से धीमा था। Claude Code में Claude Sonnet 5.5 पर यह 19.6 s और $0.0548 लेता था, जबकि इसके बिना 11.4 s और $0.0283। इस काम को 3.15.0 पर फिर से नहीं मापा गया है।
+- **जो आप इंस्टॉल करते हैं, वह ठीक वही नहीं है जो मापा गया।** बिल्ड रिलीज़ कमिट से कंपाइल किए गए थे, साइन-इन बंद और बैकग्राउंड प्रोसेस बंद करके। हस्ताक्षरित डाउनलोड नहीं मापे गए।
+- **नमूना छोटा है।** हर सेटअप के तीन सेशन, एक मॉडल, एक छोटा नया प्रोजेक्ट, एक मशीन, और एक साथ चार सेशन। अनुपातों को इस जॉब का मापन समझें, आपके लिए वादा नहीं। इन तीन सेटअप का कोई भी सेशन हटाया या दोबारा नहीं चलाया गया। हमने यह नहीं मापा कि आपका कितना काम इस जॉब जैसा है।
+
+### खुद जाँचें
+
+[रिपोर्ट](../benchmarks/2026-11-22-standard-benchmark.md) तीनों प्रॉम्प्ट प्रकाशित करती है (पुर्तगाली में, साथ में अनुवाद के), हर बाहरी जाँच का विवरण और हर सेशन के आँकड़े; [डेटा फ़ाइल](../benchmarks/2026-11-22-standard-benchmark.json) इन्हें JSON में देती है। टेस्ट हार्नेस प्रकाशित नहीं है। वही तीन प्रॉम्प्ट अपने एजेंट में, Simplicio चालू और बंद करके, अपने एक छोटे प्रोजेक्ट में चलाएँ, और अपना समय और अपना बिल मिलाएँ।
+
+<a id="install"></a>
+
+## इंस्टॉल
+
+हस्ताक्षरित नेटिव बाइनरी इंस्टॉल करें। एक तरीका चुनें।
 
 macOS / Linux:
 
@@ -109,157 +198,245 @@ macOS / Linux:
 curl -fsSL https://raw.githubusercontent.com/simpletibr/simplicio/master/install.sh | sh
 ```
 
-Windows PowerShell:
+Windows (PowerShell):
 
 ```powershell
 irm https://raw.githubusercontent.com/simpletibr/simplicio/master/install.ps1 | iex
 ```
 
-हो गया। एक कमांड। कोई पैकेज मैनेजर नहीं, कोई मॉडल कॉन्फ़िगरेशन नहीं।
-
----
-
-## 📊 Benchmark (2026-10-31)
-
-एक असली मॉडल एक ही सत्र में फ़ाइल बनाता है और उसे संपादित करता है। परिणाम की जाँच सत्र के बाहर होती है: पेज हेडलेस Chrome में, स्क्रिप्ट उन्हें चलाकर। 60 सत्र, माध्यिका मान।
-
-| कार्य | सेटअप | n | समय | मॉडल अनुरोध | आउटपुट टोकन | लागत | डिलीवरी |
-|:---|:---|---:|---:|---:|---:|---:|---:|
-| **JSON फ़ाइल से पेज, जिसे जनरेटर कवर करता है** | **Simplicio 3.10.8** | 10 | **14.1 s** | **6** | **602** | **$0.0021** | **10/10** |
-|  | Simplicio 3.9.2 | 10 | 166.2 s | 24.5 | 19,944 | $0.0215 | 10/10 |
-|  | बिना MCP | 10 | 176.3 s | 32.5 | 17,929 | $0.0203 | 10/10 |
-| **नया पेज, अलग डेटा और भाषा, जनरेटर बनाने में उपयोग नहीं हुआ** | **Simplicio 3.10.8** | 6 | **14.1 s** | **6** | **524** | **$0.0010** | **6/6** |
-|  | Simplicio 3.9.2 | 6 | 110.9 s | 17.5 | 16,091 | $0.0153 | 6/6 |
-| **Python स्क्रिप्ट, जिसे कोई जनरेटर कवर नहीं करता** | **Simplicio 3.10.8** | 6 | **30.7 s** | **10.5** | **1,796** | **$0.0031** | **6/6** |
-|  | Simplicio 3.9.2 | 6 | 34.1 s | 11.5 | 2,485 | $0.0051 | 6/6 |
-|  | बिना MCP | 6 | 22.7 s | 8 | 1,268 | $0.0024 | 6/6 |
-
-लाभ जनरेटर से आता है: पेज वाले कार्यों में `simplicio_map` अनुरोध को रूट करता है और `simplicio_codegen` 0 LLM टोकन में फ़ाइल लिखता है। जब कोई जनरेटर कार्य को कवर नहीं करता, तब 3.10.8 फिर भी 3.9.2 से बेहतर है, लेकिन बिना MCP की तुलना में प्रति सत्र लगभग 8 सेकंड और $0.0007 अधिक लेता है।
-
-> हर रन में OpenCode 2.1.4 और DeepSeek V4.1 Flash, OpenRouter के एक ही निश्चित एंडपॉइंट पर। लागत प्रति दस लाख टोकन $0.15 इनपुट, $0.60 आउटपुट और $0.003 कैश पर निकाली गई है। यह एक मॉडल और तीन छोटे कार्यों का परिणाम है: दूसरे कार्यों में संख्याएँ अलग होंगी। [प्रॉम्प्ट, विधि, सीमाएँ और प्रति सत्र डेटा](../benchmarks/2026-10-31-map-codegen.md).
-
-वही कार्य दूसरे मॉडलों पर, Simplicio के साथ और उसके बिना। हर मॉडल एक ही क्लाइंट में चला, इसलिए किसी मॉडल की तुलना उसी मॉडल से करें।
-
-| मॉडल | कार्य | Simplicio 3.10.8 | बिना MCP | डिलीवरी |
-|:---|:---|---:|---:|---:|
-| **Claude Sonnet 5.5** (Claude Code) | JSON फ़ाइल से पेज, जिसे जनरेटर कवर करता है | **17.5 s · $0.0672** | 33.4 s · $0.0927 | 10/10 |
-|  | नया पेज, अलग डेटा और भाषा, जनरेटर बनाने में उपयोग नहीं हुआ | **16.3 s · $0.0514** | 22.5 s · $0.0610 | 10/10 |
-|  | Python स्क्रिप्ट, जिसे कोई जनरेटर कवर नहीं करता | **19.6 s · $0.0548** | 11.4 s · $0.0283 | 10/10 |
-| **Grok 4.7** (Grok Build) | JSON फ़ाइल से पेज, जिसे जनरेटर कवर करता है | **31.0 s · $0.1690** | 359.7 s · $0.8590 | 6/6 |
-|  | नया पेज, अलग डेटा और भाषा, जनरेटर बनाने में उपयोग नहीं हुआ | **36.0 s · $0.2059** | 387.5 s · $0.8518 | 6/6 |
-|  | Python स्क्रिप्ट, जिसे कोई जनरेटर कवर नहीं करता | **82.0 s · $0.3315** | 63.1 s · $0.2452 | 6/6 |
-| **Claude Haiku 5.5** (OpenCode) | JSON फ़ाइल से पेज, जिसे जनरेटर कवर करता है | **13.7 s · $0.0046** | 29.3 s · $0.0083 | 10/10 |
-|  | नया पेज, अलग डेटा और भाषा, जनरेटर बनाने में उपयोग नहीं हुआ | **13.8 s · $0.0023** | 28.7 s · $0.0057 | 10/10 |
-|  | Python स्क्रिप्ट, जिसे कोई जनरेटर कवर नहीं करता | **19.2 s · $0.0033** | 16.6 s · $0.0030 | 10/10 |
-
-[प्रॉम्प्ट, विधि, सीमाएँ और प्रति सत्र डेटा](../benchmarks/2026-11-01-multi-model.md).
-
----
-
-## 🎯 यह क्या करता है
-
-| कमांड | विवरण |
-|---|---|
-| `simplicio map --repo .` | LLM के लिए रिपॉजिटरी मैप करता है |
-| `simplicio memory "query"` | न्यूरल रिकॉल (FTS + वेक्टर) |
-| `simplicio edit '{...}'` | निर्धारित फ़ाइल संपादन |
-| `simplicio coding-loop "task"` | टेस्ट पास होने तक दोहराता है |
-| `simplicio deliver certify` | शिप करने से पहले 5 गुणवत्ता गेट |
-| `simplicio run "task" --agents N` | मल्टी-एजेंट ऑर्केस्ट्रेशन |
----
-
-## 🏗️ आर्किटेक्चर
-
-```
-LLM (Claude/Codex/Gemini)          Simplicio Runtime (Rust)
-  |                                   |
-  | 1. Orient                         | simplicio map
-  | 2. Recall                         | simplicio memory
-  | 3. Decide                         |
-  | 4. Edit  ───────────────────────> | simplicio edit (0 tokens)
-  | 5. Verify <─────────────────────  | simplicio deliver certify
-  | 6. Iterate                        | simplicio coding-loop
-```
-
-**LLM तर्क करता है। Simplicio निर्धारित रूप से निष्पादित करता है।**
-
----
-
-## ✨ सुविधाएँ
-
-- 🏠 **स्थानीय-प्रथम** — अंतर्निहित llama.cpp, केवल ज़रूरत पड़ने पर रिमोट पर स्केल करें
-- 🪜 **स्तरीय एजेंट** — भुगतान वाले क्लाउड से पहले 64 → 100 → 200 → 600 स्थानीय एजेंट
-- 🔇 **शैनन नवीनता गेट** — डुप्लिकेट आउटपुट फ़िल्टर करता है (डीडुप पर शून्य टोकन)
-- 🔒 **सीलबंद रसीदें** — प्रति आर्टिफैक्ट sha256, छेड़छाड़-रोधी साक्ष्य श्रृंखला
-- 🛡️ **5 डिलीवरी गेट** — स्वीकृति, सत्यापन, रन-वेरिफाई, रिग्रेशन, सेल्फ-रिव्यू
-- ⚡ **एक्शन गेट** — चैट-आरंभित म्यूटेशन के लिए जोखिम वर्गीकरण + ब्लॉकलिस्ट
-- 🔌 **MCP/ACP** — मॉडल कॉन्टेक्स्ट प्रोटोकॉल + एजेंट क्लाइंट प्रोटोकॉल
-- 🌐 **गेटवे** — टेलीग्राम, डिस्कॉर्ड, स्लैक, व्हाट्सएप
-- 🧩 **स्किल सिस्टम** — पुन: प्रयोज्य क्षमताओं को लोड और चेन करता है
-- 💾 **मेमोरी DB** — सत्रों में स्थायी FTS + वेक्टर रिकॉल
-- 🔀 **LLM राउटर** — कोई LLM नहीं → स्थानीय LLM → रिमोट LLM स्वचालित रूप से
-- 🖥️ **क्रॉस-प्लेटफ़ॉर्म** — macOS, Linux, Windows, एकल बाइनरी
-
----
-
-## 🎁 मुफ्त सार्वजनिक बीटा
-
-**निर्धारित कमांड हमेशा के लिए मुफ्त हैं:**
-`map`, `validate`, `edit`, `deliver`, `checkpoint`
-
-**AI सुविधाएँ सार्वजनिक बीटा के दौरान बिना किसी समाप्ति तिथि के मुफ्त हैं।**
-भविष्य के अपडेट में बिलिंग निर्धारित की जाएगी।
+Python (PyPI):
 
 ```bash
-simplicio license status
+python3 -m pip install --upgrade simplicio-installer
+simplicio install
 ```
 
----
+Windows पर `py -m pip install --upgrade simplicio-installer` इस्तेमाल करें, और फिर `simplicio install`। अगर Python की script डायरेक्टरी आपके `PATH` पर नहीं है, तो पहले उसे जोड़ें।
 
-## 📋 आवश्यकताएँ
+इंस्टॉलर आपके प्लेटफ़ॉर्म के लिए सबसे नया हस्ताक्षरित रिलीज़ डाउनलोड करता है और उसका SHA-256 और Ed25519 हस्ताक्षर जाँचता है। उसके बाद ही वह इंस्टॉल की गई बाइनरी को बदलता है। बाइनरी `~/.simplicio/bin/` में रखी जाती है (Windows पर, `%USERPROFILE%\.simplicio\bin\` में), और जो एजेंट मिलते हैं उनमें Simplicio अपने आप रजिस्टर हो जाता है। रजिस्ट्रेशन में विफलता हो तो इंस्टॉलर सफलता की रिपोर्ट करने के बजाय रुक जाता है। जो एजेंट पहले से खुला है, उसे रीस्टार्ट करें ताकि वह अपनी कॉन्फ़िगरेशन दोबारा लोड करे।
 
-| आवश्यकता | न्यूनतम | अनुशंसित |
+**साइन-इन।** बीटा के दौरान भी Google साइन-इन ज़रूरी है। `simplicio auth login` चलाएँ, फिर `simplicio auth status --json` चलाएँ, और जब स्टेटस `active: true` दिखाए, तब आगे बढ़ें। रजिस्ट्रेशन के लिए आपका साइन-इन होना ज़रूरी नहीं है, इसलिए साइन-इन से पहले भी एजेंट कॉन्फ़िगर हो जाते हैं। किसी एजेंट की कॉन्फ़िगरेशन में कभी पासवर्ड या टोकन न डालें।
+
+<details>
+<summary>जाँचें, अपडेट करें, हटाएँ</summary>
+
+अपडेट करने के लिए इंस्टॉलर फिर से चलाएँ। कोई भी इंस्टॉलर कभी भी फिर से चलाया जा सकता है, और वह सबसे नया रिलीज़ ढूँढ लेता है। `install.sh` और `install.ps1` इस रिपॉज़िटरी के रूट में हैं।
+
+```bash
+# macOS / Linux
+sh install.sh --doctor
+sh install.sh --uninstall --keep-data
+sh install.sh --uninstall --purge       # needs SIMPLICIO_CONFIRM_PURGE=1; preserves ~/.simplicio/.env
+```
+
+```powershell
+# Windows
+pwsh install.ps1 -Doctor
+pwsh install.ps1 -Uninstall -KeepData
+pwsh install.ps1 -Uninstall -Purge      # needs SIMPLICIO_CONFIRM_PURGE=1; preserves .env
+```
+
+- `--doctor` इंस्टॉलेशन की जाँच करता है।
+- `--uninstall --keep-data` इंस्टॉल की गई बाइनरी हटाता है और आपका डेटा रखता है। इसमें `~/.simplicio/login.json` में रखी 30 दिन की Google साइन-इन स्थिति भी शामिल है।
+- `--uninstall --purge` सिर्फ़ वह स्थिति हटाता है जिसे Simplicio मैनेज करता है, जिसमें साइन-इन स्थिति भी शामिल है। यह `~/.simplicio/.env` रखता है, जहाँ प्रदाता (provider) के क्रेडेंशियल हो सकते हैं। purge के लिए `SIMPLICIO_CONFIRM_PURGE=1` ज़रूरी है।
+- अनइंस्टॉल आपके एजेंट्स की कॉन्फ़िगरेशन में बदलाव नहीं करता। Simplicio की एंट्रियाँ हर एजेंट में तब तक रहती हैं, जब तक आप उन्हें उस एजेंट की अपनी सेटिंग्स में हटा नहीं देते।
+- किसी प्रोजेक्ट के अपने `.simplicio` फ़ोल्डर का डेटा `--keep-data` से नहीं हटता। `--purge` चुनने से पहले देख लें कि उसका लक्ष्य क्या है।
+
+पूरा विवरण: [INSTALL.md](../INSTALL.md)।
+
+</details>
+
+<a id="first-run"></a>
+
+## पहली बार चलाना
+
+```bash
+simplicio version
+cd my-project
+simplicio onboard
+```
+
+`simplicio version` इंस्टॉल की गई बाइनरी की पुष्टि करता है। `simplicio onboard` पहली बार प्रोजेक्ट तैयार करता है। फिर उस प्रोजेक्ट में अपना एजेंट खोलें और हमेशा की तरह काम करें। यह पक्का करने के लिए कि Simplicio लोड हो गया है, एजेंट की MCP सर्वरों की सूची में `simplicio` खोजें। Claude Code में, `/mcp` जुड़े हुए सर्वर दिखाता है। इंस्टॉलर पहले पढ़ना चाहते हैं? वह [install.sh](../install.sh) है।
+
+<a id="works-with-the-agent-you-already-use"></a>
+
+## आपके मौजूदा एजेंट के साथ काम करता है
+
+Simplicio एक लोकल STDIO MCP सर्वर है, इसलिए जो भी एजेंट लोकल MCP सर्वर शुरू कर सकता है, उसे इससे जोड़ा जा सकता है।
+
+इंस्टॉलर रजिस्ट्रेशन का काम Simplicio के अपने रजिस्ट्रार को सौंपता है। वह आपकी मशीन पर मौजूद एजेंट्स का पता लगाता है, और जिन्हें वह कॉन्फ़िगर करना जानता है, उनमें Simplicio की एंट्री लिखता है। इनमें Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI और Kiro शामिल हैं। इस रिपॉज़िटरी की दो फ़ाइलें बताती हैं कि हर इंटीग्रेशन कितनी दूर तक जाता है:
+
+- रजिस्ट्री [`plugins/simplicio/host-surfaces.json`](../plugins/simplicio/host-surfaces.json) 43 एजेंट आईडी बताती है, और हर एक के लिए बताती है कि Simplicio उस तक कैसे पहुँचता है: Simplicio द्वारा लिखी गई MCP एंट्री (23), नेटिव प्लगइन या एक्सटेंशन (5), पोर्टेबल प्लगइन पैकेज (4), गाइडेड सेटअप जिसे आप खुद फ़ॉलो करते हैं (9), या कोई दूसरा कमांड-लाइन टूल (2)।
+- कंपैटिबिलिटी मैट्रिक्स [`docs/hosts/compatibility-matrix.md`](../docs/hosts/compatibility-matrix.md) बताती है कि क्या सत्यापित हुआ है। इन 43 में से वह 12 एजेंट्स को समर्थित मार्क करती है और 29 को `unverified`, और उसमें Codex और Gemini CLI के लिए कोई पंक्ति नहीं है। जहाँ रजिस्ट्री कहती है कि Simplicio एंट्री लिखता है और मैट्रिक्स कहती है `unverified`, वहाँ उस इंटीग्रेशन को बिना परखा हुआ मानें।
+
+23 एजेंट्स के लिए [`docs/hosts/`](../docs/hosts/) में गाइड है। जिन एजेंट्स तक प्लगइन के ज़रिए पहुँचा जाता है, उनमें प्लगइन एक अलग चरण में लागू होता है, जो आपकी सहमति माँगता है, और उसका विवरण [INSTALL.md](../INSTALL.md) में है।
+
+<details>
+<summary>सभी 43 एजेंट, Simplicio उन तक कैसे पहुँचता है उसके अनुसार</summary>
+
+| Simplicio उस तक कैसे पहुँचता है | संख्या | एजेंट्स |
 |---|---|---|
-| RAM | 8 GB | 16 GB+ |
-| स्टोरेज | 5 MB | 1.5 GB (स्थानीय LLM के साथ) |
-| OS | macOS 13+, Linux, Windows 10+ | macOS ARM64 |
-| टर्मिनल | कोई भी आधुनिक टर्मिनल | WezTerm / Alacritty / Ghostty |
+| Simplicio द्वारा लिखी गई MCP एंट्री | 23 | **xAI Grok Build**, MiMo Code, Amp, OpenClaude, Antigravity, **Pi**, **oh-my-pi**, Goose, Auggie, Autohand Code, Charm, Cline, Command Code, Continue, Droid, Kilocode, Kimi, Mistral Vibe, Rovo Dev, **Visual Studio Code**, **Meta Muse Code**, **OpenMausBot**, **OpenMuse (Python)** |
+| नेटिव प्लगइन या एक्सटेंशन | 5 | **Claude Code**, Codex, **OpenCode**, Hermes Agent, Gemini CLI |
+| पोर्टेबल प्लगइन पैकेज | 4 | **Cursor**, GitHub Copilot, **Kiro**, Qwen Code |
+| गाइडेड सेटअप जिसे आप खुद फ़ॉलो करते हैं | 9 | Devin, Codebuff, CopilotKit OpenDots, CopilotKit OpenBot, agentes.chat, OpenAI dots, xAI Grok Bot, Meta Muse app, Cue by Manus |
+| कोई दूसरा कमांड-लाइन टूल | 2 | **OrcaDev / Orca ADE**, T3 Code |
 
----
+बोल्ड: कंपैटिबिलिटी मैट्रिक्स उस एजेंट को समर्थित मार्क करती है।
 
-## 🌐 पारिस्थितिकी तंत्र
+</details>
 
-- [वेबसाइट](https://simpleti.com.br/simplicio/#start) — पूर्ण दस्तावेज़, बेंचमार्क, इंस्टॉल
-- [डिस्कॉर्ड](https://discord.gg/wM6tr7xVb) — समुदाय और सहायता
+रजिस्ट्रेशन दोबारा करने के लिए `simplicio mcp register` चलाएँ। सर्वर कमांड है `simplicio serve --mcp --stdio`। आपके एजेंट को ये मुख्य टूल मिलते हैं:
 
----
+| टूल | यह आपको क्या देता है |
+|---|---|
+| `simplicio_map` | रिपॉज़िटरी का संक्षिप्त मैप, ताकि एजेंट उसमें अपना रास्ता पहचान सके |
+| `simplicio_context` | किसी काम के लिए ज़रूरी कॉन्टेक्स्ट, सीमित, पूरी फ़ाइलों के बजाय |
+| `simplicio_edit` | तैयार योजना से स्ट्रक्चर्ड फ़ाइल एडिट |
+| `simplicio_validate` | पाइपलाइन, टेस्ट और डिलीवरी की जाँच |
+| `simplicio_run` | Simplicio के नियंत्रण में चलने वाला एक टास्क रन |
 
-## 📄 लाइसेंस
+सूची असल में वही है जो सर्वर शुरू होने पर रिपोर्ट करता है। [MCP-CONNECT.md](../MCP-CONNECT.md) मुख्य टूल्स का विवरण देता है।
 
-Proprietary. बाइनरी डाउनलोड और उपयोग करने के लिए मुफ्त है। AI सुविधाएँ
-सार्वजनिक बीटा के दौरान मुफ्त हैं। [LICENSE](../plugins/simplicio/LICENSE) देखें।
+<details>
+<summary>मैनुअल कॉन्फ़िगरेशन</summary>
 
----
+अगर आपका एजेंट आपके लिए कॉन्फ़िगर नहीं हुआ है, तो यह एंट्री उसकी MCP कॉन्फ़िगरेशन में जोड़ें। पाथ को इंस्टॉल की गई बाइनरी के एब्सोल्यूट पाथ से बदलें।
 
-## ⭐ स्टार इतिहास
+```json
+{
+  "mcpServers": {
+    "simplicio": {
+      "command": "/absolute/path/to/.simplicio/bin/simplicio",
+      "args": ["serve", "--mcp", "--stdio"]
+    }
+  }
+}
+```
 
-<a href="https://star-history.com/#simpletibr/simplicio&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&theme=dark&legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" />
-    <img alt="स्टार हिस्ट्री चार्ट" src="https://api.star-history.com/chart?repos=simpletibr/simplicio&type=date&legend=top-left" width="100%" />
-  </picture>
-</a>
+Codex TOML पढ़ता है। एजेंट्स `command` को सीधे शुरू करते हैं, इसलिए `~` इस्तेमाल न करें और शेल एक्सपैंशन पर भरोसा न करें। Windows पाथ में फ़ॉरवर्ड स्लैश इस्तेमाल करें, और उदाहरण वाला यूज़र नाम बदल दें।
 
----
+Windows:
 
-## 💬 समुदाय
+```toml
+[mcp_servers.simplicio]
+command = "C:/Users/YourName/.simplicio/bin/simplicio.exe"
+args = ["serve", "--mcp", "--stdio"]
+```
 
-- [डिस्कॉर्ड](https://discord.gg/wM6tr7xVb) — चैट, सहायता, प्रारंभिक पहुँच
-- [GitHub Issues](https://github.com/simpletibr/simplicio/issues) — बग और फीचर अनुरोध
+macOS:
 
----
+```toml
+[mcp_servers.simplicio]
+command = "/Users/your-name/.simplicio/bin/simplicio"
+args = ["serve", "--mcp", "--stdio"]
+```
+
+Linux:
+
+```toml
+[mcp_servers.simplicio]
+command = "/home/your-name/.simplicio/bin/simplicio"
+args = ["serve", "--mcp", "--stdio"]
+```
+
+हर एजेंट अपनी फ़ाइल कहाँ रखता है: [MCP-CONNECT.md](../MCP-CONNECT.md)।
+
+</details>
+
+<a id="command-line"></a>
+
+## कमांड लाइन
+
+| कमांड | आपको क्या मिलता है |
+|---|---|
+| `simplicio map --repo . --for-llm markdown` | रिपॉज़िटरी का संक्षिप्त स्ट्रक्चरल मैप, मॉडल के पढ़ने के लिए लिखा गया |
+| `simplicio context --repo .` | किसी काम के लिए सीमित कॉन्टेक्स्ट |
+| `simplicio memory query "query" --json` | प्रोजेक्ट जो पहले से जानता है, वह उसकी इंडेक्स की गई मेमोरी से याद किया हुआ, JSON के रूप में |
+| `simplicio edit --plan plan.json --repo .` | तैयार स्ट्रक्चर्ड एडिट का सेट, जो फ़ाइलों पर लागू होता है |
+| `simplicio run "task" --repo . --agents N` | N एजेंट्स के साथ एक टास्क रन, Simplicio के नियंत्रण में |
+| `simplicio loop` | राउंड-दर-राउंड चलने वाला काम, जब तक वह स्थिर न हो जाए |
+
+Simplicio के संदेशों में आप ये नाम देखेंगे: Mapper देखता है, Fast प्रोजेक्ट करता है या वापस लाता है, Dev CLI एडिट करता है, Runtime नियंत्रित करता है, और Loop स्थिर होता है।
+
+<a id="safety-and-privacy"></a>
+
+## सुरक्षा और गोपनीयता
+
+यह खंड वर्शन 3.15.0 का विवरण देता है।
+
+**Simplicio क्या भेजता है, और किसे**
+
+- **आपकी मशीन पर रहता है।** मैपिंग, कॉन्टेक्स्ट, एडिट और जाँच Simplicio बाइनरी के अंदर चलते हैं। यह नतीजे उसी मशीन पर आपके एजेंट को देता है। आपका एजेंट अपने मॉडल प्रदाता को क्या भेजता है, यह पहले की तरह एजेंट ही तय करता है।
+- **SimpleTI को (simpleti.com.br)।** सिर्फ़ साइन-इन और प्लान जाँच। इनमें आपका साइन-इन टोकन, Simplicio का वर्शन और आपके कंप्यूटर का होस्ट नाम जाता है। एक वैकल्पिक लाइसेंस लुकअप में आपका अकाउंट ईमेल भी जाता है। जवाब में वे आपका अकाउंट ईमेल, नाम और प्लान लौटाते हैं। रिपॉज़िटरी की कोई सामग्री नहीं: कोई फ़ाइल नहीं, फ़ाइल पाथ नहीं, प्रॉम्प्ट नहीं और एडिट नहीं।
+- **GitHub को।** नए रिलीज़ की एक बैकग्राउंड जाँच, अधिकतम लगभग हर 12 घंटे में एक बार। इसमें आपके या आपके कोड के बारे में कुछ नहीं जाता। इसे बंद करने के लिए `SIMPLICIO_DISABLE_AUTO_UPDATE=1` सेट करें। अपडेट करते समय नई बाइनरी GitHub से डाउनलोड होती है, और पुरानी को बदलने से पहले उसका SHA-256 और हस्ताक्षर जाँचे जाते हैं।
+- **कोई एनालिटिक्स नहीं।** Simplicio 3.15.0 और वे फ़ाइलें, जो यह आपके एजेंट्स में इंस्टॉल करता है, इसके लिए जाँची गई हैं: इनमें से कोई भी एनालिटिक्स, क्रैश रिपोर्ट या उपयोग का डेटा अपलोड नहीं करता। उपयोग और बचत के रिकॉर्ड लोकल फ़ाइलें हैं। यह जो हुक इंस्टॉल करता है, वे सिर्फ़ लोकल प्रोग्राम चलाते हैं (Simplicio बाइनरी और, वैकल्पिक प्लगइन के लिए, लोकल स्क्रिप्ट); उनमें से कोई भी नेटवर्क से संपर्क नहीं करता।
+- **आपकी कॉन्फ़िगर की गई सेवाओं को।** मॉडल प्रदाता, GitHub, Jira, चैट नोटिफ़ायर या टीम कैश को वही मिलता है जो उस फ़ीचर से भेजा जाता है, और उसमें प्रॉम्प्ट और कोड शामिल हो सकते हैं। मॉडल प्रदाता को भेजे गए अनुरोधों में एक हेडर होता है, जो Simplicio को क्लाइंट के रूप में बताता है।
+- **बिना किसी कॉन्फ़िगरेशन के दो फ़ीचर इंटरनेट पर सार्वजनिक रूप से उपलब्ध सेवा तक पहुँचते हैं।** वेब सर्च, जब वह चलती है, खोज क्वेरी DuckDuckGo को भेजती है, जब तक आप कोई दूसरी सर्च सेवा कॉन्फ़िगर न करें। Simplicio की अपनी चैट में, वेब सवाल जैसा दिखने वाला संदेश वही क्वेरी बन सकता है। डिपेंडेंसी सिक्योरिटी ऑडिट, जब आप उसे चलाते हैं, आपकी डिपेंडेंसी के नाम और वर्शन osv.dev को भेजता है। इनमें से कोई भी फ़ाइलों की सामग्री नहीं भेजता।
+- **डाउनलोड।** इंस्टॉलर और अपडेट का रास्ता GitHub से डाउनलोड करते हैं। कुछ वैकल्पिक हेल्पर स्क्रिप्ट्स, जब आप उन्हें चलाते हैं, तब अपने टूल्स PyPI या npm से लाती हैं। अगर कोई एजेंट प्लगइन शुरू होता है और उसे Simplicio बाइनरी नहीं मिलती, तो वह GitHub से आधिकारिक इंस्टॉलर डाउनलोड करता है, जो एक कमिट पर पिन किया गया हो और SHA-256 से जाँचा गया हो।
+
+**हस्ताक्षरित रिलीज़।** हर रिलीज़ अपनी बाइनरी SHA-256 चेकसम, Ed25519 हस्ताक्षर, SBOM (बिल्ड में क्या है उसकी सूची) और बिल्ड प्रोवेनेंस के साथ प्रकाशित करता है। इंस्टॉलर और अपडेट का रास्ता इंस्टॉल की गई बाइनरी बदलने से पहले चेकसम और हस्ताक्षर जाँचते हैं। स्टेबल रिलीज़ के लिए अनुबंध में हस्ताक्षर का न होना या अमान्य होना, और चेकसम का मेल न खाना, सख़्त विफलता है। अनुबंध [docs/UPDATE_SIGNATURE_CONTRACT.md](../docs/UPDATE_SIGNATURE_CONTRACT.md) में है।
+
+**इंस्टॉलर आपके एजेंट में क्या बदलता है।** यह एजेंट की MCP कॉन्फ़िगरेशन में एक Simplicio एंट्री जोड़ता है और बाकी कॉन्फ़िगरेशन को वैसा ही रखता है। Claude Code में यह `mcp__simplicio__*` की अनुमति भी देता है, ताकि ऑटो मोड में कोई Simplicio टूल ब्लॉक न हो। जिन एजेंट्स के हुक इंटरफ़ेस को इंस्टॉलर ने सत्यापित किया है, उनमें यह Simplicio के हुक भी इंस्टॉल करता है। [INSTALL.md](../INSTALL.md) बताता है कि इंस्टॉलर क्या लिखता है, और [`docs/hosts/`](../docs/hosts/) में हर एजेंट का गाइड विवरण देता है। अनइंस्टॉल इन एंट्रियों को वापस नहीं करता। इंस्टॉल खंड बताता है कि इन्हें कैसे हटाया जाए।
+
+## इस रिपॉज़िटरी में और भी
+
+<details>
+<summary>Desktop ऐप (macOS प्रीव्यू)</summary>
+
+macOS (Apple Silicon) के लिए एक Desktop प्रीव्यू [Simplicio-3.8.47-arm64.dmg](https://github.com/simpletibr/simplicio/releases/download/v3.8.47/Simplicio-3.8.47-arm64.dmg) के रूप में प्रकाशित है। इसका SHA-256 [DESKTOP-SHA256SUMS](../DESKTOP-SHA256SUMS) में है, जो Simplicio बाइनरी के चेकसम से अलग है। DMG में हस्ताक्षर फ़ाइल नहीं है, और उसमें Simplicio 3.8.47 बाइनरी बंडल है।
+
+- Windows Desktop प्रकाशित नहीं है। Windows पर ऊपर दिया कमांड-लाइन इंस्टॉल इस्तेमाल करें।
+- Apple Developer ID साइनिंग और नोटराइज़ेशन नहीं किए गए हैं। पैकेज ad-hoc साइन किया गया है, यानी बिना Apple developer सर्टिफ़िकेट के, और Gatekeeper की स्वीकृति का दावा नहीं है, इसलिए इसे खोलते समय macOS चेतावनी दिखा सकता है।
+- जब तक हस्ताक्षरित Desktop पैकेज प्रकाशित नहीं होता, तब तक ऊपर दिया कमांड-लाइन इंस्टॉल ही समर्थित सार्वजनिक इंस्टॉलेशन का रास्ता है।
+
+विवरण: [docs/desktop/RELEASE.md](../docs/desktop/RELEASE.md)।
+
+</details>
+
+<details>
+<summary>मेंटेनर्स के लिए: बना हुआ फ़्लो आरेख</summary>
+
+README.md और MCP-CONNECT.md में दर्ज कमांड और टूल्स एक फ़्लो के रूप में बनाए गए हैं, [docs/flow/simplicio.svg](../docs/flow/simplicio.svg), जो एक सोर्स फ़ाइल `docs/flow/simplicio.flow.json` से बनी है। इसे `python3 scripts/generate_flow.py` से फिर से बनाएँ, और `python3 scripts/generate_flow.py --check` से ड्रिफ़्ट की जाँच करें। अनुबंध, जो इसे इस पेज और MCP-CONNECT.md के साथ मेल में रखता है, है `python3 -m pytest tests/test_flow_contract.py -q`। Langflow इम्पोर्ट की जाँच `scripts/verify_flow_langflow.py` है, जो तब फ़ेल-क्लोज़्ड होती है (exit 2, `status=blocked`) जब कोई सर्वर नहीं चल रहा हो। सबूत `docs/flow/evidence/` और `docs/flow/render/` के नीचे हैं, और [docs/flow/README.md](../docs/flow/README.md) में ज़रूरतें और उसे दोहराने का तरीका है।
+
+</details>
+
+<a id="questions-people-ask"></a>
+
+## लोग जो सवाल पूछते हैं
+
+**क्या तुलना निष्पक्ष है?**<br>
+एक ही राउंड में, वही एजेंट, वही मॉडल, वही तीन प्रॉम्प्ट, वही शुरुआती प्रोजेक्ट और वही बाहरी जाँच। बेसलाइन में कोई MCP सर्वर और कोई Simplicio कॉन्फ़िगरेशन नहीं है। देखें [जहाँ Simplicio आगे नहीं रहता](#where-simplicio-does-not-win) और रिपोर्ट की [सीमाएँ](../benchmarks/2026-11-22-standard-benchmark.md#limits)।
+
+**क्या मुझे अपना एजेंट या अपना मॉडल बदलना होगा?**<br>
+नहीं। Simplicio उसी एजेंट में जुड़ता है जो आप पहले से इस्तेमाल करते हैं। ऊपर के बेंचमार्क में हर सेटअप ने वही एजेंट और वही मॉडल इस्तेमाल किया।
+
+**क्या मुझे ये नतीजे हमेशा मिलेंगे?**<br>
+नहीं। ये सिर्फ़ एक जॉब को मापते हैं, एक मॉडल के साथ, एक मशीन पर, और हर सेटअप के तीन सेशन में। देखें [जहाँ Simplicio आगे नहीं रहता](#where-simplicio-does-not-win), और तुलना अपने काम पर चलाएँ।
+
+**क्या यह ओपन सोर्स है?**<br>
+नहीं। Simplicio मालिकाना है। यह एक हस्ताक्षरित बाइनरी है, जो रिलीज़ एसेट्स के रूप में प्रकाशित होती है, और इसका सोर्स सार्वजनिक नहीं है। इस रिपॉज़िटरी में इंस्टॉलर, एजेंट्स के लिए पैकेज, Desktop ऐप का सोर्स, दस्तावेज़ और बेंचमार्क डेटा हैं।
+
+**इसे कैसे हटाएँ?**<br>
+`sh install.sh --uninstall --keep-data` चलाएँ, या Windows पर `pwsh install.ps1 -Uninstall -KeepData`। यह बाइनरी हटाता है और आपका डेटा रखता है। यह आपके एजेंट्स की कॉन्फ़िगरेशन में बदलाव नहीं करता, इसलिए Simplicio की एंट्रियाँ हर एजेंट की अपनी सेटिंग्स में हटाएँ। [इंस्टॉल](#install) में विवरण और purge विकल्प हैं।
+
+**क्या मुझे अकाउंट चाहिए?**<br>
+हाँ। बीटा के दौरान भी Google साइन-इन ज़रूरी है। `simplicio auth login` चलाएँ।
+
+**क्या मेरा कोड मेरी मशीन से बाहर जाता है?**<br>
+मैपिंग, कॉन्टेक्स्ट, एडिट और जाँच आपकी मशीन पर चलते हैं। Simplicio साइन-इन और प्लान जाँच के लिए SimpleTI से, और अपडेट खोजने के लिए GitHub से बात करता है, और दोनों में से किसी में रिपॉज़िटरी की सामग्री नहीं जाती। जो फ़ीचर आप कॉन्फ़िगर करते हैं या चलाते हैं, वे दूसरी सेवाओं तक पहुँच सकते हैं। पूरी सूची [Simplicio क्या भेजता है, और किसे](#safety-and-privacy) में है।
+
+<a id="documentation-and-community"></a>
+
+## दस्तावेज़ और समुदाय
+
+- **वेबसाइट:** [simpleti.com.br/simplicio](https://simpleti.com.br/simplicio/)
+- **दस्तावेज़:** [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
+- **Discord:** [समुदाय से जुड़ें](https://discord.gg/wM6tr7xVb)
+- **Issues:** [GitHub इश्यू ट्रैकर](https://github.com/simpletibr/simplicio/issues)
+- **इस रिपॉज़िटरी में:** [INSTALL.md](../INSTALL.md), [MCP-CONNECT.md](../MCP-CONNECT.md) और [docs/hosts/](../docs/hosts/)
+- **संबंधित:** Simplicio Video (hypit)। इसे क्लोन करने के लिए: `git clone https://github.com/hypit-ai/hypit.git simplicio-video`
 
 <p align="center">
-  <strong>🔥 Simplicio 🔥</strong>
+  <sub>© 2026 SimpleTI. Simplicio एक पंजीकृत मालिकाना सॉफ़्टवेयर है। सर्वाधिकार सुरक्षित।</sub>
 </p>
