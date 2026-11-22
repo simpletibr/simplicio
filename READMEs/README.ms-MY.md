@@ -44,7 +44,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-dark.svg">
-    <img src="../assets/benchmark-2026-11-22-light.svg" width="840" alt="Carta bar yang membandingkan persediaan tanpa Simplicio, Simplicio 3.14.0 dan Simplicio 3.15.0 pada tiga ukuran, median bagi tiga sesi setiap satu. Masa untuk keseluruhan tugasan: 121 s tanpa Simplicio, 104 s dengan Simplicio 3.14.0 dan 25 s dengan Simplicio 3.15.0. Kos: $0.0226, $0.0220 dan $0.0076. Token output: 18,162, 19,722 dan 3,211.">
+    <img src="../assets/benchmark-2026-11-22-light.svg" width="840" alt="Carta bar yang membandingkan tanpa Simplicio, Simplicio 3.14.0 dan Simplicio 3.15.0 mengikut tiga ukuran, median bagi tiga sesi setiap satu. Masa untuk keseluruhan tugasan: 121 s tanpa Simplicio, 104 s dengan Simplicio 3.14.0 dan 25 s dengan Simplicio 3.15.0. Kos: $0.0226, $0.0220 dan $0.0076. Token output: 18,162, 19,722 dan 3,211.">
   </picture>
 </p>
 
@@ -74,13 +74,11 @@
 
 ## Apa itu Simplicio
 
-Simplicio ialah program tempatan yang memberi ejen pengekodan yang sudah anda gunakan satu mod super pantas, walau apa pun ejennya dan walau apa pun modelnya. Angka dalam halaman ini datang daripada satu ejen dan satu model; bahagian di bawah menyatakan dengan tepat apa yang diukur.
+Simplicio ialah program tempatan yang memberi ejen pengekodan yang sudah anda gunakan satu mod ultra-pantas, walau apa pun ejennya dan walau apa pun modelnya. Angka dalam halaman ini datang daripada satu ejen dan satu model; bahagian di bawah menyatakan dengan tepat apa yang diukur.
 
-- **Anda kekalkan ejen dan model anda.** Simplicio tidak menggantikan Claude Code, Codex, Cursor atau apa-apa model yang berada di sebalik mereka.
-- **Anda memasang satu binari natif yang ditandatangani.** Pemasang mengesahkan tandatangan, kemudian mendaftarkan Simplicio dalam ejen yang dijumpainya pada mesin anda.
-- **Ia berjalan pada mesin anda.** Ejen anda memulakannya sebagai pelayan MCP STDIO tempatan. MCP ialah Model Context Protocol, cara piawai ejen pengekodan memanggil alat luaran. STDIO bermakna ejen itu sendiri melancarkan program dan berkomunikasi dengannya melalui input dan output piawai.
-- **Ia memberi ejen anda alat.** Peta repositori, konteks terhad, suntingan berstruktur dan semakan. [Alat teras](#works-with-the-agent-you-already-use) disenaraikan di bawah.
-- **Yang berubah ialah sesi.** Berapa lama ia mengambil masa dan berapa kosnya. Bahagian seterusnya menunjukkan dengan berapa banyak, dan di mana ia tidak membantu.
+- **Anda kekalkan ejen dan model anda.** Simplicio tidak menggantikan Claude Code, Codex, Cursor atau model di sebaliknya.
+- **Satu binari yang ditandatangani** mendaftarkan dirinya dalam ejen anda dan berjalan pada mesin anda sebagai pelayan MCP STDIO tempatan.
+- **Yang berubah ialah sesi.** Masa dan kosnya.
 
 <p align="center">
   <picture>
@@ -90,31 +88,36 @@ Simplicio ialah program tempatan yang memberi ejen pengekodan yang sudah anda gu
 </p>
 
 <p align="center">
-  <sub>Gambar ini menunjukkan apa yang berlaku secara lalai. Senarai lengkap, termasuk ciri yang sampai ke perkhidmatan lain, ada dalam <a href="#safety-and-privacy">Apa yang Simplicio hantar, dan kepada siapa</a> di bawah Keselamatan dan privasi.</sub>
+  <sub>Aliran lalai. <a href="#safety-and-privacy">Senarai lengkap</a> memuatkan perkhidmatan yang lain.</sub>
 </p>
+
+<details>
+<summary>MCP dan STDIO</summary>
+
+MCP ialah Model Context Protocol, cara ejen pengekodan memanggil alat luaran. STDIO bermakna ejen itu sendiri melancarkan program dan berkomunikasi dengannya melalui input dan output piawainya.
+
+Ia memberi ejen anda alat. Peta repositori, konteks terhad, suntingan berstruktur dan semakan. [Alat teras](#works-with-the-agent-you-already-use) disenaraikan di bawah.
+
+Anda memasang satu binari natif yang ditandatangani. Pemasang mengesahkan tandatangan, kemudian mendaftarkan Simplicio dalam ejen yang dijumpainya pada mesin anda.
+
+</details>
 
 <a id="the-measurement"></a>
 
 ## Pengukuran
 
-Satu tugasan, dijalankan dengan cara yang sama sama ada dengan atau tanpa Simplicio. Tugasan itu ialah satu sesi ejen dengan tiga langkah dalam perbualan yang sama:
+Satu tugasan, dijalankan dengan cara yang sama, dengan atau tanpa Simplicio: tiga langkah dalam satu sesi ejen, setiap hasil disemak dari luar.
 
 1. Bina senarai pengguna: satu API dan satu halaman dengan jadual, carian dan pengisihan.
-2. Ubah suai: buang satu lajur, tambah penapis mengikut peranan dan satu lajur tarikh.
-3. Tambah pendaftaran ringkas: satu titik akhir `POST` yang menyemak input, dan satu halaman borang.
-
-Selepas setiap langkah, hasilnya disemak dari luar sesi. API dipanggil melalui HTTP dan halaman dimuatkan dalam Chrome mod headless, iaitu Chrome tanpa tetingkap. Setiap persediaan menggunakan ejen dan model yang sama: Claude Code 2.1.330 dengan Claude Haiku 5.5. Garis dasar ialah Claude Code 2.1.330 dengan alatnya sendiri, tanpa pelayan MCP dan tanpa konfigurasi Simplicio. Semakan tidak menguji kotak carian, pengisihan, ubah hala selepas menyimpan, rupa halaman atau kualiti kod.
-
-Setiap sesi ada dalam carta ini, bukan median sahaja.
+2. Ubah suai: buang satu lajur, tambah penapis peranan dan satu lajur tarikh.
+3. Tambah pendaftaran: satu titik akhir `POST` yang menyemak input, dan satu halaman borang.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-sessions-dark.svg">
-    <img src="../assets/benchmark-2026-11-22-sessions-light.svg" width="840" alt="Plot serakan bagi setiap sesi, dengan masa untuk keseluruhan tugasan pada paksi mendatar dan kos yang dilaporkan oleh ejen pada paksi menegak. Simplicio 3.15.0, berlian hijau: 23 hingga 27 s dan $0.0071 hingga $0.0098. Simplicio 3.14.0, segi empat kelabu: 90 hingga 106 s dan $0.0214 hingga $0.0249. Tanpa Simplicio, bulatan berongga: 97 hingga 172 s dan $0.0186 hingga $0.0280.">
+    <img src="../assets/benchmark-2026-11-22-sessions-light.svg" width="840" alt="Plot serakan bagi setiap sesi, dengan masa untuk keseluruhan tugasan pada paksi mendatar dan kos yang dilaporkan ejen pada paksi menegak. Simplicio 3.15.0, berlian hijau: 23 hingga 27 s dan $0.0071 hingga $0.0098. Simplicio 3.14.0, segi empat kelabu: 90 hingga 106 s dan $0.0214 hingga $0.0249. Tanpa Simplicio, bulatan berongga: 97 hingga 172 s dan $0.0186 hingga $0.0280.">
   </picture>
 </p>
-
-Median bagi 3 sesi untuk setiap persediaan. Garis kecil di bawah setiap nilai ialah sesi terendah dan tertinggi.
 
 | Ukuran | Tanpa Simplicio | Simplicio 3.14.0 | Simplicio 3.15.0 |
 |---|---|---|---|
@@ -128,9 +131,9 @@ Median bagi 3 sesi untuk setiap persediaan. Garis kecil di bawah setiap nilai ia
 | Memori puncak | **270 MB**<br><sub>248–274</sub> | 436 MB<br><sub>432–439</sub> | 375 MB<br><sub>365–379</sub> |
 | Langkah disiapkan | 9 daripada 9 | 9 daripada 9 | 9 daripada 9 |
 
-Huruf tebal menandakan nilai terbaik dalam setiap baris, hanya bagi nilai yang julatnya tidak bertindih dengan nilai lain. Julat token input bertindih, jadi larian ini tidak mendakwa sebarang perbezaan dalam token input. "9 daripada 9" bermaksud 3 langkah dalam setiap 3 sesi, dan setiap langkah lulus setiap semakan luaran. Masa tugasan ialah masa untuk keseluruhan tugasan. Permintaan model ialah satu panggilan kepada model, dan panggilan alat ialah satu penggunaan alat oleh ejen. Kos dilaporkan ialah apa yang dilaporkan oleh ejen: token yang digunakan didarab dengan harga model yang diterbitkan. Ia hanya mengira token model. Ia bukan invois.
+Median bagi 3 sesi, daripada yang terendah hingga tertinggi di bawah setiap nilai. Huruf tebal menandakan nilai terbaik dalam satu baris apabila julat tidak bertindih. "9 daripada 9" ialah 3 langkah dalam setiap 3 sesi, semuanya lulus setiap semakan luaran.
 
-Apa yang berubah dalam sesi, mengikut kiraan: model membuat lebih sedikit permintaan, dan ejen membuat lebih sedikit panggilan alat.
+Permintaan dan panggilan alat bagi setiap sesi.
 
 <p align="center">
   <picture>
@@ -139,16 +142,14 @@ Apa yang berubah dalam sesi, mengikut kiraan: model membuat lebih sedikit permin
   </picture>
 </p>
 
-Masa mengikut langkah, pada satu skala yang sama.
+Masa mengikut langkah, pada skala yang sama.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/benchmark-2026-11-22-steps-dark.svg">
-    <img src="../assets/benchmark-2026-11-22-steps-light.svg" width="840" alt="Median masa mengikut langkah pada satu skala yang sama. Langkah 1, bina: 57.3 s tanpa Simplicio, 53.7 s dengan Simplicio 3.14.0 dan 5.8 s dengan Simplicio 3.15.0. Langkah 2, ubah: 17.3 s, 15.2 s dan 8.9 s. Langkah 3, daftar: 31.4 s, 27.5 s dan 10.3 s.">
+    <img src="../assets/benchmark-2026-11-22-steps-light.svg" width="840" alt="Median masa mengikut langkah pada skala yang sama. Langkah 1, bina: 57.3 s tanpa Simplicio, 53.7 s dengan Simplicio 3.14.0 dan 5.8 s dengan Simplicio 3.15.0. Langkah 2, ubah: 17.3 s, 15.2 s dan 8.9 s. Langkah 3, daftar: 31.4 s, 27.5 s dan 10.3 s.">
   </picture>
 </p>
-
-Setiap median diambil secara berasingan, jadi langkah-langkah itu tidak menjumlah kepada median keseluruhan tugasan.
 
 <details>
 <summary>Nombor tepat mengikut langkah</summary>
@@ -163,7 +164,23 @@ Setiap sel ialah median masa dan median kos bagi langkah itu:
 
 </details>
 
-**Cara membaca.** Nisbah diambil daripada median sebelum pembundaran. Berbanding ejen yang sama tanpa Simplicio, keseluruhan tugasan berjalan 4.9 kali lebih pantas dan kosnya kira-kira sepertiga. Berbanding keluaran sebelumnya, ia berjalan 4.2 kali lebih pantas. Dalam sesi, model membuat 10 permintaan dan bukannya 25, serta menulis 3,211 token output dan bukannya 18,162, dan tugasan itu lulus semakan luaran yang sama. Kes terburuk: sesi paling pantas tanpa Simplicio (97.1 s) masih 3.7 kali lebih perlahan daripada sesi paling perlahan dengan Simplicio 3.15.0 (26.6 s), dan sesi paling murah tanpanya ($0.0186) masih berharga 1.9 kali ganda sesi paling mahal dengannya ($0.0098). Garis dasar ialah Claude Code 2.1.330 dengan alatnya sendiri, tanpa pelayan MCP dan tanpa konfigurasi Simplicio. Kos hanya mengira token model. Sesi dijalankan empat pada satu masa pada satu mesin, jadi bandingkan masa hanya dalam pusingan ini.
+**Cara membaca.** Keseluruhan tugasan berjalan 4.9 kali lebih pantas pada kira-kira sepertiga kos; malah sesi paling pantas tanpa Simplicio (97.1 s) masih 3.7 kali lebih perlahan daripada sesi paling perlahan dengan 3.15.0 (26.6 s). [Kaedah, had](../benchmarks/2026-11-22-standard-benchmark.md#limits)
+
+<details>
+<summary>Cara setiap nombor ditakrifkan</summary>
+
+- Nisbah diambil daripada median sebelum pembundaran. Berbanding keluaran sebelumnya, keseluruhan tugasan berjalan 4.2 kali lebih pantas.
+- Setiap median diambil secara berasingan, jadi langkah-langkah itu tidak menjumlah kepada median keseluruhan tugasan.
+- Kes terburuk: sesi paling pantas tanpa Simplicio (97.1 s) masih 3.7 kali lebih perlahan daripada sesi paling perlahan dengan Simplicio 3.15.0 (26.6 s), dan sesi paling murah tanpanya ($0.0186) masih berharga 1.9 kali ganda sesi paling mahal dengannya ($0.0098).
+- Garis dasar ialah Claude Code 2.1.330 dengan alatnya sendiri, tanpa pelayan MCP dan tanpa konfigurasi Simplicio.
+- Setiap langkah disemak dari luar sesi: API dipanggil melalui HTTP dan halaman dimuatkan dalam Chrome mod headless, iaitu Chrome tanpa tetingkap.
+- Semakan tidak menguji kotak carian, pengisihan, ubah hala selepas menyimpan, rupa halaman atau kualiti kod.
+- Permintaan model ialah satu panggilan kepada model; panggilan alat ialah satu penggunaan alat oleh ejen.
+- Kos dilaporkan ialah token yang digunakan didarab dengan harga model yang diterbitkan. Ia hanya mengira token model. Ia bukan invois.
+- Julat token input bertindih, jadi larian ini tidak mendakwa sebarang perbezaan dalam token input.
+- Empat sesi dijalankan serentak pada satu mesin: bandingkan masa hanya dalam pusingan ini.
+
+</details>
 
 <a id="where-simplicio-does-not-win"></a>
 
@@ -176,21 +193,30 @@ Setiap sel ialah median masa dan median kos bagi langkah itu:
   </picture>
 </p>
 
+- **Memori.** Memori puncak 39% lebih tinggi: 375 MB berbanding 270 MB.
+- **Keluaran sebelumnya tidak menunjukkan peningkatan pada tugasan ini.** Simplicio 3.14.0 berharga sama dengan tanpa Simplicio.
+- **Skrip Python pendek untuk sekali guna.** Simplicio 3.10.8 lebih perlahan (19.6 s berbanding 11.4 s) dan tidak diukur semula.
+- **Apa yang anda pasang tidak sama tepat dengan apa yang diukur.** Binari dikompil daripada commit keluaran, dengan log masuk dimatikan.
+- **Sampel ini kecil.** Tiga sesi bagi setiap persediaan, satu model, satu projek.
+
+<details>
+<summary>Had sepenuhnya</summary>
+
 - **Memori.** Memori puncak 39% lebih tinggi daripada ejen biasa: 375 MB berbanding 270 MB.
-- **Keluaran sebelumnya tidak menunjukkan peningkatan pada tugasan ini.** Simplicio 3.14.0 berharga sama dengan tanpa Simplicio, dan perbezaan masanya berada dalam julat variasi antara larian. Peningkatan yang dipaparkan di halaman ini datang bersama 3.15.0.
-- **Skrip Python pendek untuk sekali guna.** Dalam pusingan sebelumnya, Simplicio 3.10.8 lebih perlahan daripada ejen biasa dengan setiap model yang diuji. Pada Claude Sonnet 5.5 dalam Claude Code ia mengambil 19.6 s dan $0.0548, berbanding 11.4 s dan $0.0283 tanpanya. Tugasan itu belum diukur semula pada 3.15.0.
-- **Apa yang anda pasang tidak sama tepat dengan apa yang diukur.** Binari dikompil daripada commit keluaran, dengan log masuk dimatikan dan proses latar belakang dimatikan. Muat turun yang ditandatangani tidak diukur.
-- **Sampel ini kecil.** Tiga sesi bagi setiap persediaan, satu model, satu projek baharu yang kecil, satu mesin, empat sesi serentak. Baca nisbah sebagai ukuran bagi tugasan ini, bukan sebagai janji untuk tugasan anda. Tiada sesi daripada tiga persediaan ini digugurkan atau dijalankan semula. Kami belum mengukur berapa banyak kerja anda menyerupai tugasan ini.
+- **Keluaran sebelumnya tidak menunjukkan peningkatan pada tugasan ini.** Simplicio 3.14.0 berharga sama dengan tanpa Simplicio, dan perbezaan masanya berada dalam julat variasi antara larian. Peningkatan itu datang bersama 3.15.0.
+- **Skrip Python pendek untuk sekali guna.** Dalam pusingan terdahulu, Simplicio 3.10.8 lebih perlahan daripada ejen biasa dengan setiap model yang diuji: pada Claude Sonnet 5.5 dalam Claude Code, 19.6 s dan $0.0548 berbanding 11.4 s dan $0.0283. Tidak diukur semula pada 3.15.0.
+- **Apa yang anda pasang tidak sama tepat dengan apa yang diukur.** Binari dikompil daripada commit keluaran, dengan log masuk dan proses latar belakang dimatikan. Muat turun yang ditandatangani tidak diukur.
+- **Sampel ini kecil.** Tiga sesi bagi setiap persediaan, satu model, satu projek baharu yang kecil, satu mesin, empat sesi serentak; tiada satu pun digugurkan atau dijalankan semula. Nisbah ini mengukur tugasan ini, bukan tugasan anda, dan kami belum mengukur berapa banyak kerja anda menyerupai tugasan ini.
+
+</details>
 
 ### Semak sendiri
 
-[Laporan](../benchmarks/2026-11-22-standard-benchmark.md) menerbitkan ketiga-tiga gesaan (dalam Bahasa Portugis, dengan terjemahan), penerangan setiap semakan luaran dan nombor bagi setiap sesi; [fail data](../benchmarks/2026-11-22-standard-benchmark.json) menyimpannya dalam format JSON. Rangka kerja ujian tidak diterbitkan. Jalankan tiga gesaan yang sama dalam ejen anda sendiri dengan Simplicio dihidupkan dan dimatikan, dalam projek kecil anda sendiri, dan bandingkan masa dan bil anda sendiri.
+[Laporan](../benchmarks/2026-11-22-standard-benchmark.md) menerbitkan tiga gesaan (dalam Bahasa Portugis, dengan terjemahan), setiap semakan luaran dan setiap sesi; [fail data](../benchmarks/2026-11-22-standard-benchmark.json) menyimpannya dalam format JSON. Rangka kerja ujian tidak diterbitkan.
 
 <a id="install"></a>
 
 ## Pemasangan
-
-Pasang binari natif yang ditandatangani. Pilih satu laluan.
 
 macOS / Linux:
 
@@ -211,16 +237,22 @@ python3 -m pip install --upgrade simplicio-installer
 simplicio install
 ```
 
-Pada Windows, gunakan `py -m pip install --upgrade simplicio-installer` kemudian `simplicio install`. Jika direktori skrip Python tidak berada dalam `PATH` anda, tambahkannya dahulu.
+Pada Windows, gunakan `py -m pip install --upgrade simplicio-installer` dan kemudian `simplicio install`.
 
-Pemasang memuat turun keluaran bertandatangan terkini untuk platform anda dan menyemak SHA-256 dan tandatangan Ed25519-nya. Barulah ia menggantikan binari yang dipasang. Ia meletakkan binari di bawah `~/.simplicio/bin/` (pada Windows, `%USERPROFILE%\.simplicio\bin\`) dan secara automatik mendaftarkan Simplicio dalam ejen yang dijumpainya. Kegagalan pendaftaran menghentikan pemasang dan tidak melaporkan kejayaan. Mulakan semula mana-mana ejen yang sudah terbuka supaya ia memuat semula konfigurasinya.
-
-**Log masuk.** Log masuk Google diperlukan, termasuk semasa beta. Jalankan `simplicio auth login`, kemudian `simplicio auth status --json`, dan teruskan apabila status melaporkan `active: true`. Pendaftaran tidak memerlukan anda log masuk, jadi ejen dikonfigurasikan walaupun sebelum anda log masuk. Jangan sekali-kali tampal kata laluan atau token ke dalam konfigurasi ejen.
+Pemasang mengesahkan keluaran bertandatangan dan secara automatik mendaftarkan Simplicio dalam ejen yang dijumpainya. Kemudian log masuk dengan `simplicio auth login`.
 
 <details>
-<summary>Semak, kemas kini, nyahpasang</summary>
+<summary>Butiran pemasangan</summary>
 
-Untuk mengemas kini, jalankan pemasang sekali lagi. Anda boleh menjalankan mana-mana pemasang sekali lagi pada bila-bila masa, dan ia akan mendapatkan keluaran terkini. `install.sh` dan `install.ps1` terdapat di akar repositori ini.
+- Ia memuat turun keluaran bertandatangan terkini untuk platform anda dan menyemak SHA-256 serta tandatangan Ed25519-nya sebelum menggantikan binari yang dipasang.
+- Binari diletakkan di bawah `~/.simplicio/bin/` (pada Windows, `%USERPROFILE%\.simplicio\bin\`), dan Simplicio didaftarkan secara automatik dalam ejen yang dijumpainya. Kegagalan pendaftaran menghentikan pemasang dan tidak melaporkan kejayaan.
+- Mulakan semula mana-mana ejen yang sudah terbuka supaya ia memuat semula konfigurasinya. Jika direktori skrip Python tidak berada dalam `PATH` anda, tambahkannya dahulu.
+
+**Log masuk.** Log masuk Google diperlukan, termasuk semasa beta. Jalankan `simplicio auth login`, kemudian `simplicio auth status --json`, dan teruskan apabila ia melaporkan `active: true`. Pendaftaran berfungsi sebelum anda log masuk. Jangan sekali-kali tampal kata laluan atau token ke dalam konfigurasi ejen.
+
+Untuk mengesahkan Simplicio sudah dimuatkan, cari `simplicio` dalam senarai pelayan MCP ejen. Dalam Claude Code, `/mcp` menyenaraikan pelayan yang bersambung. Lebih suka membaca pemasang dahulu? Ia ialah [install.sh](../install.sh).
+
+Untuk mengemas kini, jalankan mana-mana pemasang sekali lagi pada bila-bila masa: ia mendapatkan keluaran terkini. `install.sh` dan `install.ps1` terdapat di akar repositori ini.
 
 ```bash
 # macOS / Linux
@@ -256,23 +288,22 @@ cd my-project
 simplicio onboard
 ```
 
-`simplicio version` mengesahkan binari yang dipasang. `simplicio onboard` menyediakan projek buat kali pertama. Kemudian buka ejen anda dalam projek itu dan bekerja seperti biasa. Untuk mengesahkan bahawa Simplicio sudah dimuatkan, cari `simplicio` dalam senarai pelayan MCP ejen. Dalam Claude Code, `/mcp` menyenaraikan pelayan yang bersambung. Lebih suka membaca pemasang dahulu? Ia ialah [install.sh](../install.sh).
+`simplicio version` menyemak pemasangan; `simplicio onboard` menyediakan projek. Kemudian buka ejen anda di sana.
 
 <a id="works-with-the-agent-you-already-use"></a>
 
 ## Berfungsi dengan ejen yang anda sudah gunakan
 
-Simplicio ialah pelayan MCP STDIO tempatan, jadi mana-mana ejen yang boleh memulakan pelayan MCP tempatan boleh diarahkan kepadanya.
+Pemasang menyerahkan pendaftaran kepada pendaftar Simplicio sendiri. Ia menulis entri Simplicio untuk ejen yang ia tahu cara mengkonfigurasinya, antaranya Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI dan Kiro.
 
-Pemasang menyerahkan pendaftaran kepada pendaftar Simplicio sendiri. Ia mengesan ejen pada mesin anda dan menulis entri Simplicio untuk ejen yang ia tahu cara mengkonfigurasinya, antaranya Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI dan Kiro. Dua fail dalam repositori ini menyatakan sejauh mana setiap integrasi berjalan:
-
-- Registri [`plugins/simplicio/host-surfaces.json`](../plugins/simplicio/host-surfaces.json) menamakan 43 id ejen dan menyatakan, bagi setiap satu, cara Simplicio sampai kepadanya: entri MCP yang Simplicio tulis (23), plugin atau sambungan natif (5), pakej plugin mudah alih (4), persediaan berpandu yang anda ikuti sendiri (9), atau alat baris arahan lain (2).
-- Matriks keserasian [`docs/hosts/compatibility-matrix.md`](../docs/hosts/compatibility-matrix.md) menyatakan apa yang telah disahkan. Daripada 43 ejen itu, ia menandakan 12 ejen sebagai disokong dan 29 sebagai `unverified`, dan ia tidak mempunyai baris untuk Codex dan Gemini CLI. Di tempat registri menyatakan Simplicio menulis entri dan matriks menyatakan `unverified`, anggap integrasi itu belum diuji.
-
-23 ejen mempunyai panduan dalam [`docs/hosts/`](../docs/hosts/). Bagi ejen yang dicapai melalui plugin, plugin itu digunakan dalam langkah berasingan yang meminta persetujuan anda, dan [INSTALL.md](../INSTALL.md) menerangkannya.
+Registri [`plugins/simplicio/host-surfaces.json`](../plugins/simplicio/host-surfaces.json) menamakan 43 id ejen; matriks [`docs/hosts/compatibility-matrix.md`](../docs/hosts/compatibility-matrix.md) menandakan 12 disokong dan 29 `unverified`. Anggap integrasi `unverified` sebagai belum diuji.
 
 <details>
-<summary>Semua 43 ejen, mengikut cara Simplicio sampai kepadanya</summary>
+<summary>Semua 43 ejen</summary>
+
+- Registri menamakan 43 id ejen dan cara Simplicio sampai kepada setiap satu: entri MCP yang Simplicio tulis (23), plugin atau sambungan natif (5), pakej plugin mudah alih (4), persediaan berpandu yang anda ikuti sendiri (9), atau alat baris arahan lain (2).
+- Matriks tidak mempunyai baris untuk Codex dan Gemini CLI. Walaupun di tempat registri menyatakan Simplicio menulis entri, anggap integrasi `unverified` sebagai belum diuji.
+- 23 ejen mempunyai panduan dalam [`docs/hosts/`](../docs/hosts/). Bagi ejen yang dicapai melalui plugin, plugin itu digunakan dalam langkah berasingan yang meminta persetujuan anda, dan [INSTALL.md](../INSTALL.md) menerangkannya.
 
 | Cara Simplicio sampai kepadanya | Bilangan | Ejen |
 |---|---|---|
@@ -286,7 +317,7 @@ Tebal: matriks keserasian menandakan ejen itu sebagai disokong.
 
 </details>
 
-Untuk mengulang pendaftaran, jalankan `simplicio mcp register`. Arahan pelayan ialah `simplicio serve --mcp --stdio`. Ini ialah alat teras yang diterima oleh ejen anda:
+Ini ialah alat teras yang diterima oleh ejen anda:
 
 | Alat | Apa yang diberikannya kepada anda |
 |---|---|
@@ -296,10 +327,12 @@ Untuk mengulang pendaftaran, jalankan `simplicio mcp register`. Arahan pelayan i
 | `simplicio_validate` | Semakan saluran paip, ujian dan penghantaran |
 | `simplicio_run` | Larian tugasan di bawah kawalan Simplicio |
 
-Senarai langsung ialah apa sahaja yang dilaporkan pelayan semasa permulaan. [MCP-CONNECT.md](../MCP-CONNECT.md) menerangkan alat teras.
+[MCP-CONNECT.md](../MCP-CONNECT.md) menerangkan alat teras.
 
 <details>
 <summary>Konfigurasi manual</summary>
+
+Simplicio ialah pelayan MCP STDIO tempatan, jadi mana-mana ejen yang boleh memulakan pelayan MCP tempatan boleh diarahkan kepadanya. Untuk mengulang pendaftaran, jalankan `simplicio mcp register`. Arahan pelayan ialah `simplicio serve --mcp --stdio`.
 
 Jika ejen anda tidak dikonfigurasikan untuk anda, tambahkan entri ini ke dalam konfigurasi MCP-nya. Gantikan laluan dengan laluan mutlak binari yang dipasang.
 
@@ -365,19 +398,41 @@ Nama yang akan anda lihat dalam mesej Simplicio: Mapper memerhati, Fast mengunju
 
 Bahagian ini menerangkan versi 3.15.0.
 
-**Apa yang Simplicio hantar, dan kepada siapa**
+- **Kekal pada mesin anda.** Pemetaan, konteks, suntingan dan semakan dijalankan di dalam binari Simplicio.
+- **Kepada SimpleTI (simpleti.com.br).** Log masuk dan semakan pelan sahaja, tanpa kandungan repositori.
+- **Kepada GitHub.** Semakan keluaran yang boleh anda matikan.
+- **Tiada analitik.** Simplicio tidak memuat naik analitik, laporan ranap atau data penggunaan.
+- **Kepada perkhidmatan yang anda konfigurasikan.** Mereka menerima apa yang dihantar oleh ciri itu, yang boleh termasuk gesaan dan kod.
+- **Dua ciri sampai ke perkhidmatan umum di internet tanpa sebarang konfigurasi.** Carian web (DuckDuckGo) dan audit kebergantungan (osv.dev); kedua-duanya tidak menghantar kandungan fail.
+- **Muat turun.** Daripada GitHub; sesetengah skrip pembantu juga mengambil alat daripada PyPI atau npm.
 
-- **Kekal pada mesin anda.** Pemetaan, konteks, suntingan dan semakan dijalankan di dalam binari Simplicio. Ia menyerahkan hasil kepada ejen anda pada mesin yang sama. Apa yang dihantar oleh ejen anda kepada penyedia modelnya sendiri ditentukan oleh ejen itu, seperti sebelum ini.
-- **Kepada SimpleTI (simpleti.com.br).** Log masuk dan semakan pelan sahaja. Ia membawa token log masuk anda, versi Simplicio dan nama hos komputer anda. Carian lesen pilihan turut membawa e-mel akaun anda. Ia memulangkan e-mel akaun, nama dan pelan anda. Tiada kandungan repositori: tiada fail, tiada laluan fail, tiada gesaan dan tiada suntingan.
-- **Kepada GitHub.** Semakan latar belakang untuk keluaran baharu, paling banyak kira-kira sekali setiap 12 jam. Ia tidak membawa apa-apa tentang anda atau kod anda. Tetapkan `SIMPLICIO_DISABLE_AUTO_UPDATE=1` untuk mematikannya. Apabila anda mengemas kini, binari baharu dimuat turun daripada GitHub, dan SHA-256 serta tandatangannya disemak sebelum ia menggantikan yang lama.
-- **Tiada analitik.** Simplicio 3.15.0 dan fail yang dipasangnya ke dalam ejen anda telah disemak untuk perkara ini: tiada satu pun memuat naik analitik, laporan ranap atau data penggunaan. Rekod penggunaan dan penjimatan ialah fail tempatan. Cangkuk (hook) yang dipasangnya hanya menjalankan program tempatan (binari Simplicio dan, bagi plugin pilihan, skrip tempatan); tiada satu pun daripadanya menghubungi rangkaian.
+<details>
+<summary>Butiran</summary>
+
+- **Kekal pada mesin anda.** Pemetaan, konteks, suntingan dan semakan dijalankan di dalam binari Simplicio. Ia menyerahkan hasil kepada ejen anda pada mesin yang sama. Rekod penggunaan dan penjimatan ialah fail tempatan. Apa yang dihantar oleh ejen anda kepada penyedia modelnya sendiri ditentukan oleh ejen itu, seperti sebelum ini.
+- **Kepada SimpleTI (simpleti.com.br).** Log masuk dan semakan pelan sahaja, tanpa kandungan repositori: tiada fail, laluan fail, gesaan atau suntingan.
+  - Ia membawa token log masuk anda, versi Simplicio dan nama hos komputer anda. Carian lesen pilihan turut membawa e-mel akaun anda.
+  - Ia memulangkan e-mel akaun, nama dan pelan anda.
+- **Kepada GitHub.** Semakan latar belakang untuk keluaran baharu, paling banyak kira-kira sekali setiap 12 jam, tanpa membawa apa-apa tentang anda atau kod anda. Tetapkan `SIMPLICIO_DISABLE_AUTO_UPDATE=1` untuk mematikannya. Kemas kini memuat turun binari daripada GitHub dan menyemak SHA-256 serta tandatangannya sebelum menggantikan yang lama.
+- **Tiada analitik.** Simplicio 3.15.0 dan fail yang dipasangnya dalam ejen anda telah disemak untuk ini: tiada satu pun memuat naik analitik, laporan ranap atau data penggunaan. Cangkuk (hook) yang dipasangnya hanya menjalankan program tempatan (binari Simplicio dan, bagi plugin pilihan, skrip tempatan); tiada satu pun daripadanya menghubungi rangkaian.
 - **Kepada perkhidmatan yang anda konfigurasikan.** Penyedia model, GitHub, Jira, pemberitahu sembang atau cache pasukan menerima apa yang dihantar oleh ciri itu, yang boleh termasuk gesaan dan kod. Permintaan kepada penyedia model membawa pengepala yang menamakan Simplicio sebagai klien.
-- **Dua ciri sampai ke perkhidmatan di internet yang terbuka kepada umum tanpa sebarang konfigurasi.** Carian web, apabila ia berjalan, menghantar pertanyaan carian kepada DuckDuckGo melainkan anda mengkonfigurasi perkhidmatan carian lain. Dalam sembang Simplicio sendiri, mesej yang kelihatan seperti soalan web boleh menjadi pertanyaan carian itu. Audit keselamatan kebergantungan, apabila anda menjalankannya, menghantar nama dan versi kebergantungan anda kepada osv.dev. Kedua-duanya tidak menghantar kandungan fail.
-- **Muat turun.** Pemasang dan laluan kemas kini memuat turun dari GitHub. Sesetengah skrip pembantu pilihan mengambil alatnya sendiri dari PyPI atau npm apabila anda menjalankannya. Jika plugin ejen dimulakan dan tidak menemui binari Simplicio, ia memuat turun pemasang rasmi dari GitHub, dipinkan pada commit tertentu dan disemak dengan SHA-256.
+- **Dua ciri sampai ke perkhidmatan umum di internet tanpa sebarang konfigurasi.** Kedua-duanya tidak menghantar kandungan fail.
+  - Carian web, apabila ia berjalan, menghantar pertanyaan carian kepada DuckDuckGo melainkan anda mengkonfigurasi perkhidmatan carian lain. Dalam sembang Simplicio sendiri, mesej yang kelihatan seperti soalan web boleh menjadi pertanyaan carian itu.
+  - Audit keselamatan kebergantungan, apabila anda menjalankannya, menghantar nama dan versi kebergantungan anda kepada osv.dev.
+- **Muat turun.** Pemasang dan laluan kemas kini memuat turun dari GitHub. Sesetengah skrip pembantu pilihan mengambil alatnya sendiri dari PyPI atau npm apabila anda menjalankannya. Plugin ejen yang tidak menemui binari Simplicio memuat turun pemasang rasmi dari GitHub, dipinkan pada commit tertentu dan disemak dengan SHA-256.
 
-**Keluaran bertandatangan.** Setiap keluaran menerbitkan binarinya dengan checksum SHA-256, tandatangan Ed25519, SBOM (senarai apa yang ada dalam binaan) dan asal-usul binaan. Pemasang dan laluan kemas kini menyemak checksum dan tandatangan sebelum menggantikan binari yang dipasang. Bagi keluaran stabil, kontrak menjadikan tandatangan yang hilang atau tidak sah serta ketidakpadanan checksum sebagai kegagalan keras. Kontrak itu terdapat dalam [docs/UPDATE_SIGNATURE_CONTRACT.md](../docs/UPDATE_SIGNATURE_CONTRACT.md).
+**Keluaran bertandatangan.** Setiap keluaran menerbitkan binarinya dengan checksum SHA-256, tandatangan Ed25519, SBOM (senarai apa yang ada dalam binaan) dan asal-usul binaan.
 
-**Apa yang pemasang ubah dalam ejen anda.** Ia menambah entri Simplicio pada konfigurasi MCP ejen dan mengekalkan bahagian konfigurasi yang lain. Dalam Claude Code ia juga membenarkan `mcp__simplicio__*`, jadi alat Simplicio tidak ditolak dalam mod auto. Dalam ejen yang antara muka cangkuknya telah disahkan oleh pemasang, ia turut memasang cangkuk Simplicio di sana. [INSTALL.md](../INSTALL.md) menyatakan apa yang ditulis oleh pemasang, dan panduan setiap ejen dalam [`docs/hosts/`](../docs/hosts/) memberikan butirannya. Nyahpasang tidak membatalkan entri-entri ini. Bahagian Pemasangan menerangkan cara membuangnya.
+Pemasang dan laluan kemas kini menyemak checksum dan tandatangan sebelum menggantikan binari yang dipasang. Bagi keluaran stabil, tandatangan yang hilang atau tidak sah serta ketidakpadanan checksum ialah kegagalan keras; kontraknya terdapat dalam [docs/UPDATE_SIGNATURE_CONTRACT.md](../docs/UPDATE_SIGNATURE_CONTRACT.md).
+
+**Apa yang diubah oleh pemasang dalam ejen anda.**
+
+- Ia menambah entri Simplicio pada konfigurasi MCP ejen dan mengekalkan bahagian konfigurasi yang lain.
+- Dalam Claude Code ia juga membenarkan `mcp__simplicio__*`, jadi alat Simplicio tidak ditolak dalam mod auto.
+- Dalam ejen yang antara muka cangkuknya telah disahkan oleh pemasang, ia turut memasang cangkuk Simplicio di sana.
+- Nyahpasang tidak membatalkan entri ini; bahagian Pemasangan menerangkan cara membuangnya. [INSTALL.md](../INSTALL.md) menyatakan apa yang ditulis oleh pemasang, dan panduan setiap ejen dalam [`docs/hosts/`](../docs/hosts/) memberikan butirannya.
+
+</details>
 
 ## Turut ada dalam repositori ini
 
@@ -397,7 +452,10 @@ Butiran: [docs/desktop/RELEASE.md](../docs/desktop/RELEASE.md).
 <details>
 <summary>Untuk penyelenggara: rajah aliran yang dijana</summary>
 
-Arahan dan alat yang didokumentasikan dalam README.md dan MCP-CONNECT.md dilukis sebagai satu aliran, [docs/flow/simplicio.svg](../docs/flow/simplicio.svg), dijana daripada satu fail sumber, `docs/flow/simplicio.flow.json`. Jana semula dengan `python3 scripts/generate_flow.py` dan semak hanyutannya dengan `python3 scripts/generate_flow.py --check`. Kontrak yang memastikannya selari dengan halaman ini dan dengan MCP-CONNECT.md ialah `python3 -m pytest tests/test_flow_contract.py -q`. Semakan import Langflow ialah `scripts/verify_flow_langflow.py`, yang gagal dalam keadaan tertutup (keluar dengan kod 2, `status=blocked`) apabila tiada pelayan berjalan. Bukti terdapat di bawah `docs/flow/evidence/` dan `docs/flow/render/`, dan [docs/flow/README.md](../docs/flow/README.md) memuatkan keperluan serta cara mengulanginya.
+- Arahan dan alat yang didokumentasikan dalam README.md dan MCP-CONNECT.md dilukis sebagai satu aliran, [docs/flow/simplicio.svg](../docs/flow/simplicio.svg), dijana daripada satu fail sumber, `docs/flow/simplicio.flow.json`.
+- Jana semula dengan `python3 scripts/generate_flow.py` dan semak hanyutannya dengan `python3 scripts/generate_flow.py --check`.
+- Kontrak yang memastikannya selari dengan halaman ini dan dengan MCP-CONNECT.md ialah `python3 -m pytest tests/test_flow_contract.py -q`.
+- Semakan import Langflow ialah `scripts/verify_flow_langflow.py`, yang gagal dalam keadaan tertutup (keluar dengan kod 2, `status=blocked`) apabila tiada pelayan berjalan. Bukti terdapat di bawah `docs/flow/evidence/` dan `docs/flow/render/`; [docs/flow/README.md](../docs/flow/README.md) memuatkan keperluan dan cara mengulanginya.
 
 </details>
 
@@ -406,25 +464,25 @@ Arahan dan alat yang didokumentasikan dalam README.md dan MCP-CONNECT.md dilukis
 ## Soalan yang sering ditanya
 
 **Adakah perbandingan ini adil?**<br>
-Ejen yang sama, model yang sama, tiga gesaan yang sama, projek permulaan yang sama dan semakan luaran yang sama, dalam satu pusingan. Garis dasar tidak mempunyai pelayan MCP dan tiada konfigurasi Simplicio. Lihat [Di mana Simplicio tidak menang](#where-simplicio-does-not-win) dan [Had](../benchmarks/2026-11-22-standard-benchmark.md#limits) laporan itu.
+Ejen yang sama, model yang sama, gesaan yang sama, projek yang sama dan semakan luaran yang sama; garis dasar tidak mempunyai Simplicio. Lihat [di mana ia tidak menang](#where-simplicio-does-not-win).
 
 **Adakah saya perlu menukar ejen atau model saya?**<br>
-Tidak. Simplicio bersambung dengan ejen yang sudah anda gunakan. Dalam penanda aras di atas, setiap persediaan menggunakan ejen dan model yang sama.
+Tidak. Simplicio bersambung dengan ejen yang sudah anda gunakan.
 
 **Adakah saya akan sentiasa mendapat nombor ini?**<br>
-Tidak. Nombor ini mengukur satu tugasan, dengan satu model, pada satu mesin, dalam tiga sesi bagi setiap persediaan. Lihat [Di mana Simplicio tidak menang](#where-simplicio-does-not-win), dan jalankan perbandingan ini pada kerja anda sendiri.
+Tidak. Nombor ini mengukur satu tugasan, satu model dan satu mesin.
 
 **Adakah ia sumber terbuka?**<br>
-Tidak. Simplicio ialah proprietari. Ia ialah binari yang ditandatangani, diterbitkan sebagai aset keluaran, dan sumbernya tidak awam. Repositori ini menyimpan pemasang, pakej untuk ejen, sumber aplikasi Desktop, dokumentasi dan data penanda aras.
+Tidak. Simplicio ialah proprietari: sebuah binari yang ditandatangani. Repositori ini menyimpan pemasang, pakej, dokumentasi dan data.
 
 **Bagaimana saya membuangnya?**<br>
-Jalankan `sh install.sh --uninstall --keep-data`, atau `pwsh install.ps1 -Uninstall -KeepData` pada Windows. Ia mengeluarkan binari dan menyimpan data anda. Ia tidak mengubah konfigurasi ejen anda, jadi buang entri Simplicio dalam tetapan setiap ejen. [Pemasangan](#install) mempunyai butiran dan pilihan pembersihan penuh.
+Jalankan `sh install.sh --uninstall --keep-data`, atau `pwsh install.ps1 -Uninstall -KeepData` pada Windows. Ia tidak mengubah konfigurasi ejen anda, jadi buang entri Simplicio dalam tetapan setiap ejen.
 
 **Adakah saya perlu akaun?**<br>
 Ya. Log masuk Google diperlukan, termasuk semasa beta. Jalankan `simplicio auth login`.
 
 **Adakah kod saya meninggalkan mesin saya?**<br>
-Pemetaan, konteks, suntingan dan semakan dijalankan pada mesin anda. Simplicio berhubung dengan SimpleTI untuk log masuk dan semakan pelan, dan dengan GitHub untuk mencari kemas kini, dengan tiada kandungan repositori dalam kedua-duanya. Ciri yang anda konfigurasikan atau jalankan boleh sampai ke perkhidmatan lain. Senarai lengkap ada dalam [Apa yang Simplicio hantar, dan kepada siapa](#safety-and-privacy).
+Pemetaan, konteks, suntingan dan semakan dijalankan pada mesin anda; SimpleTI dan GitHub tidak menerima kandungan repositori. [Butiran](#safety-and-privacy).
 
 <a id="documentation-and-community"></a>
 
@@ -434,9 +492,8 @@ Pemetaan, konteks, suntingan dan semakan dijalankan pada mesin anda. Simplicio b
 - **Dokumentasi:** [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
 - **Discord:** [Sertai komuniti](https://discord.gg/wM6tr7xVb)
 - **Isu:** [penjejak isu GitHub](https://github.com/simpletibr/simplicio/issues)
-- **Dalam repositori ini:** [INSTALL.md](../INSTALL.md), [MCP-CONNECT.md](../MCP-CONNECT.md) dan [docs/hosts/](../docs/hosts/)
 - **Berkaitan:** Simplicio Video (hypit). Untuk mengklonnya: `git clone https://github.com/hypit-ai/hypit.git simplicio-video`
 
 <p align="center">
-  <sub>© 2026 SimpleTI. Simplicio ialah perisian proprietari berdaftar. Semua hak terpelihara.</sub>
+  <sub>© 2026 SimpleTI. Simplicio ialah perisian proprietari yang didaftarkan. Semua hak terpelihara.</sub>
 </p>
