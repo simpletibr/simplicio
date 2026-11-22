@@ -343,10 +343,11 @@ def test_readme_headline_and_reading_paragraph_match_the_data():
     fastest_none, slowest_new = min(walls[ARM_IDS[0]]), max(walls[ARM_IDS[2]])
     cheapest_none, dearest_new = min(costs[ARM_IDS[0]]), max(costs[ARM_IDS[2]])
     worst = (
-        f"Worst case: the fastest session without Simplicio ({_round(fastest_none, 0)} s) against the slowest session "
-        f"with Simplicio 3.15.0 ({_round(slowest_new, 0)} s) is still {_round(fastest_none / slowest_new, 1)} times faster, "
-        f"and the cheapest (${_round(cheapest_none, 4)}) against the dearest (${_round(dearest_new, 4)}) "
-        f"is {_round(cheapest_none / dearest_new, 1)} times cheaper."
+        f"Worst case: the fastest session without Simplicio ({_round(fastest_none, 0)} s) was still "
+        f"{_round(fastest_none / slowest_new, 1)} times slower than the slowest session with Simplicio 3.15.0 "
+        f"({_round(slowest_new, 0)} s), and the cheapest session without it (${_round(cheapest_none, 4)}) still cost "
+        f"{_round(cheapest_none / dearest_new, 1)} times as much as the most expensive session with it "
+        f"(${_round(dearest_new, 4)})."
     )
     assert worst in text
     assert f"{out_new:,} output tokens instead of {out_none:,}" in text
@@ -692,34 +693,84 @@ def _section(text: str, start: str, end: str) -> str:
     return text.split(start, 1)[1].split(end, 1)[0]
 
 
-def test_agents_section_follows_the_compatibility_matrix_and_the_registry():
+SURFACE_GROUPS = (
+    ("An MCP entry that Simplicio writes", ("runtime-mcp",)),
+    ("A native plugin or extension", ("native-plugin", "native-extension")),
+    ("A portable plugin package", ("agent-plugin-v1",)),
+    ("A guided setup you follow yourself", ("guided-runtime",)),
+    ("Another command-line tool", ("delegated-cli",)),
+)
+SEVEN_NAMED_AGENTS = ("Claude Code", "Codex", "Cursor", "Visual Studio Code", "OpenCode", "Gemini CLI", "Kiro")
+
+
+def _registry_hosts() -> list[dict]:
+    return json.loads(_read(HOST_REGISTRY))["hosts"]
+
+
+def _lower_first(text: str) -> str:
+    return text[0].lower() + text[1:]
+
+
+def _guides_for_registry_agents(registry: list[dict]) -> list[str]:
+    """Registry ids that have a guide page. pi.md covers Pi and oh-my-pi, orca.md covers OrcaDev / Orca ADE."""
+    stems = {path.stem for path in (ROOT / "docs" / "hosts").glob("*.md") if path.stem != "compatibility-matrix"}
+    alias = {"orca-dev": "orca", "oh-my-pi": "pi"}
+    return [host["id"] for host in registry if host["id"] in stems or alias.get(host["id"]) in stems]
+
+
+def test_agents_section_is_written_from_the_registry_and_the_matrix():
     text = _read(README)
     section = _section(text, "## Works with the agent you already use", "<summary>Manual configuration</summary>")
+    registry = _registry_hosts()
+    names = [host["name"] for host in registry]
     matrix = _matrix_rows()
-    registry = [host["name"] for host in json.loads(_read(HOST_REGISTRY))["hosts"]]
-    acted_on = [name for name, capability in matrix.items() if capability != "unsupported"]
-    assert acted_on, "the matrix has no agent with a capability"
-    assert f"gives {len(acted_on)} agents a capability other than `unsupported`" in section
-    for name in acted_on:
-        assert name in section.split("The registry in")[0], f"{name} is not named as detected"
-    assert f"names {len(registry)} agent ids in all" in section
-    rest = [name for name in registry if name not in acted_on]
+    supported = [name for name, capability in matrix.items() if capability != "unsupported"]
+    assert all(name in names for name in supported)
+    lower_rows = [row.lower() for row in matrix]
+    unverified = [n for n in names if n not in supported and any(n.lower() in row for row in lower_rows)]
+    no_row = [n for n in names if n not in supported and n not in unverified]
+
+    # how Simplicio reaches each agent: the registry's surface field
+    counts = [(label, sum(1 for host in registry if host["surface"] in surfaces)) for label, surfaces in SURFACE_GROUPS]
+    assert sum(n for _, n in counts) == len(names), "a registry surface is not in any group of the table"
+    parts = [f"{_lower_first(label)} ({n})" for label, n in counts]
+    reaches = ", ".join(parts[:-1]) + f", or {parts[-1]}"
+    assert f"names {len(names)} agent ids and says, for each, how Simplicio reaches it: {reaches}." in section
+
+    # what has been verified: the matrix
+    assert len(supported) + len(unverified) + len(no_row) == len(names)
+    assert (f"Of those {len(names)} it marks {len(supported)} agents as supported and {len(unverified)} `unverified`, "
+            f"and it has no row for {' and '.join(no_row)}.") in section
+    assert "Where the registry says Simplicio writes the entry and the matrix says `unverified`, treat that integration as untested." in section
+
+    # the seven agents named as examples exist in the registry and in the sentence
+    sentence = "among them " + ", ".join(SEVEN_NAMED_AGENTS[:-1]) + " and " + SEVEN_NAMED_AGENTS[-1] + "."
+    assert sentence in section
+    for name in SEVEN_NAMED_AGENTS:
+        assert name in names, name
+    assert "The installer hands registration to Simplicio's own registrar." in section
+
+    # guides and plugins
+    assert f"{len(_guides_for_registry_agents(registry))} agents have a guide in [`docs/hosts/`](docs/hosts/)." in section
+    assert "the plugin is applied in a separate step that asks for your consent, and [INSTALL.md](INSTALL.md) describes it." in section
+
+    # the collapsed table: names from the registry, counts in a column, the supported ones in bold
     details = section.split("<details>", 1)[1].split("</details>", 1)[0]
-    assert f"<summary>The other {len(rest)} agents in the registry</summary>" in details
-    for name in rest:
-        assert name in details, f"{name} is missing from the list of the others"
-    lower = [row.lower() for row in matrix]
-    no_row = [name for name in rest if not any(name.lower() in row for row in lower)]
-    marked = [name for name in rest if name not in no_row]
-    assert f"Marked `unsupported` and `unverified` in the matrix ({len(marked)}):" in details
-    assert f"Not in the matrix ({len(no_row)}):" in details
-    assert f"marks {len(marked)} of the other {len(rest)} `unsupported`" in section
-    assert f"no row for the remaining {len(no_row)}" in section
-    # Statements that are true of every row and every guide, and nothing about verification of every guide.
-    assert "| How Simplicio reaches it |" not in text
-    assert "Each host guide states" not in text and "shows what the installer does for each host" not in text
-    assert "the plugin is applied in a separate step that asks for your consent" in section
-    assert "[INSTALL.md](INSTALL.md) describes it" in section
+    assert f"<summary>All {len(names)} agents, by how Simplicio reaches them</summary>" in details
+    assert "| How Simplicio reaches it | Count | Agents |" in details
+    for (label, surfaces), (_, n) in zip(SURFACE_GROUPS, counts):
+        members = [host["name"] for host in registry if host["surface"] in surfaces]
+        shown = ", ".join(f"**{name}**" if name in supported else name for name in members)
+        assert f"| {label} | {n} | {shown} |" in details, label
+    assert sorted(re.findall(r"\*\*([^*]+)\*\*", details.split("Bold:", 1)[0])) == sorted(supported)
+    assert "Bold: the compatibility matrix marks the agent as supported." in details
+
+    # what must not come back
+    for gone in ("nothing is configured automatically", "The installer detects these today", "The other 31 agents in the registry",
+                 "If your agent is not one of the 12 above", "| How Simplicio reaches it |\n|---|---|\n| Native plugin or extension (5)",
+                 "Each host guide states", "shows what the installer does for each host"):
+        assert gone not in text, gone
+    assert "If your agent was not configured for you, add this entry to its MCP configuration." in text
 
 
 def test_readme_says_what_the_checks_do_not_test_and_what_is_published():

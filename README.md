@@ -155,7 +155,7 @@ Each cell is the median time and the median cost of the step:
 
 </details>
 
-**How to read it.** The ratios come from the unrounded medians. Against the same agent without Simplicio, the whole job ran 4.9 times faster and cost about a third as much. Against the previous release it ran 4.2 times faster. In the session, the model made 10 requests instead of 25 and wrote 3,211 output tokens instead of 18,162, and the job passed the same outside checks. Worst case: the fastest session without Simplicio (97 s) against the slowest session with Simplicio 3.15.0 (27 s) is still 3.7 times faster, and the cheapest ($0.0186) against the dearest ($0.0098) is 1.9 times cheaper. The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration. Cost counts model tokens only. The sessions ran four at a time on one machine, so compare times only inside this round.
+**How to read it.** The ratios come from the unrounded medians. Against the same agent without Simplicio, the whole job ran 4.9 times faster and cost about a third as much. Against the previous release it ran 4.2 times faster. In the session, the model made 10 requests instead of 25 and wrote 3,211 output tokens instead of 18,162, and the job passed the same outside checks. Worst case: the fastest session without Simplicio (97 s) was still 3.7 times slower than the slowest session with Simplicio 3.15.0 (27 s), and the cheapest session without it ($0.0186) still cost 1.9 times as much as the most expensive session with it ($0.0098). The baseline is Claude Code 2.1.330 with its own tools, no MCP server and no Simplicio configuration. Cost counts model tokens only. The sessions ran four at a time on one machine, so compare times only inside this round.
 
 ### Where Simplicio does not win
 
@@ -248,16 +248,25 @@ simplicio onboard
 
 Simplicio is a local STDIO MCP server, so an agent that can start a local MCP server can be pointed at it.
 
-The [compatibility matrix](docs/hosts/compatibility-matrix.md) gives 12 agents a capability other than `unsupported`. The installer detects these today and registers Simplicio in them: Claude Code, Cursor, OpenCode, Visual Studio Code, Kiro, Pi, oh-my-pi, OrcaDev / Orca ADE (through its documented command line), xAI Grok Build, Meta Muse Code, OpenMausBot and OpenMuse (Python). For every agent it names, the matrix gives a capability, a contract and the probe the installer uses, and a dash means there is none.
+The installer hands registration to Simplicio's own registrar. It detects the agents on your machine and writes the Simplicio entry for the ones it knows how to configure, among them Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI and Kiro. Two files in this repository say how far each integration goes:
 
-The registry in [`plugins/simplicio/host-surfaces.json`](plugins/simplicio/host-surfaces.json) names 43 agent ids in all. The matrix marks 29 of the other 31 `unsupported` and `unverified`: it lists no executable probe and no automatic configuration writer for them, so nothing is configured automatically. Use the manual configuration below, or the agent's guide in [`docs/hosts/`](docs/hosts/) when it has one. The matrix has no row for the remaining 2, Codex and Gemini CLI. For agents reached through a plugin, the plugin is applied in a separate step that asks for your consent, and [INSTALL.md](INSTALL.md) describes it.
+- The registry [`plugins/simplicio/host-surfaces.json`](plugins/simplicio/host-surfaces.json) names 43 agent ids and says, for each, how Simplicio reaches it: an MCP entry that Simplicio writes (23), a native plugin or extension (5), a portable plugin package (4), a guided setup you follow yourself (9), or another command-line tool (2).
+- The compatibility matrix [`docs/hosts/compatibility-matrix.md`](docs/hosts/compatibility-matrix.md) says what has been verified. Of those 43 it marks 12 agents as supported and 29 `unverified`, and it has no row for Codex and Gemini CLI. Where the registry says Simplicio writes the entry and the matrix says `unverified`, treat that integration as untested.
+
+23 agents have a guide in [`docs/hosts/`](docs/hosts/). For agents reached through a plugin, the plugin is applied in a separate step that asks for your consent, and [INSTALL.md](INSTALL.md) describes it.
 
 <details>
-<summary>The other 31 agents in the registry</summary>
+<summary>All 43 agents, by how Simplicio reaches them</summary>
 
-Marked `unsupported` and `unverified` in the matrix (29): GitHub Copilot, MiMo Code, Amp, OpenClaude, Antigravity, Hermes Agent, Devin, Goose, Auggie, Autohand Code, Charm, Cline, Codebuff, Command Code, Continue, Droid, Kilocode, Kimi, Mistral Vibe, Qwen Code, Rovo Dev, T3 Code, CopilotKit OpenDots, CopilotKit OpenBot, agentes.chat, OpenAI dots, xAI Grok Bot, Meta Muse app, Cue by Manus.
+| How Simplicio reaches it | Count | Agents |
+|---|---|---|
+| An MCP entry that Simplicio writes | 23 | **xAI Grok Build**, MiMo Code, Amp, OpenClaude, Antigravity, **Pi**, **oh-my-pi**, Goose, Auggie, Autohand Code, Charm, Cline, Command Code, Continue, Droid, Kilocode, Kimi, Mistral Vibe, Rovo Dev, **Visual Studio Code**, **Meta Muse Code**, **OpenMausBot**, **OpenMuse (Python)** |
+| A native plugin or extension | 5 | **Claude Code**, Codex, **OpenCode**, Hermes Agent, Gemini CLI |
+| A portable plugin package | 4 | **Cursor**, GitHub Copilot, **Kiro**, Qwen Code |
+| A guided setup you follow yourself | 9 | Devin, Codebuff, CopilotKit OpenDots, CopilotKit OpenBot, agentes.chat, OpenAI dots, xAI Grok Bot, Meta Muse app, Cue by Manus |
+| Another command-line tool | 2 | **OrcaDev / Orca ADE**, T3 Code |
 
-Not in the matrix (2): Codex, which [MCP-CONNECT.md](MCP-CONNECT.md) describes, and Gemini CLI, whose extension manifest is in `plugins/simplicio/`.
+Bold: the compatibility matrix marks the agent as supported.
 
 </details>
 
@@ -276,7 +285,7 @@ The live list is whatever the server reports at startup. [MCP-CONNECT.md](MCP-CO
 <details>
 <summary>Manual configuration</summary>
 
-If your agent is not one of the 12 above, or you prefer to set it up yourself, add this entry to its MCP configuration. Replace the path with the absolute path of the installed binary.
+If your agent was not configured for you, add this entry to its MCP configuration. Replace the path with the absolute path of the installed binary.
 
 ```json
 {
