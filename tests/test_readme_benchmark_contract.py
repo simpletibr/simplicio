@@ -260,7 +260,7 @@ def test_public_files_name_only_published_setups_and_no_private_paths():
 def test_readme_table_puts_the_value_first_and_the_range_under_it():
     text = _read(README)
     totals = _session_totals(_data())
-    assert "The small line under each value is the lowest and the highest session." in text
+    assert "Median of 3 sessions, lowest to highest under each value." in text
     for key in ("wall", "cost_cli", "requests", "tools", "output", "input", "cpu", "rss"):
         best = _best_arm_with_a_clear_gap(totals, key)
         for arm in ARM_IDS:
@@ -338,9 +338,8 @@ def test_readme_headline_and_reading_paragraph_match_the_data():
     assert f"{_round(prev / new, 1)} times faster" in text
     req_none, req_new = (_spread(totals, arm, "requests")[0] for arm in (ARM_IDS[0], ARM_IDS[2]))
     out_none, out_new = (_spread(totals, arm, "output")[0] for arm in (ARM_IDS[0], ARM_IDS[2]))
-    assert f"{req_new} requests instead of {req_none}" in text
     assert "The ratios come from the unrounded medians." in text
-    assert "and the job passed the same outside checks" in text
+    assert f"| Model requests | {req_none}<br>" in _read(README) and f"| **{req_new}**<br>" in _read(README)
     assert "for the same delivered result" not in text
     walls = {arm: [s["wall"] for s in totals[arm]] for arm in ARM_IDS}
     costs = {arm: [s["cost_cli"] for s in totals[arm]] for arm in ARM_IDS}
@@ -354,7 +353,7 @@ def test_readme_headline_and_reading_paragraph_match_the_data():
         f"(${_round(dearest_new, 4)})."
     )
     assert worst in text
-    assert f"{out_new:,} output tokens instead of {out_none:,}" in text
+    assert f"**{out_new:,}**<br>" in _read(README) and f"| {out_none:,}<br>" in _read(README)
     sessions = len([s for s in _data()["sessions"] if s["arm"] == ARM_IDS[0]])
     assert f"median of {sessions} sessions" in text.lower()
 
@@ -653,15 +652,15 @@ def test_readme_puts_each_figure_where_the_page_needs_it_and_keeps_the_exact_num
     def at(needle):
         return text.index(needle)
 
-    assert at("Every session is on this chart, not only the medians.") < at("sessions-light.svg") < at("| Measure | No Simplicio")
-    assert at("| Steps delivered | 9 of 9 |") < at("What changed in the session, in counts") < at("work-light.svg")
+    assert at("3. Add a registration") < at("sessions-light.svg") < at("| Measure | No Simplicio")
+    assert at("| Steps delivered | 9 of 9 |") < at("work-light.svg")
     assert at("work-light.svg") < at("Time by step, on one shared scale.") < at("steps-light.svg")
     details = "<details>\n<summary>Exact numbers by step</summary>"
     assert at("steps-light.svg") < at(details) < at("| 1. Build | 57.3 s")
     # the by-step table is inside the details block, not visible on its own
     before = text[: at(details)]
     assert "| 1. Build |" not in before
-    assert at("| 3. Register |") < at("</details>", ) < at("**How to read it.**")
+    assert at("| 3. Register |") < text.index("</details>", at("| 3. Register |")) < at("**How to read it.**")
     assert at("### Where Simplicio does not win") < at("memory-light.svg") < at("- **Memory.**")
     assert "| Measure | No Simplicio | Simplicio 3.14.0 | Simplicio 3.15.0 |" in text
 
@@ -743,14 +742,15 @@ def test_agents_section_is_written_from_the_registry_and_the_matrix():
     assert sum(n for _, n in counts) == len(names), "a registry surface is not in any group of the table"
     parts = [f"{_lower_first(label)} ({n})" for label, n in counts]
     reaches = ", ".join(parts[:-1]) + f", or {parts[-1]}"
-    assert f"names {len(names)} agent ids and says, for each, how Simplicio reaches it: {reaches}." in section
+    assert f"The registry names {len(names)} agent ids and how Simplicio reaches each: {reaches}." in section
 
     # what has been verified: the matrix
     assert len(supported) + len(unverified) + len(no_row) == len(names)
-    assert (f"Of those {len(names)} it marks {len(supported)} agents as supported and {len(unverified)} `unverified`, "
-            f"and it has no row for {' and '.join(no_row)}.") in section
-    assert ("Where the registry says Simplicio writes the entry and the matrix says `unverified`, "
-            "treat that integration as untested.") in section
+    assert (f"names {len(names)} agent ids; the matrix [`docs/hosts/compatibility-matrix.md`]"
+            f"(docs/hosts/compatibility-matrix.md) marks {len(supported)} supported and {len(unverified)} `unverified`. "
+            "Treat an `unverified` integration as untested.") in section
+    assert f"The matrix has no row for {' and '.join(no_row)}." in section
+    assert "Even where the registry says Simplicio writes the entry, treat an `unverified` integration as untested." in section
 
     # the seven agents named as examples exist in the registry and in the sentence
     sentence = "among them " + ", ".join(SEVEN_NAMED_AGENTS[:-1]) + " and " + SEVEN_NAMED_AGENTS[-1] + "."
@@ -766,7 +766,7 @@ def test_agents_section_is_written_from_the_registry_and_the_matrix():
 
     # the collapsed table: names from the registry, counts in a column, the supported ones in bold
     details = section.split("<details>", 1)[1].split("</details>", 1)[0]
-    assert f"<summary>All {len(names)} agents, by how Simplicio reaches them</summary>" in details
+    assert f"<summary>All {len(names)} agents</summary>" in details
     assert "| How Simplicio reaches it | Count | Agents |" in details
     for (label, surfaces), (_, n) in zip(SURFACE_GROUPS, counts):
         members = [host["name"] for host in registry if host["surface"] in surfaces]
@@ -790,13 +790,13 @@ def test_readme_says_what_the_checks_do_not_test_and_what_is_published():
             "the look of the page or the quality of the code.") in text
     assert text.count("The checks do not test") == 1
     assert ("[The report](benchmarks/2026-11-22-standard-benchmark.md) publishes the three prompts "
-            "(in Portuguese, with a translation), a description of every outside check and the per-session numbers") in text
+            "(in Portuguese, with a translation), every outside check and every session") in text
     assert "The test harness is not published." in text
     assert "Each median is taken separately, so the steps do not add up to the whole-job median." in text
     for needle in ("**The previous release showed no gain on this job.**",
                    "**What you install is not exactly what was measured.**",
-                   "No session of these three setups was dropped or re-run.",
-                   "We have not measured how much of your work looks like this job.",
+                   "none dropped or re-run.",
+                   "we have not measured how much of your work looks like it.",
                    "Read with it: one small job, three sessions per setup, one model."):
         assert needle in text, needle
     assert "pay for itself" not in text
@@ -816,11 +816,11 @@ def test_install_and_safety_statements_match_what_the_scripts_do():
     text = _read(README)
     for needle in ("- `--doctor` checks the installation.",
                    "A purge needs `SIMPLICIO_CONFIRM_PURGE=1`.",
-                   "You can run either installer again at any time",
+                   "To update, run either installer again at any time",
                    "Uninstall does not edit your agents' configuration. The Simplicio entries stay in each agent "
                    "until you remove them in that agent's own settings.",
                    "It does not edit your agents' configuration, so remove the Simplicio entries in each agent's own settings.",
-                   "For stable releases the contract makes a missing or invalid signature and a checksum mismatch hard failures.",
+                   "For stable releases a missing or invalid signature and a checksum mismatch are hard failures;",
                    "The DMG has no signature file and bundles the Simplicio 3.8.47 binary.",
                    "and Gatekeeper acceptance is not claimed, so macOS may warn you when you open it.",
                    "[MCP-CONNECT.md](MCP-CONNECT.md) describes the core tools.",
@@ -966,7 +966,7 @@ def test_hooks_are_named_plainly_in_two_places_only_and_never_described():
     # The word appears in the README only in the installer paragraph and in the privacy item.
     for line in readme.splitlines():
         if "hook" in line.lower():
-            allowed = line.startswith("**What the installer changes in your agent.**") or line.startswith("- **No analytics.**")
+            allowed = line.startswith("- In agents whose hook interface") or line.startswith("- **No analytics.**")
             assert allowed, line[:80]
     assert "hook" not in report.lower()
     # The setups are not enumerated in the measurement paragraph or in the report.
@@ -1030,3 +1030,158 @@ def test_readme_keeps_the_phrases_other_contracts_pin():
         assert needle in text, needle
     assert "HTTP/OAuth" not in text
     assert "Authenticate" not in text
+
+
+# --------------------------------------------------------------------------
+# Three lines at most per text item
+# --------------------------------------------------------------------------
+
+# The owner's rule: no paragraph, list item, caption or answer is longer than three rendered lines at GitHub's desktop
+# width. The proxy is the visible text of the item: at most 300 characters in README.md, 360 in the translations (other
+# languages run longer). Table cells and fenced code are exempt.
+MAX_ITEM_CHARS = 300
+MAX_ITEM_CHARS_TRANSLATED = 360
+
+_LIST_MARK_RE = re.compile(r"^\s*(?:[-*]|\d+\.)\s+")
+_BLOCK_ONLY_RE = re.compile(r"^\s*</?(?:picture|source|img|details|div|p)\b[^>]*>\s*$", re.I)
+
+
+def _visible(raw: str) -> str:
+    """What a reader sees of an item: markup, link targets, images and code-span backticks removed."""
+    text = re.sub(r"<!--.*?-->", "", raw, flags=re.S)
+    text = re.sub(r"<img\b[^>]*>", "", text, flags=re.I)
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    text = re.sub(r"<br\s*/?>", " ", text, flags=re.I)
+    text = re.sub(r"<[^>]+>", "", text)
+    text = html.unescape(text.replace("&lrm;", ""))
+    text = text.replace("`", "").replace("**", "")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def text_items(markdown: str) -> list[str]:
+    """The paragraphs, list items, headings, captions and answers of a page, as raw text, in order.
+
+    Fenced code and table rows are left out. A blank line ends a paragraph; a list marker starts a new item.
+    """
+    items: list[str] = []
+    current: list[str] = []
+    in_fence = False
+
+    def flush() -> None:
+        if current:
+            items.append("\n".join(current))
+            current.clear()
+
+    for line in markdown.split("\n"):
+        if line.lstrip().startswith("```"):
+            flush()
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if not line.strip():
+            flush()
+            continue
+        if line.lstrip().startswith("|"):
+            flush()
+            continue
+        if line.startswith("#"):
+            flush()
+            items.append(line)
+            continue
+        if _LIST_MARK_RE.match(line):
+            flush()
+        current.append(line)
+    flush()
+    return items
+
+
+def visible_items(markdown: str) -> list[str]:
+    """The text items a visitor sees without opening a <details> block (the <summary> lines are visible)."""
+    items: list[str] = []
+    depth = 0
+    block: list[str] = []
+    in_fence = False
+    # one pass over the lines, tracking <details> depth; an item is visible when it starts at depth 0
+    for raw in text_items(markdown):
+        first = raw.split("\n", 1)[0].strip()
+        if first.startswith("<details"):
+            if depth == 0:
+                items.append(raw)  # the block holding <details> and its <summary>
+            depth += raw.count("<details")
+            depth -= raw.count("</details>")
+            continue
+        if first.startswith("</details>"):
+            depth -= raw.count("</details>")
+            continue
+        if depth == 0:
+            items.append(raw)
+    del block, in_fence
+    return items
+
+
+def _words(raw: str) -> list[str]:
+    return re.sub(r"^\s*(?:#+|[-*]|\d+\.)\s+", "", _visible(raw)).split()
+
+
+def too_long(markdown: str, limit: int) -> list[tuple[int, str]]:
+    found = []
+    for raw in text_items(markdown):
+        text = _visible(raw)
+        if len(text) > limit:
+            found.append((len(text), text))
+    return found
+
+
+def _report(found: list[tuple[int, str]], limit: int) -> str:
+    return f"{len(found)} item(s) longer than {limit} characters:\n" + "\n".join(
+        f"  {size:4d}  {text[:90]}..." for size, text in found)
+
+
+def test_text_item_proxy_counts_what_a_reader_sees():
+    sample = "- **Bold** and [a link](https://example.com/very/long/target) with `code` and<br>\n  a second line.\n"
+    assert text_items(sample) == [sample.rstrip("\n")]
+    assert _visible(sample) == "- Bold and a link with code and a second line."
+    assert too_long("```\n" + "x" * 500 + "\n```\n| " + "y" * 500 + " |\n", 300) == []
+    assert too_long("a " * 160, 300) and not too_long("a " * 100, 300)
+
+
+def test_every_text_item_of_the_english_readme_is_three_lines_at_most():
+    found = too_long(_read(README), MAX_ITEM_CHARS)
+    assert not found, _report(found, MAX_ITEM_CHARS)
+
+
+@pytest.mark.parametrize("page", LOCALIZED, ids=lambda p: p.name.split(".")[1])
+def test_every_text_item_of_a_translation_is_three_lines_at_most(page):
+    found = too_long(_read(page), MAX_ITEM_CHARS_TRANSLATED)
+    assert not found, _report(found, MAX_ITEM_CHARS_TRANSLATED)
+
+
+# The second owner rule: the page is mostly figures and tables, and the prose a visitor sees is short. Everything that
+# defines a measure, states a limit in full or details a privacy item sits in a collapsed <details> block, where
+# the 300-character cap still holds and no word budget applies.
+MAX_VISIBLE_WORDS = 1100
+SOFT_ITEM_CHARS = 200
+MAX_SOFT_LONG_ITEMS = 9  # fewer than ten visible items longer than 200 characters
+
+
+def test_visible_item_helper_skips_collapsed_blocks_and_keeps_summaries():
+    sample = ("Visible one.\n\n<details>\n<summary>Open me</summary>\n\nHidden two.\n\n- Hidden three.\n\n</details>\n\n"
+              "## Heading\n\n- Visible four.\n")
+    seen = [_visible(item) for item in visible_items(sample)]
+    assert seen == ["Visible one.", "Open me", "## Heading", "- Visible four."]
+    assert sum(len(_words(item)) for item in visible_items(sample)) == 2 + 2 + 1 + 2
+
+
+def test_the_visible_prose_of_the_english_readme_is_at_most_1100_words():
+    words = sum(len(_words(item)) for item in visible_items(_read(README)))
+    assert words <= MAX_VISIBLE_WORDS, (
+        f"{words} words of visible prose (outside <details>; table cells, code, alt text and attributes not counted); "
+        f"the budget is {MAX_VISIBLE_WORDS}. Move detail into a collapsed block or cut it")
+
+
+def test_few_visible_items_are_longer_than_200_characters():
+    long = [(len(_visible(item)), _visible(item)) for item in visible_items(_read(README))
+            if len(_visible(item)) > SOFT_ITEM_CHARS]
+    assert len(long) <= MAX_SOFT_LONG_ITEMS, _report(sorted(long, reverse=True), SOFT_ITEM_CHARS)

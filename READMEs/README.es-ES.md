@@ -54,7 +54,7 @@
 </p>
 
 <p align="center">
-  <sub>Léelo junto con esto: un trabajo pequeño, tres sesiones por escenario, un modelo. Las comprobaciones externas cubren menos de lo que piden los prompts. El pico de memoria fue mayor: 375 MB frente a 270 MB. Las compilaciones de Simplicio se generaron a partir de los commits de publicación, con el inicio de sesión desactivado.</sub>
+  <sub>Léelo junto con esto: un trabajo pequeño, tres sesiones por escenario, un modelo. Las comprobaciones externas cubren menos de lo que piden los prompts. El pico de memoria fue mayor: 375 MB frente a 270 MB. Los builds de Simplicio se compilaron a partir de los commits de publicación, con el inicio de sesión desactivado.</sub>
 </p>
 
 <p align="center">No se publica cómo logra Simplicio este resultado. Sí se publican las mediciones, incluidas las que pierde.</p>
@@ -76,11 +76,9 @@
 
 Simplicio es un programa local que da al agente de programación que ya usas un modo ultrarrápido, sea cual sea el agente y sea cual sea el modelo. Los números de esta página salen de un solo agente y un solo modelo; la sección de abajo dice exactamente qué se midió.
 
-- **Conservas tu agente y tu modelo.** Simplicio no reemplaza a Claude Code, Codex, Cursor ni el modelo que haya detrás de ellos.
-- **Instalas un único binario nativo firmado.** El instalador verifica la firma y luego registra Simplicio en los agentes que encuentra en tu equipo.
-- **Se ejecuta en tu equipo.** Tu agente lo inicia como un servidor MCP local por STDIO. MCP es el Model Context Protocol, la forma estándar en que un agente de programación llama a herramientas externas. STDIO significa que el agente lanza el programa por sí mismo y se comunica con él a través de su entrada y salida estándar.
-- **Da herramientas a tu agente.** Un mapa del repositorio, contexto acotado, ediciones estructuradas y comprobaciones. [Las herramientas principales](#works-with-the-agent-you-already-use) se enumeran más abajo.
-- **Lo que cambia es la sesión.** Cuánto tarda y cuánto cuesta. La siguiente sección muestra cuánto, y dónde no ayuda.
+- **Conservas tu agente y tu modelo.** Simplicio no reemplaza a Claude Code, Codex, Cursor ni el modelo que hay detrás de ellos.
+- **Un único binario firmado** se registra en tus agentes y se ejecuta en tu equipo como servidor MCP local por STDIO.
+- **Lo que cambia es la sesión.** Su tiempo y su coste.
 
 <p align="center">
   <picture>
@@ -90,22 +88,29 @@ Simplicio es un programa local que da al agente de programación que ya usas un 
 </p>
 
 <p align="center">
-  <sub>El gráfico muestra lo que ocurre por defecto. La lista completa, incluidas las funciones que llegan a otros servicios, está en <a href="#safety-and-privacy">Qué envía Simplicio, y a quién</a>, dentro de Seguridad y privacidad.</sub>
+  <sub>El flujo por defecto. La <a href="#safety-and-privacy">lista completa</a> incluye los demás servicios.</sub>
 </p>
+
+<details>
+<summary>MCP y STDIO</summary>
+
+MCP es el Model Context Protocol, la forma en que un agente de programación llama a herramientas externas. STDIO significa que el agente lanza el programa por sí mismo y se comunica con él a través de su entrada y salida estándar.
+
+Le da a tu agente herramientas: un mapa del repositorio, contexto acotado, ediciones estructuradas y comprobaciones. [Las herramientas principales](#works-with-the-agent-you-already-use) se enumeran más abajo.
+
+Instalas un único binario nativo firmado. El instalador verifica la firma y luego registra Simplicio en los agentes que encuentra en tu equipo.
+
+</details>
 
 <a id="the-measurement"></a>
 
 ## La medición
 
-Un mismo trabajo, ejecutado de la misma forma con y sin Simplicio. El trabajo es una sesión de agente con tres pasos en la misma conversación:
+Un mismo trabajo, ejecutado de la misma forma con y sin Simplicio: tres pasos en una sesión de agente, y cada resultado comprobado desde fuera.
 
 1. Construir un listado de usuarios: una API y una página con una tabla, búsqueda y ordenación.
 2. Modificarlo: quitar una columna, añadir un filtro por rol y una columna de fecha.
-3. Añadir un registro sencillo: un endpoint `POST` que valida su entrada, y una página con un formulario.
-
-Después de cada paso, el resultado se comprueba desde fuera de la sesión. Se llama a la API por HTTP y las páginas se cargan en Chrome sin interfaz gráfica, es decir, sin ventana. Todos los escenarios usaron el mismo agente y el mismo modelo: Claude Code 2.1.330 con Claude Haiku 5.5. La línea base es Claude Code 2.1.330 con sus propias herramientas, sin servidor MCP y sin configuración de Simplicio. Las comprobaciones no prueban el cuadro de búsqueda, la ordenación, la redirección tras guardar, el aspecto de la página ni la calidad del código.
-
-Cada sesión aparece en este gráfico, no solo las medianas.
+3. Añadir un registro: un endpoint `POST` que valida su entrada, y una página con un formulario.
 
 <p align="center">
   <picture>
@@ -113,8 +118,6 @@ Cada sesión aparece en este gráfico, no solo las medianas.
     <img src="../assets/benchmark-2026-11-22-sessions-light.svg" width="840" alt="Gráfico de dispersión de todas las sesiones, con el tiempo del trabajo completo en horizontal y el coste informado por el agente en vertical. Simplicio 3.15.0, rombos verdes: de 23 a 27 s y de $0.0071 a $0.0098. Simplicio 3.14.0, cuadrados grises: de 90 a 106 s y de $0.0214 a $0.0249. Sin Simplicio, círculos huecos: de 97 a 172 s y de $0.0186 a $0.0280.">
   </picture>
 </p>
-
-Mediana de 3 sesiones por escenario. La línea pequeña bajo cada valor indica la sesión más baja y la más alta.
 
 | Medida | Sin Simplicio | Simplicio 3.14.0 | Simplicio 3.15.0 |
 |---|---|---|---|
@@ -128,9 +131,9 @@ Mediana de 3 sesiones por escenario. La línea pequeña bajo cada valor indica l
 | Pico de memoria | **270 MB**<br><sub>248–274</sub> | 436 MB<br><sub>432–439</sub> | 375 MB<br><sub>365–379</sub> |
 | Pasos entregados | 9 de 9 | 9 de 9 | 9 de 9 |
 
-En negrita aparece el mejor valor de cada fila, solo cuando su rango no se solapa con los demás. Los rangos de tokens de entrada se solapan, así que esta ejecución no afirma ninguna diferencia en tokens de entrada. «9 de 9» equivale a 3 pasos en cada una de 3 sesiones, y cada paso superó todas las comprobaciones externas. El tiempo del trabajo es el tiempo de todo el trabajo. Una solicitud al modelo es una llamada al modelo, y una llamada a herramienta es un uso de una herramienta por parte del agente. El coste informado es el que muestra el agente: los tokens usados multiplicados por el precio publicado del modelo. Solo cuenta los tokens del modelo. No es una factura.
+Mediana de 3 sesiones, de la más baja a la más alta bajo cada valor. En negrita, el mejor valor de cada fila cuando los rangos no se solapan. «9 de 9» equivale a 3 pasos en cada una de 3 sesiones, y cada paso superó todas las comprobaciones externas.
 
-Lo que cambió en la sesión, en recuento: el modelo hizo menos solicitudes, y el agente hizo menos llamadas a herramientas.
+Solicitudes y llamadas a herramientas por sesión.
 
 <p align="center">
   <picture>
@@ -148,8 +151,6 @@ Tiempo por paso, en una escala común.
   </picture>
 </p>
 
-Cada mediana se calcula por separado, así que los pasos no suman la mediana del trabajo completo.
-
 <details>
 <summary>Cifras exactas por paso</summary>
 
@@ -163,7 +164,23 @@ Cada celda muestra la mediana del tiempo y la mediana del coste del paso:
 
 </details>
 
-**Cómo leerlo.** Las proporciones se calculan con las medianas sin redondear. Frente al mismo agente sin Simplicio, el trabajo completo fue 4.9 veces más rápido y costó alrededor de un tercio. Frente a la versión anterior, fue 4.2 veces más rápido. En la sesión, el modelo hizo 10 solicitudes en lugar de 25 y generó 3,211 tokens de salida en lugar de 18,162, y el trabajo superó las mismas comprobaciones externas. Peor caso: la sesión más rápida sin Simplicio (97.1 s) seguía siendo 3.7 veces más lenta que la sesión más lenta con Simplicio 3.15.0 (26.6 s), y la sesión más barata sin Simplicio ($0.0186) seguía costando 1.9 veces más que la más cara con Simplicio ($0.0098). La línea base es Claude Code 2.1.330 con sus propias herramientas, sin servidor MCP y sin configuración de Simplicio. El coste cuenta solo los tokens del modelo. Las sesiones se ejecutaron cuatro a la vez en un mismo equipo, así que compara los tiempos solo dentro de esta ronda.
+**Cómo leerlo.** Las proporciones se calculan con las medianas sin redondear. Frente al mismo agente sin Simplicio, el trabajo completo fue 4.9 veces más rápido y costó alrededor de un tercio. Incluso la sesión más rápida sin Simplicio (97.1 s) fue 3.7 veces más lenta que la más lenta con 3.15.0 (26.6 s). [Método y límites](../benchmarks/2026-11-22-standard-benchmark.md#limits)
+
+<details>
+<summary>Cómo se define cada cifra</summary>
+
+- Las proporciones se calculan con las medianas sin redondear. Frente a la versión anterior, el trabajo completo fue 4.2 veces más rápido.
+- Cada mediana se calcula por separado, así que los pasos no suman la mediana del trabajo completo.
+- Peor caso: la sesión más rápida sin Simplicio (97.1 s) seguía siendo 3.7 veces más lenta que la sesión más lenta con Simplicio 3.15.0 (26.6 s), y la sesión más barata sin Simplicio ($0.0186) seguía costando 1.9 veces más que la más cara con Simplicio ($0.0098).
+- La línea base es Claude Code 2.1.330 con sus propias herramientas, sin servidor MCP y sin configuración de Simplicio.
+- Cada paso se comprueba desde fuera de la sesión: la API se llama por HTTP y las páginas se cargan en Chrome sin interfaz gráfica, es decir, sin ventana.
+- Las comprobaciones no prueban el cuadro de búsqueda, la ordenación, la redirección tras guardar, el aspecto de la página ni la calidad del código.
+- Una solicitud al modelo es una llamada al modelo; una llamada a herramienta es un uso de una herramienta por parte del agente.
+- El coste informado son los tokens usados multiplicados por el precio publicado del modelo. Solo cuenta los tokens del modelo. No es una factura.
+- Los rangos de tokens de entrada se solapan, así que esta ejecución no afirma ninguna diferencia en tokens de entrada.
+- Cuatro sesiones se ejecutaron a la vez en un mismo equipo: compara los tiempos solo dentro de esta ronda.
+
+</details>
 
 <a id="where-simplicio-does-not-win"></a>
 
@@ -176,21 +193,30 @@ Cada celda muestra la mediana del tiempo y la mediana del coste del paso:
   </picture>
 </p>
 
+- **Memoria.** El pico de memoria fue un 39% mayor: 375 MB frente a 270 MB.
+- **La versión anterior no mostró mejora en este trabajo.** Simplicio 3.14.0 costó lo mismo que sin Simplicio.
+- **Un script corto de Python de uso puntual.** Simplicio 3.10.8 fue más lento (19.6 s frente a 11.4 s) y no se volvió a medir.
+- **Lo que instalas no es exactamente lo que se midió.** Los builds se compilaron a partir de los commits de publicación, con el inicio de sesión desactivado.
+- **La muestra es pequeña.** Tres sesiones por escenario, un modelo, un proyecto.
+
+<details>
+<summary>Los límites completos</summary>
+
 - **Memoria.** El pico de memoria fue un 39% mayor que con el agente sin Simplicio: 375 MB frente a 270 MB.
-- **La versión anterior no mostró mejora en este trabajo.** Simplicio 3.14.0 costó lo mismo que sin Simplicio, y su diferencia de tiempo está dentro de la variación entre ejecuciones. La mejora de esta página llegó con 3.15.0.
-- **Un script corto de Python de uso puntual.** En una ronda anterior, Simplicio 3.10.8 fue más lento que el agente sin Simplicio con todos los modelos probados. Con Claude Sonnet 5.5 en Claude Code tardó 19.6 s y $0.0548, frente a 11.4 s y $0.0283 sin Simplicio. Esa tarea no se ha vuelto a medir con 3.15.0.
-- **Lo que instalas no es exactamente lo que se midió.** Las compilaciones se generaron a partir de los commits de publicación, con el inicio de sesión desactivado y el proceso en segundo plano desactivado. Las descargas firmadas no se midieron.
-- **La muestra es pequeña.** Tres sesiones por escenario, un modelo, un proyecto nuevo y pequeño, un equipo, cuatro sesiones a la vez. Lee las proporciones como una medición de este trabajo, no como una promesa para el tuyo. De estos tres escenarios no se descartó ni se repitió ninguna sesión. No hemos medido cuánto de tu trabajo se parece a este.
+- **La versión anterior no mostró mejora en este trabajo.** Simplicio 3.14.0 costó lo mismo que sin Simplicio, y su diferencia de tiempo está dentro de la variación entre ejecuciones. La mejora llegó con 3.15.0.
+- **Un script corto de Python de uso puntual.** En una ronda anterior, Simplicio 3.10.8 fue más lento que el agente sin Simplicio con todos los modelos probados: con Claude Sonnet 5.5 en Claude Code, 19.6 s y $0.0548 frente a 11.4 s y $0.0283. No se volvió a medir con 3.15.0.
+- **Lo que instalas no es exactamente lo que se midió.** Los builds se compilaron a partir de los commits de publicación, con el inicio de sesión y el proceso en segundo plano desactivados. Las descargas firmadas no se midieron.
+- **La muestra es pequeña.** Tres sesiones por escenario, un modelo, un proyecto nuevo y pequeño, un equipo, cuatro sesiones a la vez; no se descartó ni se repitió ninguna sesión. Las proporciones miden este trabajo, no el tuyo, y no hemos medido cuánto de tu trabajo se parece a este.
+
+</details>
 
 ### Compruébalo tú mismo
 
-[El informe](../benchmarks/2026-11-22-standard-benchmark.md) publica los tres prompts (en portugués, con una traducción), una descripción de cada comprobación externa y los números por sesión; [el archivo de datos](../benchmarks/2026-11-22-standard-benchmark.json) los tiene en JSON. El arnés de pruebas no se publica. Ejecuta los mismos tres prompts en tu propio agente, con Simplicio activado y desactivado, en un proyecto pequeño tuyo, y compara tus propios tiempos y tu propia factura.
+[El informe](../benchmarks/2026-11-22-standard-benchmark.md) publica los tres prompts (en portugués, con una traducción), todas las comprobaciones externas y cada sesión; [el archivo de datos](../benchmarks/2026-11-22-standard-benchmark.json) los tiene en JSON. El arnés de pruebas no se publica.
 
 <a id="install"></a>
 
 ## Instalación
-
-Instala el binario nativo firmado. Elige una de estas vías.
 
 macOS / Linux:
 
@@ -211,16 +237,22 @@ python3 -m pip install --upgrade simplicio-installer
 simplicio install
 ```
 
-En Windows, usa `py -m pip install --upgrade simplicio-installer` y después `simplicio install`. Si el directorio de scripts de Python no está en tu `PATH`, añádelo primero.
+En Windows, usa `py -m pip install --upgrade simplicio-installer` y después `simplicio install`.
 
-El instalador descarga la última versión firmada para tu plataforma y comprueba su SHA-256 y su firma Ed25519. Solo entonces reemplaza el binario instalado. Coloca el binario en `~/.simplicio/bin/` (en Windows, `%USERPROFILE%\.simplicio\bin\`) y registra Simplicio automáticamente en los agentes que encuentra. Si el registro falla, el instalador se detiene en lugar de informar de que todo salió bien. Reinicia cualquier agente que ya esté abierto para que vuelva a cargar su configuración.
-
-**Inicio de sesión.** Se requiere iniciar sesión con Google, incluso durante la beta. Ejecuta `simplicio auth login` y después `simplicio auth status --json`, y continúa cuando el estado indique `active: true`. El registro no requiere que hayas iniciado sesión, así que los agentes quedan configurados incluso antes de iniciar sesión. Nunca pegues una contraseña ni un token en la configuración de un agente.
+El instalador verifica la versión firmada y registra Simplicio automáticamente en los agentes que encuentra. Después, inicia sesión con `simplicio auth login`.
 
 <details>
-<summary>Comprobar, actualizar, desinstalar</summary>
+<summary>Detalles de la instalación</summary>
 
-Para actualizar, vuelve a ejecutar el instalador. Puedes volver a ejecutar cualquiera de los dos instaladores en cualquier momento, y ambos resuelven la última versión. Los archivos `install.sh` y `install.ps1` están en la raíz de este repositorio.
+- Descarga la última versión firmada para tu plataforma y comprueba su SHA-256 y su firma Ed25519 antes de reemplazar el binario instalado.
+- El binario va en `~/.simplicio/bin/` (en Windows, `%USERPROFILE%\.simplicio\bin\`), y Simplicio se registra automáticamente en los agentes que encuentra. Si el registro falla, el instalador se detiene en lugar de informar de que todo salió bien.
+- Reinicia cualquier agente que ya esté abierto para que vuelva a cargar su configuración. Si el directorio de scripts de Python no está en tu `PATH`, añádelo primero.
+
+**Inicio de sesión.** Se requiere iniciar sesión con Google, incluso durante la beta. Ejecuta `simplicio auth login`, después `simplicio auth status --json`, y continúa cuando indique `active: true`. El registro funciona antes de iniciar sesión. Nunca pegues una contraseña ni un token en la configuración de un agente.
+
+Para confirmar que Simplicio se cargó, busca `simplicio` en la lista de servidores MCP del agente. En Claude Code, `/mcp` muestra los servidores conectados. ¿Prefieres leer antes el instalador? Está en [install.sh](../install.sh).
+
+Para actualizar, vuelve a ejecutar cualquiera de los dos instaladores cuando quieras: los dos obtienen la última versión. `install.sh` y `install.ps1` están en la raíz de este repositorio.
 
 ```bash
 # macOS / Linux
@@ -256,23 +288,22 @@ cd my-project
 simplicio onboard
 ```
 
-`simplicio version` confirma el binario instalado. `simplicio onboard` prepara el proyecto la primera vez. Después, abre tu agente en ese proyecto y trabaja como de costumbre. Para confirmar que Simplicio se cargó, busca `simplicio` en la lista de servidores MCP del agente. En Claude Code, `/mcp` muestra los servidores conectados. ¿Prefieres leer antes el instalador? Está en [install.sh](../install.sh).
+`simplicio version` comprueba la instalación; `simplicio onboard` prepara el proyecto. Después, abre tu agente ahí.
 
 <a id="works-with-the-agent-you-already-use"></a>
 
 ## Funciona con el agente que ya usas
 
-Simplicio es un servidor MCP local por STDIO, así que cualquier agente que pueda iniciar un servidor MCP local puede apuntar a él.
+El instalador delega el registro en el registrador propio de Simplicio. Escribe la entrada de Simplicio en los agentes que sabe configurar, entre ellos Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI y Kiro.
 
-El instalador delega el registro en el registrador propio de Simplicio. Detecta los agentes de tu equipo y escribe la entrada de Simplicio en los que sabe configurar, entre ellos Claude Code, Codex, Cursor, Visual Studio Code, OpenCode, Gemini CLI y Kiro. Dos archivos de este repositorio indican hasta dónde llega cada integración:
-
-- El registro [`plugins/simplicio/host-surfaces.json`](../plugins/simplicio/host-surfaces.json) nombra 43 identificadores de agentes e indica, para cada uno, cómo lo alcanza Simplicio: una entrada MCP que escribe Simplicio (23), un plugin o extensión nativa (5), un paquete de plugin portable (4), una instalación guiada que sigues tú mismo (9), u otra herramienta de línea de comandos (2).
-- La matriz de compatibilidad [`docs/hosts/compatibility-matrix.md`](../docs/hosts/compatibility-matrix.md) indica lo que está verificado. De esos 43, marca 12 agentes como compatibles y 29 como `unverified`, y no tiene fila para Codex ni para Gemini CLI. Cuando el registro dice que Simplicio escribe la entrada y la matriz dice `unverified`, considera esa integración como no probada.
-
-23 agentes tienen una guía en [`docs/hosts/`](../docs/hosts/). En los agentes que se conectan mediante un plugin, el plugin se aplica en un paso aparte que pide tu consentimiento, y [INSTALL.md](../INSTALL.md) lo describe.
+El registro [`plugins/simplicio/host-surfaces.json`](../plugins/simplicio/host-surfaces.json) nombra 43 identificadores de agentes; la matriz [`docs/hosts/compatibility-matrix.md`](../docs/hosts/compatibility-matrix.md) marca 12 como compatibles y 29 como `unverified`. Trata una integración `unverified` como no probada.
 
 <details>
-<summary>Los 43 agentes, según cómo los alcanza Simplicio</summary>
+<summary>Los 43 agentes</summary>
+
+- El registro nombra 43 identificadores de agentes y cómo llega Simplicio a cada uno: una entrada MCP que escribe Simplicio (23), un plugin o extensión nativa (5), un paquete de plugin portable (4), una instalación guiada que sigues tú mismo (9), u otra herramienta de línea de comandos (2).
+- La matriz no tiene fila para Codex ni para Gemini CLI. Aunque el registro diga que Simplicio escribe la entrada, trata una integración `unverified` como no probada.
+- 23 agentes tienen una guía en [`docs/hosts/`](../docs/hosts/). En los agentes que se conectan mediante un plugin, el plugin se aplica en un paso aparte que pide tu consentimiento, y [INSTALL.md](../INSTALL.md) lo describe.
 
 | Cómo lo alcanza Simplicio | Cantidad | Agentes |
 |---|---|---|
@@ -286,7 +317,7 @@ En negrita: la matriz de compatibilidad marca el agente como compatible.
 
 </details>
 
-Para repetir el registro, ejecuta `simplicio mcp register`. El comando del servidor es `simplicio serve --mcp --stdio`. Estas son las herramientas principales que recibe tu agente:
+Estas son las herramientas principales que recibe tu agente:
 
 | Herramienta | Qué te da |
 |---|---|
@@ -296,10 +327,12 @@ Para repetir el registro, ejecuta `simplicio mcp register`. El comando del servi
 | `simplicio_validate` | Comprobaciones de pipeline, pruebas y entrega |
 | `simplicio_run` | Una ejecución de tarea bajo el control de Simplicio |
 
-La lista vigente es la que informa el servidor al iniciarse. [MCP-CONNECT.md](../MCP-CONNECT.md) describe las herramientas principales.
+[MCP-CONNECT.md](../MCP-CONNECT.md) describe las herramientas principales.
 
 <details>
 <summary>Configuración manual</summary>
+
+Simplicio es un servidor MCP local por STDIO, así que cualquier agente que pueda iniciar un servidor MCP local puede apuntar a él. Para repetir el registro, ejecuta `simplicio mcp register`. El comando del servidor es `simplicio serve --mcp --stdio`.
 
 Si tu agente no se configuró por ti, añade esta entrada a su configuración MCP. Sustituye la ruta por la ruta absoluta del binario instalado.
 
@@ -365,19 +398,41 @@ Los nombres que verás en los mensajes de Simplicio: Mapper observa, Fast proyec
 
 Esta sección describe la versión 3.15.0.
 
-**Qué envía Simplicio, y a quién**
+- **Se queda en tu equipo.** El mapeo, el contexto, las ediciones y las comprobaciones se ejecutan dentro del binario de Simplicio.
+- **A SimpleTI (simpleti.com.br).** Solo el inicio de sesión y las comprobaciones del plan, sin contenido del repositorio.
+- **A GitHub.** Una comprobación de versiones nuevas que puedes desactivar.
+- **Sin analítica.** Simplicio no sube analítica, informes de fallos ni datos de uso.
+- **A servicios que tú configuras.** Reciben lo que envía esa función, lo que puede incluir prompts y código.
+- **Dos funciones llegan a un servicio público sin ninguna configuración.** La búsqueda web (DuckDuckGo) y la auditoría de dependencias (osv.dev); ninguna envía contenido de archivos.
+- **Descargas.** Desde GitHub; algunos scripts auxiliares también descargan herramientas de PyPI o npm.
 
-- **Se queda en tu equipo.** El mapeo, el contexto, las ediciones y las comprobaciones se ejecutan dentro del binario de Simplicio. Entrega los resultados a tu agente en el mismo equipo. Lo que tu agente envía a su propio proveedor de modelos lo decide el agente, como antes.
-- **A SimpleTI (simpleti.com.br).** Solo para el inicio de sesión y las comprobaciones del plan. Envían tu token de inicio de sesión, la versión de Simplicio y el nombre de host de tu ordenador. Una consulta de licencia opcional envía también tu correo electrónico de la cuenta. Devuelven tu correo electrónico de la cuenta, tu nombre y tu plan. Sin contenido del repositorio: ni archivos, ni rutas de archivos, ni prompts, ni ediciones.
-- **A GitHub.** Una comprobación en segundo plano de si hay una versión nueva, como máximo, aproximadamente una vez cada 12 horas. No envía nada sobre ti ni sobre tu código. Establece `SIMPLICIO_DISABLE_AUTO_UPDATE=1` para desactivarla. Al actualizar, el binario nuevo se descarga desde GitHub, y su SHA-256 y su firma se comprueban antes de reemplazar al anterior.
-- **Sin analítica.** Simplicio 3.15.0 y los archivos que instala en tus agentes se comprobaron con ese fin: ninguno sube analítica, informes de fallos ni datos de uso. Los registros de uso y ahorro son archivos locales. Los hooks que instala solo ejecutan programas locales (el binario de Simplicio y, para los plugins opcionales, scripts locales); ninguno contacta con la red.
-- **A servicios que tú configuras.** Un proveedor de modelos, GitHub, Jira, un notificador de chat o una caché de equipo reciben lo que envía esa función, lo cual puede incluir prompts y código. Las solicitudes a un proveedor de modelos llevan una cabecera que nombra a Simplicio como cliente.
-- **Dos funciones llegan a un servicio abierto al público en Internet sin ninguna configuración.** La búsqueda web, cuando se ejecuta, envía la consulta de búsqueda a DuckDuckGo, salvo que configures otro servicio de búsqueda. En el chat propio de Simplicio, un mensaje que parezca una pregunta web puede convertirse en esa consulta. La auditoría de seguridad de dependencias, cuando la ejecutas, envía a osv.dev los nombres y las versiones de tus dependencias. Ninguna de las dos envía contenido de archivos.
-- **Descargas.** El instalador y el mecanismo de actualización descargan desde GitHub. Algunos scripts auxiliares opcionales descargan sus propias herramientas desde PyPI o npm cuando los ejecutas. Si un plugin de agente se inicia y no encuentra el binario de Simplicio, descarga el instalador oficial desde GitHub, fijado a un commit concreto y comprobado por SHA-256.
+<details>
+<summary>Los detalles</summary>
 
-**Versiones firmadas.** Cada versión publica sus binarios con sumas SHA-256, firmas Ed25519, un SBOM (una lista de lo que contiene la compilación) y procedencia de la compilación. Los instaladores y el mecanismo de actualización comprueban la suma y la firma antes de reemplazar el binario instalado. En las versiones estables, el contrato hace que una firma ausente o no válida y una suma de comprobación que no coincide sean errores fatales. El contrato está en [docs/UPDATE_SIGNATURE_CONTRACT.md](../docs/UPDATE_SIGNATURE_CONTRACT.md).
+- **Se queda en tu equipo.** El mapeo, el contexto, las ediciones y las comprobaciones se ejecutan dentro del binario de Simplicio. Entrega los resultados a tu agente en el mismo equipo. Los registros de uso y de ahorro son archivos locales. Lo que tu agente envía a su proveedor de modelos lo decide el agente, como antes.
+- **A SimpleTI (simpleti.com.br).** Solo el inicio de sesión y las comprobaciones del plan, sin contenido del repositorio: ni archivos, ni rutas de archivos, ni prompts, ni ediciones.
+  - Envían tu token de inicio de sesión, la versión de Simplicio y el nombre de host de tu ordenador. Una consulta de licencia opcional envía también tu correo electrónico de la cuenta.
+  - Devuelven tu correo electrónico de la cuenta, tu nombre y tu plan.
+- **A GitHub.** Una comprobación en segundo plano de versiones nuevas, como mucho aproximadamente una vez cada 12 horas, sin enviar nada sobre ti ni sobre tu código. Define `SIMPLICIO_DISABLE_AUTO_UPDATE=1` para desactivarla. Una actualización descarga el binario desde GitHub y comprueba su SHA-256 y su firma antes de reemplazar el anterior.
+- **Sin analítica.** Simplicio 3.15.0 y los archivos que instala en tus agentes se comprobaron con ese fin: ninguno sube analítica, informes de fallos ni datos de uso. Los hooks que instala solo ejecutan programas locales (el binario de Simplicio y, en los plugins opcionales, scripts locales); ninguno contacta con la red.
+- **A servicios que tú configuras.** Un proveedor de modelos, GitHub, Jira, un notificador de chat o una caché de equipo reciben lo que envía esa función, lo que puede incluir prompts y código. Las solicitudes a un proveedor de modelos llevan una cabecera que nombra a Simplicio como cliente.
+- **Dos funciones llegan a un servicio público sin ninguna configuración.** Ninguna envía contenido de archivos.
+  - La búsqueda web, cuando se ejecuta, envía la consulta de búsqueda a DuckDuckGo, salvo que configures otro servicio de búsqueda. En el chat propio de Simplicio, un mensaje que parezca una pregunta web puede convertirse en esa consulta.
+  - La auditoría de seguridad de dependencias, cuando la ejecutas, envía a osv.dev los nombres y las versiones de tus dependencias.
+- **Descargas.** El instalador y el mecanismo de actualización descargan desde GitHub. Algunos scripts auxiliares opcionales descargan sus herramientas de PyPI o npm al ejecutarlos. Si un plugin de agente no encuentra el binario de Simplicio, descarga el instalador oficial desde GitHub, fijado a un commit y comprobado por SHA-256.
 
-**Qué cambia el instalador en tu agente.** Añade una entrada de Simplicio a la configuración MCP del agente y conserva el resto de la configuración. En Claude Code también permite `mcp__simplicio__*`, para que ninguna herramienta de Simplicio quede denegada en modo automático. En los agentes cuya interfaz de hooks el instalador ha verificado, instala también los hooks de Simplicio. [INSTALL.md](../INSTALL.md) indica lo que escribe el instalador, y la guía de cada agente en [`docs/hosts/`](../docs/hosts/) da el detalle. La desinstalación no deshace estas entradas. La sección Instalación explica cómo quitarlas.
+**Versiones firmadas.** Cada versión publica sus binarios con sumas SHA-256, firmas Ed25519, un SBOM (una lista de lo que contiene la compilación) y procedencia de la compilación.
+
+Los instaladores y el mecanismo de actualización comprueban la suma y la firma antes de reemplazar el binario instalado. En las versiones estables, una firma ausente o no válida y una suma que no coincide son errores graves; el contrato está en [docs/UPDATE_SIGNATURE_CONTRACT.md](../docs/UPDATE_SIGNATURE_CONTRACT.md).
+
+**Qué cambia el instalador en tu agente.**
+
+- Añade una entrada de Simplicio a la configuración MCP del agente y conserva el resto de la configuración.
+- En Claude Code también permite `mcp__simplicio__*`, para que ninguna herramienta de Simplicio quede denegada en modo automático.
+- En los agentes cuya interfaz de hooks el instalador ha verificado, instala también los hooks de Simplicio.
+- La desinstalación no deshace estas entradas; la sección Instalación explica cómo quitarlas. [INSTALL.md](../INSTALL.md) indica lo que escribe el instalador, y la guía de cada agente en [`docs/hosts/`](../docs/hosts/) da el detalle.
+
+</details>
 
 ## También en este repositorio
 
@@ -397,7 +452,10 @@ Detalles: [docs/desktop/RELEASE.md](../docs/desktop/RELEASE.md).
 <details>
 <summary>Para mantenedores: el diagrama de flujo generado</summary>
 
-Los comandos y herramientas documentados en README.md y MCP-CONNECT.md se representan como un único flujo, [docs/flow/simplicio.svg](../docs/flow/simplicio.svg), generado a partir de un archivo fuente, `docs/flow/simplicio.flow.json`. Vuelve a generarlo con `python3 scripts/generate_flow.py` y compruébalo con `python3 scripts/generate_flow.py --check` para detectar desviaciones. El contrato que lo mantiene alineado con esta página y con MCP-CONNECT.md es `python3 -m pytest tests/test_flow_contract.py -q`. La comprobación de importación en Langflow es `scripts/verify_flow_langflow.py`, que falla en modo cerrado (código de salida 2, `status=blocked`) cuando no hay ningún servidor en marcha. Las evidencias están en `docs/flow/evidence/` y `docs/flow/render/`, y [docs/flow/README.md](../docs/flow/README.md) describe los requisitos y cómo repetirlo.
+- Los comandos y herramientas documentados en README.md y MCP-CONNECT.md se dibujan como un único flujo, [docs/flow/simplicio.svg](../docs/flow/simplicio.svg), generado a partir de un archivo fuente, `docs/flow/simplicio.flow.json`.
+- Vuelve a generarlo con `python3 scripts/generate_flow.py` y compruébalo con `python3 scripts/generate_flow.py --check` para detectar desviaciones.
+- El contrato que lo mantiene alineado con esta página y con MCP-CONNECT.md es `python3 -m pytest tests/test_flow_contract.py -q`.
+- La comprobación de importación en Langflow es `scripts/verify_flow_langflow.py`, que falla en modo cerrado (código de salida 2, `status=blocked`) cuando no hay ningún servidor en marcha. Las evidencias están en `docs/flow/evidence/` y `docs/flow/render/`; [docs/flow/README.md](../docs/flow/README.md) recoge los requisitos y cómo repetirla.
 
 </details>
 
@@ -406,25 +464,25 @@ Los comandos y herramientas documentados en README.md y MCP-CONNECT.md se repres
 ## Preguntas frecuentes
 
 **¿Es justa la comparación?**<br>
-El mismo agente, el mismo modelo, los mismos tres prompts, el mismo proyecto inicial y las mismas comprobaciones externas, en una misma ronda. La línea base no tiene servidor MCP ni configuración de Simplicio. Consulta [Dónde Simplicio no gana](#where-simplicio-does-not-win) y los [Límites](../benchmarks/2026-11-22-standard-benchmark.md#limits) del informe.
+Mismo agente, modelo, prompts, proyecto y comprobaciones externas; la línea base no usa Simplicio. Consulta [dónde Simplicio no gana](#where-simplicio-does-not-win).
 
 **¿Tengo que cambiar mi agente o mi modelo?**<br>
-No. Simplicio se conecta al agente que ya usas. En la medición de arriba, cada escenario usó el mismo agente y el mismo modelo.
+No. Simplicio se conecta al agente que ya usas.
 
 **¿Siempre obtendré estas cifras?**<br>
-No. Miden un solo trabajo, con un modelo, en un equipo, a lo largo de tres sesiones por escenario. Consulta [Dónde Simplicio no gana](#where-simplicio-does-not-win) y ejecuta la comparación con tu propio trabajo.
+No. Miden un solo trabajo, un modelo y un equipo.
 
 **¿Es de código abierto?**<br>
-No. Simplicio es software propietario. Es un binario firmado, publicado como archivos de cada versión, y su código fuente no es público. Este repositorio contiene los instaladores, los paquetes para los agentes, el código fuente de la aplicación de escritorio, la documentación y los datos de la medición.
+No. Simplicio es software propietario: un binario firmado. Este repositorio contiene los instaladores, los paquetes, la documentación y los datos.
 
 **¿Cómo lo elimino?**<br>
-Ejecuta `sh install.sh --uninstall --keep-data`, o `pwsh install.ps1 -Uninstall -KeepData` en Windows. Elimina el binario y conserva tus datos. No modifica la configuración de tus agentes, así que quita las entradas de Simplicio en los ajustes propios de cada agente. [Instalación](#install) incluye los detalles y la opción de purga.
+Ejecuta `sh install.sh --uninstall --keep-data`, o `pwsh install.ps1 -Uninstall -KeepData` en Windows. No modifica la configuración de tus agentes, así que quita las entradas de Simplicio en los ajustes propios de cada agente.
 
 **¿Necesito una cuenta?**<br>
 Sí. Se requiere iniciar sesión con Google, incluso durante la beta. Ejecuta `simplicio auth login`.
 
 **¿Sale mi código de mi equipo?**<br>
-El mapeo, el contexto, las ediciones y las comprobaciones se ejecutan en tu equipo. Simplicio se comunica con SimpleTI para el inicio de sesión y las comprobaciones del plan, y con GitHub para buscar actualizaciones, sin contenido del repositorio en ninguno de los dos casos. Las funciones que configures o ejecutes pueden llegar a otros servicios. La lista completa está en [Qué envía Simplicio, y a quién](#safety-and-privacy).
+El mapeo, el contexto, las ediciones y las comprobaciones se ejecutan en tu equipo; SimpleTI y GitHub no reciben contenido del repositorio. [Detalles](#safety-and-privacy).
 
 <a id="documentation-and-community"></a>
 
@@ -434,7 +492,6 @@ El mapeo, el contexto, las ediciones y las comprobaciones se ejecutan en tu equi
 - **Documentación:** [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
 - **Discord:** [Únete a la comunidad](https://discord.gg/wM6tr7xVb)
 - **Incidencias:** [Gestor de incidencias de GitHub](https://github.com/simpletibr/simplicio/issues)
-- **En este repositorio:** [INSTALL.md](../INSTALL.md), [MCP-CONNECT.md](../MCP-CONNECT.md) y [docs/hosts/](../docs/hosts/)
 - **Relacionado:** Simplicio Video (hypit). Para clonarlo: `git clone https://github.com/hypit-ai/hypit.git simplicio-video`
 
 <p align="center">

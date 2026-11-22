@@ -74,13 +74,11 @@
 
 ## 什么是 Simplicio
 
-Simplicio 是一个本地程序，能让你已经在用的编码智能体拥有极速模式，无论是哪个智能体、哪个模型。本页的数字只来自一个智能体和一个模型；下面一节会准确说明测量了什么。
+Simplicio 是一个本地程序，能让你已在使用的编码智能体拥有极速模式，无论是哪种智能体、哪个模型。本页的数字只来自一个智能体和一个模型；下面一节会准确说明测量了什么。
 
-- **你的智能体和模型保持不变。** Simplicio 不会替换 Claude Code、Codex、Cursor，也不会替换它们背后的任何模型。
-- **你只需安装一个经过签名的原生二进制文件。** 安装程序会校验签名，然后在你机器上找到的智能体中注册 Simplicio。
-- **它在你的机器上运行。** 你的智能体将其作为本地 STDIO MCP 服务器启动。MCP 即 Model Context Protocol，是编码智能体调用外部工具的标准方式。STDIO 表示智能体自行启动该程序，并通过其标准输入和标准输出与之通信。
-- **它为你的智能体提供工具。** 包括仓库地图、范围受限的上下文、结构化编辑和检查。[核心工具](#works-with-the-agent-you-already-use)见下文。
-- **改变的是会话，也就是它的耗时和成本。** 下一节说明了改善的幅度，以及它在哪些情况下帮助不大。
+- **你的智能体和模型保持不变。** Simplicio 不会替换 Claude Code、Codex、Cursor，也不会替换它们背后的模型。
+- **一个经过签名的二进制文件**会在你的智能体中注册自己，并作为本地 STDIO MCP 服务器在你的机器上运行。
+- **改变的是会话本身。** 也就是它的耗时和成本。
 
 <p align="center">
   <picture>
@@ -90,22 +88,29 @@ Simplicio 是一个本地程序，能让你已经在用的编码智能体拥有�
 </p>
 
 <p align="center">
-  <sub>该图展示的是默认情况下发生的事。完整列表（包括会访问其他服务的功能）见“安全与隐私”下的 <a href="#safety-and-privacy">Simplicio 会发送什么，以及发送给谁</a>。</sub>
+  <sub>这是默认流程。<a href="#safety-and-privacy">完整列表</a>中包含其他服务。</sub>
 </p>
+
+<details>
+<summary>MCP 与 STDIO</summary>
+
+MCP 即 Model Context Protocol，是编码智能体调用外部工具的方式。STDIO 表示智能体自行启动该程序，并通过其标准输入和标准输出与之通信。
+
+它为你的智能体提供工具：仓库地图、范围受限的上下文、结构化编辑和检查。[核心工具](#works-with-the-agent-you-already-use)见下文。
+
+你只需安装一个经过签名的原生二进制文件。安装程序会校验签名，然后在你机器上找到的智能体中注册 Simplicio。
+
+</details>
 
 <a id="the-measurement"></a>
 
 ## 测量结果
 
-同一项任务，分别在使用和不使用 Simplicio 的情况下以相同方式运行。该任务是同一段对话中的一次智能体会话，包含三个步骤：
+同一项任务，分别在使用和不使用 Simplicio 的情况下以相同方式运行：在一次智能体会话中完成三个步骤，每个结果都从外部检查。
 
 1. 构建用户列表：一个 API，以及一个带表格、搜索和排序功能的页面。
-2. 修改列表：删除一列，增加按角色筛选的功能和一个日期列。
-3. 添加简单的注册功能：一个会校验输入的 `POST` 接口，以及一个表单页面。
-
-每个步骤完成后，结果都会从会话外部进行检查。API 通过 HTTP 调用，页面在无头 Chrome（即没有窗口的 Chrome）中加载。每个方案使用的都是同一个智能体和同一个模型：Claude Code 2.1.330 搭配 Claude Haiku 5.5。基线是使用其自带工具的 Claude Code 2.1.330，没有 MCP 服务器，也没有 Simplicio 配置。外部检查不测试搜索框、排序、保存后的跳转、页面外观或代码质量。
-
-每次会话都显示在此图中，而不只是中位数。
+2. 修改：删除一列，增加按角色筛选的功能，并增加一个日期列。
+3. 添加注册功能：一个会校验输入的 `POST` 接口，以及一个表单页面。
 
 <p align="center">
   <picture>
@@ -113,8 +118,6 @@ Simplicio 是一个本地程序，能让你已经在用的编码智能体拥有�
     <img src="../assets/benchmark-2026-11-22-sessions-light.svg" width="840" alt="每次会话的散点图，横轴为整项任务耗时，纵轴为智能体报告的成本。Simplicio 3.15.0，绿色菱形：23 至 27 s，$0.0071 至 $0.0098。Simplicio 3.14.0，灰色方块：90 至 106 s，$0.0214 至 $0.0249。未使用 Simplicio，空心圆：97 至 172 s，$0.0186 至 $0.0280。">
   </picture>
 </p>
-
-每个方案取 3 次会话的中位数。每个数值下方的小字为最低和最高会话的数值。
 
 | 指标 | 未使用 Simplicio | Simplicio 3.14.0 | Simplicio 3.15.0 |
 |---|---|---|---|
@@ -128,9 +131,9 @@ Simplicio 是一个本地程序，能让你已经在用的编码智能体拥有�
 | 峰值内存 | **270 MB**<br><sub>248–274</sub> | 436 MB<br><sub>432–439</sub> | 375 MB<br><sub>365–379</sub> |
 | 已交付步骤 | 9/9 | 9/9 | 9/9 |
 
-加粗表示该行的最佳值，且仅当其范围与其他值不重叠时才标注。输入 token 的范围有重叠，因此本次运行不声称输入 token 存在差异。“9/9”表示 3 次会话中每次的 3 个步骤，且每个步骤都通过了每项外部检查。任务耗时是整项任务的时间。模型请求是对模型的一次调用，工具调用是智能体对某个工具的一次使用。报告成本是智能体报告的数值，即使用的 token 数乘以模型公布的单价。它只计算模型 token，不是账单。
+每个值为 3 次会话的中位数，其下方的小字为最低到最高会话的范围。加粗表示该行的最佳值，且仅当范围互不重叠时才标注。“9/9”表示 3 次会话中每次的 3 个步骤，全部通过每项外部检查。
 
-从次数上看，会话中的变化是：模型发出的请求更少，智能体的工具调用也更少。
+每次会话的模型请求和工具调用次数。
 
 <p align="center">
   <picture>
@@ -148,8 +151,6 @@ Simplicio 是一个本地程序，能让你已经在用的编码智能体拥有�
   </picture>
 </p>
 
-每个中位数分别计算，因此各步骤相加并不等于整项任务的中位数。
-
 <details>
 <summary>各步骤的精确数值</summary>
 
@@ -163,7 +164,23 @@ Simplicio 是一个本地程序，能让你已经在用的编码智能体拥有�
 
 </details>
 
-**阅读方法。** 比率由未取整的中位数计算得出。与未使用 Simplicio 的同一智能体相比，整项任务快 4.9 倍，成本约为其三分之一。与上一版本相比，快 4.2 倍。在会话中，模型请求从 25 次降至 10 次，输出 token 从 18,162 降至 3,211，且任务通过了相同的外部检查。最坏情况：未使用 Simplicio 时最快的一次会话（97.1 s），仍比使用 Simplicio 3.15.0 时最慢的一次会话（26.6 s）慢 3.7 倍；未使用 Simplicio 时最便宜的一次会话（$0.0186），成本仍是使用 Simplicio 时最贵的一次会话（$0.0098）的 1.9 倍。基线是使用其自带工具的 Claude Code 2.1.330，没有 MCP 服务器，也没有 Simplicio 配置。成本只计算模型 token。这些会话在同一台机器上每次同时运行四个，因此耗时只能在本轮之内比较。
+**阅读方法。** 整项任务快 4.9 倍，成本约为其三分之一；即使是未使用 Simplicio 时最快的一次会话（97.1 s），也比使用 Simplicio 3.15.0 时最慢的一次会话（26.6 s）慢 3.7 倍。[方法与限制](../benchmarks/2026-11-22-standard-benchmark.md#limits)
+
+<details>
+<summary>各数字如何定义</summary>
+
+- 比率由未取整的中位数计算得出。与上一版本相比，整项任务快 4.2 倍。
+- 每个中位数分别计算，因此各步骤相加并不等于整项任务的中位数。
+- 最坏情况：未使用 Simplicio 时最快的一次会话（97.1 s）仍比使用 Simplicio 3.15.0 时最慢的一次会话（26.6 s）慢 3.7 倍；未使用 Simplicio 时最便宜的一次会话（$0.0186），成本仍是使用 Simplicio 时最贵的一次会话（$0.0098）的 1.9 倍。
+- 基线是使用其自带工具的 Claude Code 2.1.330，没有 MCP 服务器，也没有 Simplicio 配置。
+- 每个步骤都从会话外部检查：API 通过 HTTP 调用，页面在无头 Chrome（即没有窗口的 Chrome）中加载。
+- 这些检查不测试搜索框、排序、保存后的跳转、页面外观或代码质量。
+- 模型请求是对模型的一次调用；工具调用是智能体对某个工具的一次使用。
+- 报告成本是所用 token 数乘以模型公布的单价，只计算模型 token，不是账单。
+- 输入 token 的范围有重叠，因此本次运行不声称输入 token 存在差异。
+- 四个会话同时在一台机器上运行，因此耗时只能在本轮之内比较。
+
+</details>
 
 <a id="where-simplicio-does-not-win"></a>
 
@@ -176,21 +193,30 @@ Simplicio 是一个本地程序，能让你已经在用的编码智能体拥有�
   </picture>
 </p>
 
+- **内存。** 峰值内存高 39%：375 MB 对比 270 MB。
+- **上一版本在此任务上没有提升。** Simplicio 3.14.0 的成本与未使用 Simplicio 时相同。
+- **一个简短的一次性 Python 脚本。** Simplicio 3.10.8 更慢（19.6 s 对比 11.4 s），且之后未再测量。
+- **你安装的内容与测量的内容并不完全相同。** 这些构建版本是从发布提交编译的，编译时关闭了登录功能。
+- **样本量很小。** 每个方案 3 次会话，一个模型，一个项目。
+
+<details>
+<summary>完整限制说明</summary>
+
 - **内存。** 峰值内存比未使用 Simplicio 的智能体高 39%：375 MB 对比 270 MB。
-- **上一版本在此任务上没有提升。** Simplicio 3.14.0 的成本与未使用 Simplicio 时相同，其耗时差异也在多次运行的波动范围之内。本页展示的提升始于 3.15.0。
-- **一个简短的一次性 Python 脚本。** 在更早的一轮测试中，Simplicio 3.10.8 在每个尝试过的模型上都比未使用它的智能体慢。在 Claude Code 中使用 Claude Sonnet 5.5 时，它耗时 19.6 s，成本 $0.0548；未使用 Simplicio 时为 11.4 s 和 $0.0283。该任务尚未在 3.15.0 上重新测量。
+- **上一版本在此任务上没有提升。** Simplicio 3.14.0 的成本与未使用 Simplicio 时相同，其耗时差异也在多次运行的波动范围之内。提升始于 3.15.0。
+- **一个简短的一次性 Python 脚本。** 在更早的一轮测试中，Simplicio 3.10.8 在每个尝试过的模型上都比未使用它的智能体慢：在 Claude Code 中使用 Claude Sonnet 5.5 时，耗时 19.6 s、成本 $0.0548，未使用 Simplicio 时为 11.4 s 和 $0.0283。尚未在 3.15.0 上重新测量。
 - **你安装的内容与测量的内容并不完全相同。** 这些构建版本是从发布提交编译的，编译时关闭了登录功能和后台进程。经过签名的下载版本未经测量。
-- **样本量很小。** 每个方案 3 次会话，一个模型，一个全新的小型项目，一台机器，同时运行四次会话。请将这些比率理解为对本任务的测量，而不是对你的情况的承诺。这三个方案中的任何会话都没有被剔除或重新运行。我们尚未测量你的工作中有多少与本任务相似。
+- **样本量很小。** 每个方案 3 次会话，一个模型，一个全新的小型项目，一台机器，四次会话同时进行；没有任何会话被剔除或重新运行。这些比率衡量的是本任务，而不是你的任务；我们也没有测量你的工作中有多少与本任务相似。
 
-### 自己验证
+</details>
 
-[报告](../benchmarks/2026-11-22-standard-benchmark.md)公布了三条提示词（葡萄牙语原文，附译文）、每项外部检查的说明以及每次会话的数据；[数据文件](../benchmarks/2026-11-22-standard-benchmark.json)以 JSON 格式提供了相同的内容。测试工具未公开。请在你自己的智能体中，分别开启和关闭 Simplicio，在你自己的一个小型项目中运行同样的三条提示词，并比较你自己的耗时和账单。
+### 自行验证
+
+[报告](../benchmarks/2026-11-22-standard-benchmark.md)公布了三条提示词（葡萄牙语原文，附译文）、每项外部检查和每次会话的数据；[数据文件](../benchmarks/2026-11-22-standard-benchmark.json)以 JSON 格式提供了相同的内容。测试工具未公开。
 
 <a id="install"></a>
 
 ## 安装
-
-安装经过签名的原生二进制文件。选择一种方式。
 
 macOS / Linux：
 
@@ -211,16 +237,22 @@ python3 -m pip install --upgrade simplicio-installer
 simplicio install
 ```
 
-在 Windows 上，请使用 `py -m pip install --upgrade simplicio-installer`，然后运行 `simplicio install`。如果 Python 脚本目录不在你的 `PATH` 中，请先将其加入。
+在 Windows 上，请使用 `py -m pip install --upgrade simplicio-installer`，然后运行 `simplicio install`。
 
-安装程序会为你的平台下载最新的签名发布版本，并校验其 SHA-256 和 Ed25519 签名。只有校验通过后，才会替换已安装的二进制文件。二进制文件存放在 `~/.simplicio/bin/` 下（Windows 上为 `%USERPROFILE%\.simplicio\bin\`），并会自动在它找到的智能体中注册 Simplicio。注册失败时安装程序会中止，而不会报告成功。请重启所有已打开的智能体，使其重新加载配置。
-
-**登录。** 需要 Google 登录，测试版期间也是如此。运行 `simplicio auth login`，然后运行 `simplicio auth status --json`，当状态显示 `active: true` 时即可继续。注册不需要登录，因此在你登录之前，智能体就已经完成配置。切勿将密码或令牌粘贴到智能体的配置中。
+安装程序会校验已签名的发布版本，并自动在它找到的智能体中注册 Simplicio。然后使用 `simplicio auth login` 登录。
 
 <details>
-<summary>检查、更新、卸载</summary>
+<summary>安装详情</summary>
 
-要更新，请再次运行安装程序。你可以随时再次运行任一安装程序，它会获取最新发布版本。`install.sh` 和 `install.ps1` 位于本仓库的根目录。
+- 它会下载适用于你平台的最新签名发布版本，并在替换已安装的二进制文件之前，校验其 SHA-256 和 Ed25519 签名。
+- 二进制文件存放在 `~/.simplicio/bin/` 下（Windows 上为 `%USERPROFILE%\.simplicio\bin\`），并会自动在它找到的智能体中注册 Simplicio。注册失败时安装程序会中止，而不会报告成功。
+- 请重启所有已打开的智能体，使其重新加载配置。如果 Python 脚本目录不在你的 `PATH` 中，请先将其加入。
+
+**登录。** 需要 Google 登录，测试版期间也需要。运行 `simplicio auth login`，然后运行 `simplicio auth status --json`，当它报告 `active: true` 时即可继续。注册无需登录即可完成。切勿将密码或令牌粘贴到智能体的配置中。
+
+要确认 Simplicio 已加载，请在智能体的 MCP 服务器列表中查找 `simplicio`。在 Claude Code 中，`/mcp` 会列出已连接的服务器。想先阅读安装程序吗？它就是 [install.sh](../install.sh)。
+
+要更新，可随时再次运行任一安装程序：它会获取最新发布版本。`install.sh` 和 `install.ps1` 位于本仓库的根目录。
 
 ```bash
 # macOS / Linux
@@ -237,10 +269,10 @@ pwsh install.ps1 -Uninstall -Purge      # needs SIMPLICIO_CONFIRM_PURGE=1; prese
 ```
 
 - `--doctor` 用于检查安装情况。
-- `--uninstall --keep-data` 会删除已安装的二进制文件，并保留你的数据。保留的数据包括位于 `~/.simplicio/login.json` 中、有效期为 30 天的 Google 登录状态。
+- `--uninstall --keep-data` 会删除已安装的二进制文件，并保留你的数据，包括位于 `~/.simplicio/login.json` 中、有效期为 30 天的 Google 登录状态。
 - `--uninstall --purge` 只删除 Simplicio 管理的状态，包括登录状态。它会保留 `~/.simplicio/.env`，模型服务商的凭据可能保存在该文件中。清除需要设置 `SIMPLICIO_CONFIRM_PURGE=1`。
 - 卸载不会修改你智能体的配置。Simplicio 的条目会保留在每个智能体中，直到你在该智能体自己的设置中将其删除。
-- 项目自身 `.simplicio` 文件夹中的数据不会被 `--keep-data` 删除。选择 `--purge` 之前，请先检查目标。
+- 项目自身 `.simplicio` 文件夹中的数据不会被 `--keep-data` 删除。选择 `--purge` 前，请先检查目标。
 
 完整说明：[INSTALL.md](../INSTALL.md)。
 
@@ -256,23 +288,22 @@ cd my-project
 simplicio onboard
 ```
 
-`simplicio version` 用于确认已安装的二进制文件。`simplicio onboard` 会在首次运行时为项目做好准备。然后在该项目中打开你的智能体，照常工作即可。要确认 Simplicio 已加载，请在智能体的 MCP 服务器列表中查找 `simplicio`。在 Claude Code 中，`/mcp` 会列出已连接的服务器。想先阅读安装程序吗？它就是 [install.sh](../install.sh)。
+`simplicio version` 用于检查安装；`simplicio onboard` 为项目做好准备。然后在该项目中打开你的智能体。
 
 <a id="works-with-the-agent-you-already-use"></a>
 
 ## 与你已在使用的智能体配合工作
 
-Simplicio 是一个本地 STDIO MCP 服务器，因此任何能启动本地 MCP 服务器的智能体都可以指向它。
+安装程序将注册工作交给 Simplicio 自己的注册器。它会为已知如何配置的智能体写入 Simplicio 条目，其中包括 Claude Code、Codex、Cursor、Visual Studio Code、OpenCode、Gemini CLI 和 Kiro。
 
-安装程序将注册工作交给 Simplicio 自己的注册器。它会检测你机器上的智能体，并为其中能够配置的智能体写入 Simplicio 条目，包括 Claude Code、Codex、Cursor、Visual Studio Code、OpenCode、Gemini CLI 和 Kiro。本仓库中有两个文件说明每种集成的覆盖程度：
-
-- 注册表 [`plugins/simplicio/host-surfaces.json`](../plugins/simplicio/host-surfaces.json) 列出了 43 个智能体 ID，并说明了 Simplicio 如何接入每一个：由 Simplicio 写入的 MCP 条目（23 个）、原生插件或扩展（5 个）、可移植插件包（4 个）、需要你自行按指南设置的方式（9 个），或其他命令行工具（2 个）。
-- 兼容性矩阵 [`docs/hosts/compatibility-matrix.md`](../docs/hosts/compatibility-matrix.md) 说明了哪些已经过验证。在这 43 个智能体中，它将 12 个标记为受支持，29 个标记为 `unverified`，且没有 Codex 和 Gemini CLI 的行。凡是注册表显示由 Simplicio 写入条目、而矩阵标记为 `unverified` 的，请将该集成视为未经测试。
-
-有 23 个智能体在 [`docs/hosts/`](../docs/hosts/) 中有指南。对于通过插件接入的智能体，插件会在单独的一步中应用，该步骤会请求你的同意，[INSTALL.md](../INSTALL.md) 对此有说明。
+注册表 [`plugins/simplicio/host-surfaces.json`](../plugins/simplicio/host-surfaces.json) 列出了 43 个智能体 ID；兼容性矩阵 [`docs/hosts/compatibility-matrix.md`](../docs/hosts/compatibility-matrix.md) 将 12 个标记为受支持，29 个标记为 `unverified`。请将 `unverified` 的集成视为未经测试。
 
 <details>
-<summary>全部 43 个智能体，按 Simplicio 的接入方式分类</summary>
+<summary>全部 43 个智能体</summary>
+
+- 注册表列出了 43 个智能体 ID，以及 Simplicio 如何接入每一个：由 Simplicio 写入的 MCP 条目（23 个）、原生插件或扩展（5 个）、可移植插件包（4 个）、需要你自行按指南设置（9 个），或其他命令行工具（2 个）。
+- 兼容性矩阵中没有 Codex 和 Gemini CLI 的行。即使注册表显示 Simplicio 会写入条目，也请将 `unverified` 的集成视为未经测试。
+- 有 23 个智能体在 [`docs/hosts/`](../docs/hosts/) 中有指南。对于通过插件接入的智能体，插件会在单独的一步中应用，该步骤会征求你的同意，[INSTALL.md](../INSTALL.md) 对此有说明。
 
 | 接入方式 | 数量 | 智能体 |
 |---|---|---|
@@ -286,7 +317,7 @@ Simplicio 是一个本地 STDIO MCP 服务器，因此任何能启动本地 MCP 
 
 </details>
 
-要重新注册，请运行 `simplicio mcp register`。服务器命令为 `simplicio serve --mcp --stdio`。以下是你的智能体会获得的核心工具：
+以下是你的智能体会获得的核心工具：
 
 | 工具 | 提供的功能 |
 |---|---|
@@ -296,10 +327,12 @@ Simplicio 是一个本地 STDIO MCP 服务器，因此任何能启动本地 MCP 
 | `simplicio_validate` | 流水线、测试和交付检查 |
 | `simplicio_run` | 在 Simplicio 控制下运行的任务 |
 
-实际列表以服务器启动时报告的内容为准。[MCP-CONNECT.md](../MCP-CONNECT.md) 介绍了这些核心工具。
+[MCP-CONNECT.md](../MCP-CONNECT.md) 介绍了这些核心工具。
 
 <details>
 <summary>手动配置</summary>
+
+Simplicio 是一个本地 STDIO MCP 服务器，因此任何能够启动本地 MCP 服务器的智能体都可以指向它。要重复注册，请运行 `simplicio mcp register`。服务器命令为 `simplicio serve --mcp --stdio`。
 
 如果你的智能体没有为你自动配置，请将以下条目添加到其 MCP 配置中。将路径替换为已安装二进制文件的绝对路径。
 
@@ -314,7 +347,7 @@ Simplicio 是一个本地 STDIO MCP 服务器，因此任何能启动本地 MCP 
 }
 ```
 
-Codex 读取 TOML 格式。智能体会直接启动 `command`，因此不要使用 `~`，也不要依赖 shell 展开。Windows 路径请使用正斜杠，并替换示例中的用户名。
+Codex 读取 TOML。智能体会直接启动 `command`，因此不要使用 `~`，也不要依赖 shell 展开。Windows 路径请使用正斜杠，并替换示例中的用户名。
 
 Windows：
 
@@ -365,19 +398,41 @@ args = ["serve", "--mcp", "--stdio"]
 
 本节描述 3.15.0 版本。
 
-**Simplicio 会发送什么，以及发送给谁**
+- **留在你的机器上。** 映射、上下文、编辑和检查都在 Simplicio 二进制文件内运行。
+- **发送给 SimpleTI（simpleti.com.br）。** 仅用于登录和套餐检查，不包含仓库内容。
+- **发送给 GitHub。** 检查发布版本，你可以将其关闭。
+- **没有分析数据收集。** Simplicio 不上传分析数据、崩溃报告或使用数据。
+- **发送给你配置的服务。** 它们会接收该功能发送的内容，其中可能包括提示词和代码。
+- **有两项功能无需任何配置即会访问公开服务。** 网页搜索（DuckDuckGo）和依赖审计（osv.dev）；两者都不发送文件内容。
+- **下载。** 从 GitHub 下载；部分辅助脚本还会从 PyPI 或 npm 获取工具。
 
-- **留在你的机器上。** 映射、上下文、编辑和检查都在 Simplicio 二进制文件内运行。它将结果交给同一台机器上的你的智能体。你的智能体向其自身的模型服务商发送什么，仍由智能体决定，与以前一样。
-- **发送给 SimpleTI（simpleti.com.br）。** 仅用于登录和套餐检查。这些请求包含你的登录令牌、Simplicio 版本和你电脑的主机名。可选的许可证查询还会包含你的账户邮箱。返回内容包括你的账户邮箱、姓名和套餐。不包含仓库内容：没有文件、没有文件路径、没有提示词，也没有编辑内容。
-- **发送给 GitHub。** 后台检查新版本，最多约每 12 小时一次。请求不包含任何关于你或你代码的信息。设置 `SIMPLICIO_DISABLE_AUTO_UPDATE=1` 可将其关闭。更新时，新的二进制文件从 GitHub 下载，并在替换旧文件之前校验其 SHA-256 和签名。
-- **没有分析数据收集。** Simplicio 3.15.0 及其安装到你智能体中的文件均已为此进行过检查：它们都不上传分析数据、崩溃报告或使用数据。使用记录和节省记录为本地文件。它安装的钩子只运行本地程序（Simplicio 二进制文件，以及可选插件的本地脚本）；它们均不访问网络。
+<details>
+<summary>详细说明</summary>
+
+- **留在你的机器上。** 映射、上下文、编辑和检查都在 Simplicio 二进制文件内运行。它将结果交给同一台机器上的你的智能体。使用记录和节省记录是本地文件。你的智能体向其自身模型服务商发送什么，仍由智能体决定，与以前一样。
+- **发送给 SimpleTI（simpleti.com.br）。** 仅用于登录和套餐检查，不包含仓库内容：没有文件、文件路径、提示词或编辑内容。
+  - 这些请求包含你的登录令牌、Simplicio 版本和你电脑的主机名。可选的许可证查询还会包含你的账户邮箱。
+  - 返回内容包括你的账户邮箱、姓名和套餐。
+- **发送给 GitHub。** 后台检查新版本，最多约每 12 小时一次，不包含任何关于你或你代码的信息。设置 `SIMPLICIO_DISABLE_AUTO_UPDATE=1` 可将其关闭。更新时，二进制文件从 GitHub 下载，并在替换旧文件之前校验其 SHA-256 和签名。
+- **没有分析数据收集。** Simplicio 3.15.0 及其安装到你智能体中的文件均已为此进行过检查：它们都不上传分析数据、崩溃报告或使用数据。它安装的钩子只运行本地程序（Simplicio 二进制文件，以及可选插件的本地脚本）；它们都不会访问网络。
 - **发送给你配置的服务。** 模型服务商、GitHub、Jira、聊天通知器或团队缓存，会接收该功能发送的内容，其中可能包括提示词和代码。发送给模型服务商的请求带有一个标头，标明 Simplicio 为客户端。
-- **有两项功能无需任何配置即会访问面向公众的互联网服务。** 网页搜索在运行时，会把搜索词发送给 DuckDuckGo，除非你配置了其他搜索服务。在 Simplicio 自带的聊天中，看起来像网页问题的消息可能会变成这个搜索词。依赖安全审计在你运行时，会把你依赖项的名称和版本发送给 osv.dev。两者都不发送文件内容。
-- **下载。** 安装程序和更新流程都从 GitHub 下载。部分可选的辅助脚本在你运行时，会从 PyPI 或 npm 获取其自身所需的工具。如果智能体插件启动时找不到 Simplicio 二进制文件，它会从 GitHub 下载官方安装程序，该安装程序固定在某个提交上，并通过 SHA-256 校验。
+- **有两项功能无需任何配置即会访问公开服务。** 两者都不发送文件内容。
+  - 网页搜索在运行时会将搜索词发送给 DuckDuckGo，除非你配置了其他搜索服务。在 Simplicio 自带的聊天中，看起来像网页问题的消息可能会变成这个搜索词。
+  - 依赖安全审计在你运行时，会把依赖项的名称和版本发送给 osv.dev。
+- **下载。** 安装程序和更新流程都从 GitHub 下载。部分可选的辅助脚本在你运行时，会从 PyPI 或 npm 获取其自身所需的工具。如果智能体插件找不到 Simplicio 二进制文件，它会从 GitHub 下载官方安装程序，该安装程序固定在某个提交上，并通过 SHA-256 校验。
 
-**签名发布。** 每个版本都会发布其二进制文件的 SHA-256 校验和、Ed25519 签名、SBOM（构建中包含内容的清单）以及构建溯源信息。安装程序和更新流程会在替换已安装的二进制文件之前，检查校验和与签名。对于稳定版本，约定规定签名缺失或无效以及校验和不匹配都视为硬性失败。该约定见 [docs/UPDATE_SIGNATURE_CONTRACT.md](../docs/UPDATE_SIGNATURE_CONTRACT.md)。
+**签名发布。** 每个版本都会发布其二进制文件的 SHA-256 校验和、Ed25519 签名、SBOM（构建中所含内容的清单）以及构建溯源信息。
 
-**安装程序对你的智能体做了哪些改动。** 它会在智能体的 MCP 配置中添加一个 Simplicio 条目，并保留配置的其余部分。在 Claude Code 中，它还会允许 `mcp__simplicio__*`，使 Simplicio 工具在自动模式下不被拒绝。在安装程序已验证其钩子接口的智能体中，它还会安装 Simplicio 的钩子。[INSTALL.md](../INSTALL.md) 说明了安装程序写入的内容，[`docs/hosts/`](../docs/hosts/) 中各智能体的指南给出了详细信息。卸载不会撤销这些条目。“安装”一节说明了如何删除它们。
+安装程序和更新流程会在替换已安装的二进制文件之前，检查校验和与签名。对于稳定版本，签名缺失或无效，以及校验和不匹配，都会被视为硬性失败；相关约定见 [docs/UPDATE_SIGNATURE_CONTRACT.md](../docs/UPDATE_SIGNATURE_CONTRACT.md)。
+
+**安装程序对你的智能体做了哪些改动。**
+
+- 它会在智能体的 MCP 配置中添加一个 Simplicio 条目，并保留配置的其余部分。
+- 在 Claude Code 中，它还会允许 `mcp__simplicio__*`，使 Simplicio 工具在自动模式下不被拒绝。
+- 在安装程序已验证其钩子接口的智能体中，它还会安装 Simplicio 的钩子。
+- 卸载不会撤销这些条目；“安装”一节说明了如何删除它们。[INSTALL.md](../INSTALL.md) 说明了安装程序写入的内容，[`docs/hosts/`](../docs/hosts/) 中各智能体的指南给出了详细信息。
+
+</details>
 
 ## 本仓库中的其他内容
 
@@ -387,7 +442,7 @@ args = ["serve", "--mcp", "--stdio"]
 macOS（Apple Silicon）桌面版预览以 [Simplicio-3.8.47-arm64.dmg](https://github.com/simpletibr/simplicio/releases/download/v3.8.47/Simplicio-3.8.47-arm64.dmg) 的形式发布。其 SHA-256 位于 [DESKTOP-SHA256SUMS](../DESKTOP-SHA256SUMS) 中，与 Simplicio 二进制文件的校验和分开。该 DMG 没有签名文件，内含 Simplicio 3.8.47 二进制文件。
 
 - 未发布 Windows 桌面版。在 Windows 上，请使用上文的命令行安装方式。
-- 未进行 Apple Developer ID 签名和公证。该安装包为临时签名（ad-hoc），即没有使用 Apple 开发者证书；我们不声称通过 Gatekeeper 检查，因此 macOS 在你打开它时可能会发出警告。
+- 未进行 Apple Developer ID 签名和公证。该安装包为临时签名（ad-hoc），即未使用 Apple 开发者证书；我们不声称通过 Gatekeeper 验证，因此 macOS 在你打开它时可能会发出警告。
 - 在发布经过签名的桌面安装包之前，上文的命令行安装是受支持的公开安装方式。
 
 详情：[docs/desktop/RELEASE.md](../docs/desktop/RELEASE.md)。
@@ -397,7 +452,10 @@ macOS（Apple Silicon）桌面版预览以 [Simplicio-3.8.47-arm64.dmg](https://
 <details>
 <summary>面向维护者：自动生成的流程图</summary>
 
-README.md 和 MCP-CONNECT.md 中记录的命令与工具，被绘制成一张流程图 [docs/flow/simplicio.svg](../docs/flow/simplicio.svg)，该图由单一源文件 `docs/flow/simplicio.flow.json` 生成。使用 `python3 scripts/generate_flow.py` 重新生成，使用 `python3 scripts/generate_flow.py --check` 检查是否存在漂移。使其与本页及 MCP-CONNECT.md 保持一致的约束是 `python3 -m pytest tests/test_flow_contract.py -q`。Langflow 导入检查为 `scripts/verify_flow_langflow.py`，在没有服务器运行时会以“失败即关闭”的方式退出（退出码 2，`status=blocked`）。证据位于 `docs/flow/evidence/` 和 `docs/flow/render/` 下，[docs/flow/README.md](../docs/flow/README.md) 中有其要求及复现方法。
+- README.md 和 MCP-CONNECT.md 中记录的命令与工具，被绘制成一张流程图 [docs/flow/simplicio.svg](../docs/flow/simplicio.svg)，该图由单一源文件 `docs/flow/simplicio.flow.json` 生成。
+- 使用 `python3 scripts/generate_flow.py` 重新生成，使用 `python3 scripts/generate_flow.py --check` 检查是否存在漂移。
+- 使其与本页及 MCP-CONNECT.md 保持一致的约束是 `python3 -m pytest tests/test_flow_contract.py -q`。
+- Langflow 导入检查为 `scripts/verify_flow_langflow.py`，在没有服务器运行时会以失败即关闭的方式退出（退出码 2，`status=blocked`）。证据位于 `docs/flow/evidence/` 和 `docs/flow/render/` 下；[docs/flow/README.md](../docs/flow/README.md) 中有其要求及复现方法。
 
 </details>
 
@@ -406,25 +464,25 @@ README.md 和 MCP-CONNECT.md 中记录的命令与工具，被绘制成一张流
 ## 常见问题
 
 **这个比较公平吗？**<br>
-同一智能体、同一模型、同一组三条提示词、同一个起始项目和同样的外部检查，全部在同一轮中完成。基线没有 MCP 服务器，也没有 Simplicio 配置。请参阅 [Simplicio 不占优的情况](#where-simplicio-does-not-win)，以及报告中的 [局限性](../benchmarks/2026-11-22-standard-benchmark.md#limits)。
+同一智能体、同一模型、同一组提示词、同一个项目和同样的外部检查，全部在同一轮中完成；基线没有 Simplicio。请参阅 [Simplicio 不占优的情况](#where-simplicio-does-not-win)。
 
 **我需要更换智能体或模型吗？**<br>
-不需要。Simplicio 可接入你已在使用的智能体。在上文的基准测试中，每个方案都使用同一个智能体和同一个模型。
+不需要。Simplicio 可接入你已在使用的智能体。
 
 **我每次都能得到这些数字吗？**<br>
-不能。这些数字衡量的是一项任务、一个模型、一台机器上、每个方案三次会话的结果。请参阅 [Simplicio 不占优的情况](#where-simplicio-does-not-win)，并在你自己的工作上进行比较。
+不能。这些数字衡量的是一项任务、一个模型和一台机器。
 
 **它是开源的吗？**<br>
-不是。Simplicio 是专有软件。它是经过签名的二进制文件，以发布资产的形式发布，其源代码不公开。本仓库包含安装程序、供智能体使用的安装包、桌面应用源代码、文档和基准测试数据。
+不是。Simplicio 是专有软件：一个经过签名的二进制文件。本仓库保存安装程序、安装包、文档和数据。
 
 **如何卸载？**<br>
-运行 `sh install.sh --uninstall --keep-data`；在 Windows 上则运行 `pwsh install.ps1 -Uninstall -KeepData`。它会删除二进制文件并保留你的数据。它不会修改你智能体的配置，因此请在每个智能体自己的设置中删除 Simplicio 条目。[安装](#install)中有详细说明以及清除选项。
+运行 `sh install.sh --uninstall --keep-data`，在 Windows 上则运行 `pwsh install.ps1 -Uninstall -KeepData`。它不会修改你智能体的配置，因此请在每个智能体自己的设置中删除 Simplicio 条目。
 
 **我需要账户吗？**<br>
 需要。测试版期间也需要 Google 登录。运行 `simplicio auth login`。
 
 **我的代码会离开我的机器吗？**<br>
-映射、上下文、编辑和检查都在你的机器上运行。Simplicio 与 SimpleTI 通信以进行登录和套餐检查，与 GitHub 通信以检查更新，两者都不包含仓库内容。你配置或运行的功能可能会访问其他服务。完整列表见 [Simplicio 会发送什么，以及发送给谁](#safety-and-privacy)。
+映射、上下文、编辑和检查都在你的机器上运行；SimpleTI 和 GitHub 不会收到任何仓库内容。[详情](#safety-and-privacy)。
 
 <a id="documentation-and-community"></a>
 
@@ -434,8 +492,7 @@ README.md 和 MCP-CONNECT.md 中记录的命令与工具，被绘制成一张流
 - **文档：** [simpleti.com.br/simplicio/docs](https://simpleti.com.br/simplicio/docs)
 - **Discord：** [加入社区](https://discord.gg/wM6tr7xVb)
 - **问题反馈：** [GitHub 问题跟踪器](https://github.com/simpletibr/simplicio/issues)
-- **本仓库中：** [INSTALL.md](../INSTALL.md)、[MCP-CONNECT.md](../MCP-CONNECT.md) 和 [docs/hosts/](../docs/hosts/)
-- **相关项目：** Simplicio Video（hypit）。克隆方法：`git clone https://github.com/hypit-ai/hypit.git simplicio-video`
+- **相关项目：** Simplicio Video（hypit）。克隆命令：`git clone https://github.com/hypit-ai/hypit.git simplicio-video`
 
 <p align="center">
   <sub>© 2026 SimpleTI。Simplicio 是已注册的专有软件。保留所有权利。</sub>

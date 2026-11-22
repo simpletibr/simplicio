@@ -8,7 +8,7 @@ Every test is parametrized by language, so a translator runs only its own file:
 
     python3 -m pytest tests/test_readme_translations_contract.py -q -p no:cacheprovider -k es-ES
 
-The tests are numbered R01 to R14. A failure says which rule broke and, line by line,
+The tests are numbered R01 to R15. A failure says which rule broke and, line by line,
 what differs and how to fix it, so it can be repaired without reading this file.
 """
 
@@ -835,3 +835,76 @@ def test_r14_the_tagline_is_the_same_english_brand_line(lang):
          f"right under <h1>Simplicio</h1> keep the line {TAGLINE} exactly as in README.md. "
          "It is a brand line: never translate it.",
          check_tagline)
+
+
+# --------------------------------------------------------------------------
+# R15 the same text items, in the same order
+# --------------------------------------------------------------------------
+
+_ITEM_MARK_RE = re.compile(r"^(\s*)(?:[-*]|\d+\.)\s+")
+
+
+def item_kinds(doc: Doc) -> list[tuple[str, str]]:
+    """(kind, first words) of every text item of the body: paragraphs, headings, list items by depth, HTML blocks.
+
+    Fenced code and table rows are left out. A blank line ends a paragraph and a list marker starts a new item.
+    """
+    items: list[list[str]] = []
+    current: list[str] = []
+
+    def flush() -> None:
+        if current:
+            items.append(list(current))
+            current.clear()
+
+    for line in doc.body.split("\n"):
+        if (not line.strip() or line.strip() == CODE_MARK or line.lstrip().startswith("|")
+                or re.fullmatch(r'\s*<a id="[^"]*"></a>\s*', line)):  # a translated heading carries its anchor
+            flush()
+        elif line.startswith("#"):
+            flush()
+            items.append([line])
+        else:
+            if _ITEM_MARK_RE.match(line):
+                flush()
+            current.append(line)
+    flush()
+    kinds = []
+    for lines in items:
+        first = lines[0]
+        mark = _ITEM_MARK_RE.match(first)
+        if first.startswith("#"):
+            kind = first.split(" ", 1)[0]
+        elif mark:
+            kind = f"{len(mark.group(1)) // 2}{'-' if first.lstrip()[0] in '-*' else '1.'}"
+        elif first.lstrip().startswith("<"):
+            kind = "html"
+        else:
+            kind = "p"
+        kinds.append((kind, re.sub(r"\s+", " ", " ".join(lines)).strip()[:50]))
+    return kinds
+
+
+def check_items(en: Doc, tr: Doc, lang: str) -> list[str]:
+    want, got = item_kinds(en), item_kinds(tr)
+    if [k for k, _ in want] == [k for k, _ in got]:
+        return []
+    problems = []
+    if len(want) != len(got):
+        problems.append(f"README.md has {len(want)} text items (paragraphs, headings, list items, captions, answers) and the "
+                        f"page has {len(got)}. Follow README.md item by item, in the same order, one item for one item")
+    for index, (a, b) in enumerate(zip(want, got), 1):
+        if a[0] != b[0]:
+            problems.append(f"item {index}: README.md has a {a[0]} item ({a[1]!r}) where the page has a {b[0]} item ({b[1]!r}). "
+                            "Kinds: p paragraph, html block, # heading, 0- list item, 1- nested list item")
+            break
+    return problems
+
+
+@pytest.mark.parametrize("lang", LANGS)
+def test_r15_the_page_follows_readme_item_by_item(lang):
+    _run(lang, "R15", "text items",
+         "README.md keeps every paragraph, list item, caption and answer to three lines. The translation has the same "
+         "items in the same order: do not merge two items into one and do not split one into two. List the same bullets, "
+         "with the same nesting, where README.md has a list.",
+         check_items)
