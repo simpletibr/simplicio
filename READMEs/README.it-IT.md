@@ -196,6 +196,7 @@ Ogni cella contiene il tempo mediano e il costo mediano del passo:
 - **Memoria.** Il picco di memoria è stato più alto del 39%: 375 MB contro 270 MB.
 - **La release precedente non ha mostrato alcun guadagno su questo lavoro.** Simplicio 3.14.0 costava quanto senza Simplicio.
 - **Uno script Python breve e una tantum.** Simplicio 3.10.8 è stato più lento (19.6 s contro 11.4 s) e non è stato misurato di nuovo.
+- **Una piccola pagina, modelli potenti.** Simplicio 3.15.0 è stato più lento dal 14% al 47%.
 - **Ciò che installi non è esattamente ciò che è stato misurato.** Le build sono state compilate dai commit di release, con l'accesso disattivato.
 - **Il campione è piccolo.** Tre sessioni per configurazione, un solo modello, un solo progetto.
 
@@ -205,6 +206,7 @@ Ogni cella contiene il tempo mediano e il costo mediano del passo:
 - **Memoria.** Il picco di memoria è stato più alto del 39% rispetto all'agente senza Simplicio: 375 MB contro 270 MB.
 - **La release precedente non ha mostrato alcun guadagno su questo lavoro.** Simplicio 3.14.0 costava quanto senza Simplicio, e la sua differenza di tempo rientra nella variabilità tra un'esecuzione e l'altra. Il guadagno è arrivato con 3.15.0.
 - **Uno script Python breve e una tantum.** In un giro precedente, Simplicio 3.10.8 è stato più lento dell'agente senza Simplicio con ogni modello provato: con Claude Sonnet 5.5 in Claude Code, 19.6 s e $0.0548 contro 11.4 s e $0.0283. Non è stato misurato di nuovo con 3.15.0.
+- **Una piccola pagina, modelli potenti.** Con Sonnet 5.5 o Opus 5.5, Simplicio 3.15.0 ha richiesto dal 14% al 47% di tempo in più e dal 14% al 41% di costo in più in 6 casi su 6. Ogni pagina era corretta in entrambi i casi. Sonnet 5.5, creazione, mediana di 3: 24 s e $0.082 contro 20 s e $0.066. Una correzione è in corso; non è ancora in una release.
 - **Ciò che installi non è esattamente ciò che è stato misurato.** Le build sono state compilate dai commit di release, con l'accesso e il processo in background disattivati. I download firmati non sono stati misurati.
 - **Il campione è piccolo.** Tre sessioni per configurazione, un solo modello, un piccolo progetto nuovo, un computer, quattro sessioni alla volta; nessuna è stata scartata o ripetuta. I rapporti misurano questo lavoro, non il tuo, e non abbiamo misurato quanta parte del tuo lavoro gli somigli.
 
