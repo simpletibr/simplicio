@@ -198,7 +198,7 @@ Each cell is the median time and the median cost of the step:
 - **Memory.** Peak memory was 39% higher than with the plain agent: 375 MB against 270 MB.
 - **The previous release showed no gain on this job.** Simplicio 3.14.0 cost the same as no Simplicio, and its time difference is inside the run-to-run spread. The gain arrived with 3.15.0.
 - **A short one-off Python script.** In an earlier round, Simplicio 3.10.8 was slower than the plain agent with every model tried: on Claude Sonnet 5.5 in Claude Code, 19.6 s and $0.0548 against 11.4 s and $0.0283. Not measured again on 3.15.0.
-- **One small page, strong models.** On Sonnet 5.5 or Opus 5.5, Simplicio 3.15.0 took 14% to 47% more time and 14% to 41% more cost in 6 of 6 cases. Every page was correct in both. Sonnet 5.5, create, median of 3: 24 s and $0.082 against 20 s and $0.066. A fix is in progress; it is not in a release yet.
+- **One small page, strong models.** On Sonnet 5.5 or Opus 5.5 the medians of Simplicio 3.15.0 were 14% to 47% slower and 14% to 41% costlier in all 6 cases tried; 2 were single runs. Every page was correct. Sonnet 5.5, create: 24 s and $0.082 against 20 s and $0.066. A fix is in progress, not released.
 - **What you install is not exactly what was measured.** The builds were compiled from the release commits, with sign-in and the background process off. The signed downloads were not measured.
 - **The sample is small.** Three sessions per setup, one model, one small new project, one machine, four sessions at once; none dropped or re-run. The ratios measure this job, not yours, and we have not measured how much of your work looks like it.
 
