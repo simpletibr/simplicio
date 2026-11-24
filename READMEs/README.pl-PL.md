@@ -196,6 +196,7 @@ Każda komórka to mediana czasu i mediana kosztu kroku:
 - **Pamięć.** Szczytowe zużycie pamięci było o 39% wyższe: 375 MB wobec 270 MB.
 - **Poprzednie wydanie nie dało zysku w tym zadaniu.** Simplicio 3.14.0 kosztowało tyle samo co bez Simplicio.
 - **Krótki jednorazowy skrypt w Pythonie.** Simplicio 3.10.8 było wolniejsze (19.6 s wobec 11.4 s) i nie mierzono go ponownie.
+- **Jedna mała strona, mocne modele.** Simplicio 3.15.0 było wolniejsze: od 14% do 47%.
 - **To, co instalujesz, nie jest dokładnie tym, co zmierzono.** Kompilacje zbudowano z commitów wydań, z wyłączonym logowaniem.
 - **Próba jest mała.** Trzy sesje na konfigurację, jeden model, jeden projekt.
 
@@ -205,6 +206,7 @@ Każda komórka to mediana czasu i mediana kosztu kroku:
 - **Pamięć.** Szczytowe zużycie pamięci było o 39% wyższe niż przy zwykłym agencie: 375 MB wobec 270 MB.
 - **Poprzednie wydanie nie dało zysku w tym zadaniu.** Simplicio 3.14.0 kosztowało tyle samo co bez Simplicio, a jego różnica czasu mieści się w rozrzucie między przebiegami. Zysk pojawił się wraz z wersją 3.15.0.
 - **Krótki jednorazowy skrypt w Pythonie.** We wcześniejszej rundzie Simplicio 3.10.8 było wolniejsze od zwykłego agenta przy każdym wypróbowanym modelu: na Claude Sonnet 5.5 w Claude Code 19.6 s i $0.0548, wobec 11.4 s i $0.0283. Nie mierzono go ponownie na 3.15.0.
+- **Jedna mała strona, mocne modele.** Na Sonnet 5.5 lub Opus 5.5 mediany Simplicio 3.15.0 były wolniejsze o 14% do 47% i droższe o 14% do 41% we wszystkich 6 sprawdzonych przypadkach; 2 z nich to pojedyncze przebiegi. Każda strona była poprawna. Sonnet 5.5, tworzenie: 24 s i $0.082 wobec 20 s i $0.066. Poprawka jest w toku, jeszcze niewydana.
 - **To, co instalujesz, nie jest dokładnie tym, co zmierzono.** Kompilacje zbudowano z commitów wydań, z wyłączonym logowaniem i procesem w tle. Podpisane pliki do pobrania nie były mierzone.
 - **Próba jest mała.** Trzy sesje na konfigurację, jeden model, jeden mały nowy projekt, jedna maszyna, cztery sesje naraz; żadna nie została odrzucona ani powtórzona. Ilorazy mierzą to zadanie, a nie twoje, i nie zmierzyliśmy, jaka część twojej pracy do niego przypomina.
 

@@ -196,6 +196,7 @@ Cada celda muestra la mediana del tiempo y la mediana del coste del paso:
 - **Memoria.** El pico de memoria fue un 39% mayor: 375 MB frente a 270 MB.
 - **La versión anterior no mostró mejora en este trabajo.** Simplicio 3.14.0 costó lo mismo que sin Simplicio.
 - **Un script corto de Python de uso puntual.** Simplicio 3.10.8 fue más lento (19.6 s frente a 11.4 s) y no se volvió a medir.
+- **Una página pequeña, modelos potentes.** Simplicio 3.15.0 fue entre un 14% y un 47% más lento.
 - **Lo que instalas no es exactamente lo que se midió.** Los builds se compilaron a partir de los commits de publicación, con el inicio de sesión desactivado.
 - **La muestra es pequeña.** Tres sesiones por escenario, un modelo, un proyecto.
 
@@ -205,6 +206,7 @@ Cada celda muestra la mediana del tiempo y la mediana del coste del paso:
 - **Memoria.** El pico de memoria fue un 39% mayor que con el agente sin Simplicio: 375 MB frente a 270 MB.
 - **La versión anterior no mostró mejora en este trabajo.** Simplicio 3.14.0 costó lo mismo que sin Simplicio, y su diferencia de tiempo está dentro de la variación entre ejecuciones. La mejora llegó con 3.15.0.
 - **Un script corto de Python de uso puntual.** En una ronda anterior, Simplicio 3.10.8 fue más lento que el agente sin Simplicio con todos los modelos probados: con Claude Sonnet 5.5 en Claude Code, 19.6 s y $0.0548 frente a 11.4 s y $0.0283. No se volvió a medir con 3.15.0.
+- **Una página pequeña, modelos potentes.** Con Sonnet 5.5 u Opus 5.5, las medianas de Simplicio 3.15.0 fueron del 14% al 47% más lentas y del 14% al 41% más caras en los 6 casos probados; 2 fueron ejecuciones únicas. Todas las páginas fueron correctas. Sonnet 5.5, creación: 24 s y $0.082 frente a 20 s y $0.066. Hay una corrección en curso; aún sin publicar.
 - **Lo que instalas no es exactamente lo que se midió.** Los builds se compilaron a partir de los commits de publicación, con el inicio de sesión y el proceso en segundo plano desactivados. Las descargas firmadas no se midieron.
 - **La muestra es pequeña.** Tres sesiones por escenario, un modelo, un proyecto nuevo y pequeño, un equipo, cuatro sesiones a la vez; no se descartó ni se repitió ninguna sesión. Las proporciones miden este trabajo, no el tuyo, y no hemos medido cuánto de tu trabajo se parece a este.
 

@@ -196,6 +196,7 @@ Setiap sel ialah median masa dan median kos bagi langkah itu:
 - **Memori.** Memori puncak 39% lebih tinggi: 375 MB berbanding 270 MB.
 - **Keluaran sebelumnya tidak menunjukkan peningkatan pada tugasan ini.** Simplicio 3.14.0 berharga sama dengan tanpa Simplicio.
 - **Skrip Python pendek untuk sekali guna.** Simplicio 3.10.8 lebih perlahan (19.6 s berbanding 11.4 s) dan tidak diukur semula.
+- **Satu halaman kecil, model yang kuat.** Simplicio 3.15.0 lebih perlahan sebanyak 14% hingga 47%.
 - **Apa yang anda pasang tidak sama tepat dengan apa yang diukur.** Binari dikompil daripada commit keluaran, dengan log masuk dimatikan.
 - **Sampel ini kecil.** Tiga sesi bagi setiap persediaan, satu model, satu projek.
 
@@ -205,6 +206,7 @@ Setiap sel ialah median masa dan median kos bagi langkah itu:
 - **Memori.** Memori puncak 39% lebih tinggi daripada ejen biasa: 375 MB berbanding 270 MB.
 - **Keluaran sebelumnya tidak menunjukkan peningkatan pada tugasan ini.** Simplicio 3.14.0 berharga sama dengan tanpa Simplicio, dan perbezaan masanya berada dalam julat variasi antara larian. Peningkatan itu datang bersama 3.15.0.
 - **Skrip Python pendek untuk sekali guna.** Dalam pusingan terdahulu, Simplicio 3.10.8 lebih perlahan daripada ejen biasa dengan setiap model yang diuji: pada Claude Sonnet 5.5 dalam Claude Code, 19.6 s dan $0.0548 berbanding 11.4 s dan $0.0283. Tidak diukur semula pada 3.15.0.
+- **Satu halaman kecil, model yang kuat.** Pada Sonnet 5.5 atau Opus 5.5, median Simplicio 3.15.0 lebih perlahan 14% hingga 47% dan lebih mahal 14% hingga 41% dalam kesemua 6 kes yang dicuba; 2 daripadanya satu larian sahaja. Setiap halaman betul. Sonnet 5.5, cipta: 24 s dan $0.082 berbanding 20 s dan $0.066. Pembetulan sedang dibuat; belum dikeluarkan.
 - **Apa yang anda pasang tidak sama tepat dengan apa yang diukur.** Binari dikompil daripada commit keluaran, dengan log masuk dan proses latar belakang dimatikan. Muat turun yang ditandatangani tidak diukur.
 - **Sampel ini kecil.** Tiga sesi bagi setiap persediaan, satu model, satu projek baharu yang kecil, satu mesin, empat sesi serentak; tiada satu pun digugurkan atau dijalankan semula. Nisbah ini mengukur tugasan ini, bukan tugasan anda, dan kami belum mengukur berapa banyak kerja anda menyerupai tugasan ini.
 

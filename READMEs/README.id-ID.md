@@ -195,6 +195,7 @@ Setiap sel berisi median waktu dan median biaya langkah tersebut:
 - **Memori.** Puncak memori 39% lebih tinggi: 375 MB dibanding 270 MB.
 - **Rilis sebelumnya tidak menunjukkan keuntungan pada tugas ini.** Simplicio 3.14.0 berbiaya sama dengan tanpa Simplicio.
 - **Satu skrip Python kecil sekali pakai.** Simplicio 3.10.8 lebih lambat (19.6 s dibanding 11.4 s) dan tidak diukur ulang.
+- **Satu halaman kecil, model yang kuat.** Simplicio 3.15.0 lebih lambat 14% sampai 47%.
 - **Yang Anda pasang tidak sama persis dengan yang diukur.** Build dikompilasi dari commit rilis, dengan fitur masuk dimatikan.
 - **Sampelnya kecil.** Tiga sesi per kondisi uji, satu model, satu proyek.
 
@@ -204,6 +205,7 @@ Setiap sel berisi median waktu dan median biaya langkah tersebut:
 - **Memori.** Puncak memori 39% lebih tinggi daripada dengan agen biasa: 375 MB dibanding 270 MB.
 - **Rilis sebelumnya tidak menunjukkan keuntungan pada tugas ini.** Simplicio 3.14.0 berbiaya sama dengan tanpa Simplicio, dan selisih waktunya berada dalam sebaran antar-sesi. Keuntungan itu baru datang dengan 3.15.0.
 - **Satu skrip Python kecil sekali pakai.** Pada putaran sebelumnya, Simplicio 3.10.8 lebih lambat daripada agen biasa dengan setiap model yang dicoba: pada Claude Sonnet 5.5 di Claude Code, 19.6 s dan $0.0548 dibanding 11.4 s dan $0.0283. Belum diukur ulang pada 3.15.0.
+- **Satu halaman kecil, model yang kuat.** Pada Sonnet 5.5 atau Opus 5.5, median Simplicio 3.15.0 lebih lambat 14% sampai 47% dan lebih mahal 14% sampai 41% di semua 6 kasus yang dicoba; 2 di antaranya hanya satu sesi. Setiap halaman benar. Sonnet 5.5, membuat: 24 s dan $0.082 dibanding 20 s dan $0.066. Perbaikan sedang dikerjakan, belum dirilis.
 - **Yang Anda pasang tidak sama persis dengan yang diukur.** Build dikompilasi dari commit rilis, dengan fitur masuk dan proses latar belakang dimatikan. Unduhan yang ditandatangani tidak diukur.
 - **Sampelnya kecil.** Tiga sesi per kondisi uji, satu model, satu proyek baru yang kecil, satu mesin, empat sesi sekaligus; tidak ada yang dibuang atau diulang. Rasio mengukur tugas ini, bukan tugas Anda, dan kami belum mengukur seberapa banyak pekerjaan Anda yang mirip dengan tugas ini.
 
